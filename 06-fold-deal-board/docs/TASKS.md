@@ -11,7 +11,7 @@
 | MKT-02 | 링크 공유·직접 입력 | 필수 | IN_PROGRESS | — | ListingDraftTest(공유 텍스트), AppFlow*UiTest | 직접 입력·`ACTION_SEND text/plain` 수신 구현. **스크린샷 첨부 미구현(MKT-02b)** |
 | MKT-02b | 스크린샷 첨부(시스템 선택기, 앱 내부 복사) | 필수 | TODO | MKT-01 | — | Attachment 엔터티·해시·참조 무결성 필요 |
 | MKT-03 | 모델·RAM·용량·상태 | 필수 | IMPLEMENTED_UNVERIFIED | — | MKT-T01, T02, T03 | 원문 보존, 정규화 키 수정 가능. 판매자 주장/직접 확인 분리는 MKT-10 |
-| MKT-04 | 보드·필터·정렬 | 필수 | IN_PROGRESS | — | ListingFilterTest, AppFlow*UiTest | 검색·정렬 3종·판매 중만·제외 숨김, **조건 필터(분류·기종·RAM·저장공간·등록일 N일·가격 확인일 N일, 미확인=확인 필요) 구현(0.2.0)**. 남은 것: Board 엔터티(예산·필수/선호/제외 조건 저장, 여러 보드), 조건을 앱 재시작 후에도 유지 |
+| MKT-04 | 보드·필터·정렬 | 필수 | IN_PROGRESS | — | ListingFilterTest, AppFlow*UiTest | 검색·정렬 3종·판매 중만·제외 숨김, **조건 필터(분류·기종·RAM·저장공간·등록일 N일·가격 확인일 N일, 미확인=확인 필요) 구현(0.2.0)**. **고른 조건을 DataStore에 저장해 앱 재시작 후에도 유지(0.3.0)**. 남은 것: Board 엔터티(예산·필수/선호/제외 조건 묶음, 여러 보드 전환) |
 | MKT-05 | 2~4개 비교 | 필수 | IMPLEMENTED_UNVERIFIED | MKT-03 | MKT-T02, AppFlow*UiTest | 고정 항목 열, 차이(≠)·미확인 표시, 다른 항목만, 가격/총비용 기준, 카드 대체, 예산 대비 |
 | MKT-06 | 가격 관측·협상 | 필수 | IMPLEMENTED_UNVERIFIED | MKT-01 | ListingDraftTest, DatabasePersistenceTest | 관측 추가 전용(ABORT). 협상은 `PriceKind.NEGOTIATION` 관측으로 기록(DECISIONS D-07) |
 | MKT-07 | 표본 집계 | 필수 | IMPLEMENTED_UNVERIFIED | MKT-06 | MKT-T05, T06, T07, T11, T13 | 매물당 최신 게시가 1개, 총비용 기준. 최신성 기준은 로직만 있고 UI 설정 없음 |

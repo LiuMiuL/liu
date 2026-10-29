@@ -6,6 +6,20 @@
 - KVM 없음 → **에뮬레이터·실기기 실행 불가**. UI는 Robolectric(SDK 34 런타임) + Compose UI Test로만 확인.
 - 빌드 종류: debug
 
+## 0.3.0 (2026-10-30 UTC, 조건 저장)
+
+```text
+./gradlew assembleDebug lintDebug testDebugUnitTest --rerun-tasks → BUILD SUCCESSFUL
+테스트: 46 tests / 0 failures / 0 errors (결과 디렉터리를 지우고 다시 실행, 12개 테스트 클래스)
+lint: 0 errors, 34 warnings (GradleDependency 30 — DataStore 새 버전 안내 포함, AGP 버전 3, DataExtractionRules 1)
+aapt2 dump badging → versionCode 3, versionName 0.3.0 · 권한: 앱 내부 전용 DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION만
+app-debug.apk 26,786,090 bytes, SHA-256 a66cb290f5da37d996ca76b65cb9da50b26bc0a8c3dd05ef545ff1754c5dc687
+```
+
+- BoardConditionsStoreTest(3, Robolectric): 저장 안 했으면 null, 모든 조건이 **새 DataStore 인스턴스**에서 복원(파일 왕복), 해제한 조건이 남지 않음
+- ConditionsRelaunchUiTest(1, Robolectric UI 360dp): 512GB·일주일·판매 중만 선택 → 디스크 저장 확인 → 액티비티를 완전히 닫고(ViewModel·SavedState 폐기) 새로 실행 → "조건 (2)"·판매 중만 복원 → 조건 초기화 → 다시 실행 시 조건 없음. 연속 3회 실행 모두 통과
+- 실제 프로세스 종료(앱 강제 종료 후 재실행)는 Robolectric으로 재현 불가 → 디스크 왕복은 StoreTest로 대신 확인, **실기기 미검증**
+
 ## 0.2.0 (2026-10-29 UTC, 조건 필터 추가)
 
 ```text
@@ -43,6 +57,8 @@ sha256sum app-debug.apk        → c81183fcc0eba600443af247348f46ff9ead2aa75d5f3
 | AppFlowNarrowUiTest | 1 | Robolectric UI, 360×780dp | 빈 상태 → 매물 2개 입력·저장 → 상세 → 비교 선택 → 비교표(사양 다름·≠ RAM) → 액티비티 재생성 후 비교 유지, "자동 추적 없음" 문구 |
 | AppFlowWideUiTest | 1 | Robolectric UI, 900×700dp | 2패널 빈 상세 안내 확인 + 같은 흐름 |
 | ListingFilterTest (0.2.0) | 7 | JVM | 조건 필터·상대 등록일 |
+| BoardConditionsStoreTest (0.3.0) | 3 | Robolectric | 조건 DataStore 파일 왕복 |
+| ConditionsRelaunchUiTest (0.3.0) | 1 | Robolectric UI | 재실행 후 조건 유지·초기화 |
 
 ## 검증하지 않은 항목 (N/A 또는 미실시)
 

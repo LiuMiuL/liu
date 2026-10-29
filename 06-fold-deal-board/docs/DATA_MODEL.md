@@ -52,6 +52,23 @@ DB: Room `fold_deal_board.db`, **버전 1**. 스키마 JSON: `android/app/schema
 | notes | TEXT? | |
 | createdAt | INT | |
 
+## 설정: 보드 조건 (DataStore Preferences, 0.3.0)
+
+파일: `files/datastore/board_conditions.preferences_pb`. DB가 아니라 설정 파일이며 스키마 마이그레이션이 없다.
+
+| 키 | 타입 | 설명 |
+|---|---|---|
+| saved | Boolean | 한 번이라도 저장했는지(없으면 기본 조건) |
+| sort | String | SortOrder 이름. 모르는 값이면 최근 저장순 |
+| onSaleOnly, hideExcluded | Boolean | |
+| category | String? | Category 이름. 모르는 값이면 조건 없음 |
+| models | Set<String> | 정규화 모델 키 |
+| ramGb, storageGb | Set<String> | 정수 문자열 |
+| publishedWithinDays, checkedWithinDays | Int? | 없으면 조건 없음 |
+| includeUnknown | Boolean | 확인 필요 매물 표시 여부 |
+
+검색어·비교 선택·예산은 저장하지 않는다(화면 재생성 동안만 SavedState로 유지).
+
 ## 집계 규칙(ComparisonCalculator)
 
 - 대상: 삭제되지 않았고, 조건의 모델·RAM·저장공간과 정확히 같은 매물. 조건 필드가 미확인이면 "확인 필요"로 제외 목록에 표시.

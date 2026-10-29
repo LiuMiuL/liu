@@ -5,7 +5,7 @@
 
 - 독립 앱입니다. 다른 앱, 공용 서버, 공용 DB, 로그인, API 키 없이 동작합니다.
 - **자동 가격 수집은 하지 않습니다.** 모든 가격은 사용자가 직접 기록한 값이며 화면에도 그렇게 표시합니다.
-- 패키지: `com.miu.fold.deals` · versionName `0.2.0` (versionCode 2) · minSdk 30 · targetSdk 35
+- 패키지: `com.miu.fold.deals` · versionName `0.3.0` (versionCode 3) · minSdk 30 · targetSdk 35
 
 ## 현재 실제 구현 범위 (0~1단계)
 
@@ -23,7 +23,8 @@
 | 로컬 DB(Room) 영속 저장, 재실행 후 보존 | 구현 |
 | 보드 조건 필터: 분류·기종·RAM·저장공간(여러 개 선택), 등록일 24시간/3일/일주일/30일 이내, 가격 확인일 이내. 값이 미확인인 매물은 "확인 필요"로 분리 | 구현 (0.2.0) |
 | 등록일 "3일 전·어제·5시간 전" 입력을 처음 저장한 시각 기준 날짜로 변환 | 구현 (0.2.0) |
-| 스크린샷 첨부, 보드(예산·조건) 저장·여러 개, 조건 알림, 체크리스트, 내보내기·백업 | 미구현 → `docs/TASKS.md` |
+| 고른 조건(분류·기종·RAM·용량·등록일·확인일·정렬·판매 중만·제외 숨김)을 기기에 저장 — 앱을 껐다 켜도 유지 | 구현 (0.3.0) |
+| 스크린샷 첨부, 보드 여러 개(예산·조건 묶음) 전환, 조건 알림, 체크리스트, 내보내기·백업 | 미구현 → `docs/TASKS.md` |
 
 실기기(폴드) 검증은 아직 하지 않았습니다. 검증 범위는 `docs/TEST_REPORT.md`를 보세요.
 
@@ -37,6 +38,17 @@ echo "sdk.dir=/path/to/Android/sdk" > local.properties   # 또는 ANDROID_HOME �
 ./gradlew testDebugUnitTest lintDebug assembleDebug
 # 결과: app/build/outputs/apk/debug/app-debug.apk
 ```
+
+## Windows PC로 가져오기
+
+```bat
+cd /d "D:\Miu\Projects"
+git clone -b ccr-36ab13ac-iwpu74 https://github.com/LiuMiuL/liu.git "중고거래 가격 비교 어플"
+cd "중고거래 가격 비교 어플\06-fold-deal-board\android"
+gradlew.bat testDebugUnitTest assembleDebug
+```
+
+Android Studio에서는 `06-fold-deal-board/android` 폴더를 열면 됩니다(SDK 경로는 Android Studio가 `local.properties`에 자동 기록).
 
 ## 설치·제거
 

@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.miu.fold.deals.comparison.Comparison
 import com.miu.fold.deals.comparison.ComparisonCalculator
 import com.miu.fold.deals.comparison.ListingWithObservations
+import com.miu.fold.deals.data.BoardConditions
+import com.miu.fold.deals.data.BoardConditionsStore
 import com.miu.fold.deals.data.ListingRepository
 import com.miu.fold.deals.listings.FilterFacets
 import com.miu.fold.deals.listings.ListingDraft
@@ -25,6 +27,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
 
@@ -80,7 +84,17 @@ data class UiState(
     val compareItems: List<ListingWithObservations> get() = compareIds.mapNotNull { find(it) }.filter { it.listing.deletedAt == null }
 }
 
-class AppViewModel(private val state: SavedStateHandle, private val repo: ListingRepository) : ViewModel() {
+class AppViewModel(
+    private val state: SavedStateHandle,
+    private val repo: ListingRepository,
+    private val conditionsStore: BoardConditionsStore? = null,
+) : ViewModel() {
+
+    /**
+     * 화면·프로세스 재생성이면 SavedState에 조건이 남아 있다. 아래 getStateFlow가 기본값을 써 넣기 전에 확인해야 한다.
+     * 앱을 새로 켠 경우(false)에만 저장된 조건을 불러온다.
+     */
+    private val hasSavedStateConditions: Boolean = state.contains(KEY_SPEC)
 
     val route: StateFlow<Route> = state.getStateFlow(KEY_ROUTE, Route.Board.encode())
         .map { Route.decode(it) }.stateIn(viewModelScope, SharingStarted.Eagerly, Route.decode(state[KEY_ROUTE]))
@@ -164,14 +178,65 @@ class AppViewModel(private val state: SavedStateHandle, private val repo: Listin
         }
     }
 
+    private var userChangedConditions = false
+    private var lastPersistJob: kotlinx.coroutines.Job? = null
+
+    init {
+        // 화면 재생성·프로세스 재생성이면 SavedState 값이 더 최신이므로 그대로 쓴다.
+        // 앱을 새로 켠 경우에만 저장된 조건을 불러온다.
+        if (conditionsStore != null && !hasSavedStateConditions) {
+            viewModelScope.launch {
+                val saved = try {
+                    withContext(Dispatchers.IO) { conditionsStore.load() }
+                } catch (e: Exception) {
+                    messages.send("저장된 조건을 불러오지 못했어요. 기본 조건으로 시작합니다.")
+                    null
+                }
+                // 불러오는 사이 사용자가 이미 조건을 바꿨다면 덮어쓰지 않는다.
+                if (saved != null && !userChangedConditions) {
+                    state[KEY_SORT] = SortOrder.entries.firstOrNull { it.name == saved.sort }?.name ?: SortOrder.SAVED_DESC.name
+                    state[KEY_ON_SALE] = saved.onSaleOnly
+                    state[KEY_HIDE_EXCLUDED] = saved.hideExcluded
+                    state[KEY_SPEC] = saved.spec
+                }
+            }
+        }
+    }
+
+    /** 조건이 바뀔 때마다 저장한다. 연속 변경은 마지막 값만 남도록 이전 저장을 취소한다. */
+    private fun persistConditions() {
+        userChangedConditions = true
+        val store = conditionsStore ?: return
+        val f = filter.value.let { cur ->
+            BoardConditions(
+                sort = state.get<String>(KEY_SORT) ?: cur.sort.name,
+                onSaleOnly = state.get<Boolean>(KEY_ON_SALE) ?: cur.onSaleOnly,
+                hideExcluded = state.get<Boolean>(KEY_HIDE_EXCLUDED) ?: cur.hideExcluded,
+                spec = state.get<SpecFilter>(KEY_SPEC) ?: cur.spec,
+            )
+        }
+        lastPersistJob?.cancel()
+        // DataStore는 edit 변환을 호출한 코루틴 문맥에서 실행하므로, 저장이 UI 스레드에 묶이지 않게 IO에서 실행한다.
+        lastPersistJob = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                store.save(f)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                messages.send("조건 저장 실패: 앱을 다시 켜면 이번 조건이 유지되지 않을 수 있어요.")
+            }
+        }
+    }
+
     fun setQuery(q: String) { state[KEY_QUERY] = q }
-    fun setSort(s: SortOrder) { state[KEY_SORT] = s.name }
-    fun setOnSaleOnly(v: Boolean) { state[KEY_ON_SALE] = v }
-    fun setHideExcluded(v: Boolean) { state[KEY_HIDE_EXCLUDED] = v }
+    fun setSort(s: SortOrder) { state[KEY_SORT] = s.name; persistConditions() }
+    fun setOnSaleOnly(v: Boolean) { state[KEY_ON_SALE] = v; persistConditions() }
+    fun setHideExcluded(v: Boolean) { state[KEY_HIDE_EXCLUDED] = v; persistConditions() }
     fun updateSpec(transform: (SpecFilter) -> SpecFilter) {
         state[KEY_SPEC] = transform(filter.value.spec)
+        persistConditions()
     }
-    fun clearSpec() { state[KEY_SPEC] = SpecFilter() }
+    fun clearSpec() { state[KEY_SPEC] = SpecFilter(); persistConditions() }
     fun setBudget(v: String) { state[KEY_BUDGET] = v }
     fun setDiffOnly(v: Boolean) { state[KEY_DIFF_ONLY] = v }
     fun setIncludeUnknownRows(v: Boolean) { state[KEY_INCLUDE_UNKNOWN] = v }

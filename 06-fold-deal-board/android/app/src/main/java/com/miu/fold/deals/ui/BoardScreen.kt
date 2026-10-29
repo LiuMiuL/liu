@@ -253,10 +253,11 @@ private fun SpecFilterPanel(spec: SpecFilter, facets: FilterFacets, vm: AppViewM
                     }
                 }
             }
+            // 초기화 버튼은 왼쪽에 둔다. 오른쪽 아래는 '매물 추가' 버튼이 겹칠 수 있다.
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Chip("미확인 값도 보기", spec.includeUnknown) { vm.updateSpec { it.copy(includeUnknown = !it.includeUnknown) } }
-                Spacer(Modifier.weight(1f))
                 TextButton(onClick = vm::clearSpec, enabled = spec.activeCount > 0 || spec.includeUnknown) { Text("조건 초기화") }
+                Spacer(Modifier.size(Space.s))
+                Chip("미확인 값도 보기", spec.includeUnknown) { vm.updateSpec { it.copy(includeUnknown = !it.includeUnknown) } }
             }
             Text("등록일은 입력한 날짜 기준이며, '3일 전' 같은 표현은 처음 저장한 시각으로 계산합니다. 날짜를 모르는 매물은 기간 조건을 통과시키지 않습니다.",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

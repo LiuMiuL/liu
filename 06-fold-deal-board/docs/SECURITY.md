@@ -10,7 +10,8 @@
 
 - 앱 전용 내부 저장소의 Room DB(`fold_deal_board.db`)만 사용. 다른 앱 DB를 읽지 않는다.
 - 앱 수준 암호화는 하지 않는다(Android 기본 앱 샌드박스·기기 암호화에 의존). 둘은 다른 보호 수준이다.
-- OS 클라우드 백업·기기 이전 대상에서 제외(`allowBackup=false`, `data_extraction_rules.xml`).
+- 보드 조건은 앱 내부 `files/datastore/`의 DataStore 파일에 저장(0.3.0). 개인정보는 들어가지 않는다(분류·모델 키·용량·기간).
+- OS 클라우드 백업·기기 이전 대상에서 제외(`allowBackup=false`, `data_extraction_rules.xml` — database·file·sharedpref 도메인 모두 제외).
 - 앱 삭제 시 데이터도 삭제된다.
 
 ## 외부 데이터 처리

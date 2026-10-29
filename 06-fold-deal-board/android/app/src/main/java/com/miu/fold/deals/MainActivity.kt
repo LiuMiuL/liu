@@ -16,7 +16,10 @@ import com.miu.fold.deals.ui.DealTheme
 class MainActivity : ComponentActivity() {
 
     private val vm: AppViewModel by viewModels {
-        viewModelFactory { initializer { AppViewModel(createSavedStateHandle(), (application as DealApp).repository) } }
+        viewModelFactory { initializer {
+            val app = application as DealApp
+            AppViewModel(createSavedStateHandle(), app.repository, app.boardConditions)
+        } }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
