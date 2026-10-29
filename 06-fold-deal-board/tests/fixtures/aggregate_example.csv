@@ -1,0 +1,8 @@
+# 명세 4.3 계산 검수용 가상 데이터. 실제 매물이나 시세가 아니다.
+# id,modelRaw,ram,storage,price,shippingState,shipping,tradeStatus
+A,갤럭시 Z 폴드6,12GB,512GB,60만,SEPARATE,5000,ON_SALE
+B,Galaxy Z Fold6,12GB,512GB,620000원,INCLUDED,,ON_SALE
+C,z폴드6,12GB,512GB,"625,000",DIRECT_DEAL,,ON_SALE
+D,Galaxy Z Fold 6,12GB,512GB,59만,UNKNOWN,,ON_SALE
+E,Galaxy Z Fold SE,12GB,512GB,50만,INCLUDED,,ON_SALE
+F,Galaxy Z Fold6,12GB,512GB,55만,INCLUDED,,SOLD

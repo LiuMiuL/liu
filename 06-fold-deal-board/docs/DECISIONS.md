@@ -1,0 +1,20 @@
+# DECISIONS — Fold Deal Board
+
+| ID | 결정 | 이유 / 변경 전후 |
+|---|---|---|
+| D-01 | Kotlin + Jetpack Compose(Material 3) + Room + ViewModel/Flow, 단일 `:app` 모듈 | 명세 5.1 기본안. 작은 프로젝트라 모듈을 나누지 않고 패키지(`listings`, `observations`, `comparison`, `data`, `ui`)로 책임을 나눔 |
+| D-02 | 버전 고정: AGP 8.7.3, Gradle 8.14.3, Kotlin 2.0.21, KSP 2.0.21-1.0.28, Compose BOM 2024.12.01, Room 2.6.1, compileSdk/targetSdk 35, minSdk 30, JDK target 17 | 서로 호환이 확인된 안정 버전 조합. `+`/latest 미사용, `app/gradle.lockfile`로 잠금. lint의 "새 버전 있음" 경고는 의도적으로 유지(업그레이드는 별도 작업) |
+| D-03 | 화면 이동은 Navigation 라이브러리 대신 `Route`를 SavedStateHandle 문자열로 보관 | 2패널/단일 패널 전환 시 같은 경로를 그대로 복원하기 쉽고 의존성이 적음 |
+| D-04 | 편집 초안(ListingDraft)을 SavedStateHandle에 보관 | 접기·펼치기로 패널 구조가 바뀌어도 입력 중인 내용 유지, 프로세스 재생성에도 유지. 긴 설명은 Bundle 크기에 영향 — 공유 텍스트는 20,000자로 제한 |
+| D-05 | 가격은 Listing에 두지 않고 PriceObservation에 추가만 함 | 이력 덮어쓰기 금지(명세 4.1). 수정 화면에서 가격·배송이 바뀌면 새 관측을 만든다 |
+| D-06 | 가격 상태를 `PriceState`(KNOWN/UNKNOWN/NEGOTIABLE) + `PriceQualifier`(일괄/개당/보증금)로 분리 | 미확인·협의·0원 구분, 일괄 가격을 단가로 바꾸지 않음 |
+| D-07 | 협상 제안은 별도 NegotiationNote 엔터티 대신 `PriceKind.NEGOTIATION` 관측 | 같은 이력 화면에서 시간순으로 보이고, 집계는 POSTED만 사용하므로 게시가를 덮어쓰지 않음. 협상 메모가 더 필요해지면 엔터티 분리(명세 4.1과의 차이로 기록) |
+| D-08 | 매물 삭제는 소프트 삭제(`deletedAt`) | 이전 비교 기록이 매물·관측을 계속 참조할 수 있게 함. 복원 가능 |
+| D-09 | 모델 정규화는 보수적: 소문자화, 삼성/갤럭시 토큰 제거, 폴드/플립 한글→영문, "fold 6"→"fold6", 세대·파생 토큰 유지 | Fold SE·Fold5·Fold6 Ultra를 합치지 않음. 사용자가 비교 키를 직접 수정 가능 |
+| D-10 | OS 클라우드 백업·기기 이전에서 앱 데이터 제외(`allowBackup=false` + dataExtractionRules) | 메모·링크가 동의 없이 나가지 않도록. lint의 fullBackupContent 경고는 allowBackup=false로 API 30~31에서도 백업이 꺼지므로 무시 |
+| D-11 | 비교표: 항목 열 고정 + 본문 가로 스크롤. `본문 폭 < 열 폭×1.2`(글꼴 배율 반영)이면 매물별 카드 | 명세 2.2 "큰 글꼴에서 카드로 대체". "항상 표로 보기"로 강제 가능 |
+| D-12 | 2패널 조건: 창 너비 ≥600dp 이고 목록 240dp + 상세 320dp + 여백 16dp 확보 시. 840dp 이상은 목록 38%(240~420dp) | 명세 8.1 초기 설계값. 힌지 위치(WindowManager FoldingFeature)는 아직 반영 안 함 → MKT-13 |
+| D-13 | 중앙값 짝수 개는 가운데 두 값 평균을 원 단위 내림 | 금액은 정수 원으로 저장(명세 9.1) |
+| D-14 | 스낵바를 화면 위쪽(머리줄 아래 64dp)에 표시 | 하단 배치 시 "매물 추가"·"비교하기" 버튼을 가리는 문제가 UI 테스트에서 발견됨 |
+| D-15 | 테스트 함수 이름은 ASCII + 한글 설명 주석 | 비UTF-8 파일 시스템 인코딩 환경에서 한글 클래스 파일명이 컴파일 오류를 냄 |
+| D-16 | 등록일은 날짜(yyyy-MM-dd) 또는 연월(yyyy-MM) 정밀도까지만 해석, "3일 전" 같은 상대 표현은 미확인 | 임의 시각·날짜를 만들지 않음(명세 9.1) |

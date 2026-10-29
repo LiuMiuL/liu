@@ -1,0 +1,408 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "afacdf38a5d84be282b4c1a6a0173367",
+    "entities": [
+      {
+        "tableName": "listings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `platform` TEXT, `originalUrl` TEXT, `platformListingId` TEXT, `sellerTitle` TEXT, `category` TEXT NOT NULL, `brand` TEXT, `modelRaw` TEXT, `modelCanonical` TEXT, `variant` TEXT, `ramRaw` TEXT, `ramGb` INTEGER, `ramModuleGb` INTEGER, `ramModuleCount` INTEGER, `storageRaw` TEXT, `storageGb` INTEGER, `color` TEXT, `region` TEXT, `publishedRaw` TEXT, `publishedValue` TEXT, `publishedPrecision` TEXT NOT NULL, `tradeStatus` TEXT NOT NULL, `userRating` TEXT NOT NULL, `innerScreen` TEXT, `outerScreen` TEXT, `hinge` TEXT, `repairHistory` TEXT, `battery` TEXT, `conditionNote` TEXT, `description` TEXT, `memo` TEXT, `specSource` TEXT NOT NULL, `savedAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `deletedAt` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "platform",
+            "columnName": "platform",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "originalUrl",
+            "columnName": "originalUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "platformListingId",
+            "columnName": "platformListingId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sellerTitle",
+            "columnName": "sellerTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brand",
+            "columnName": "brand",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "modelRaw",
+            "columnName": "modelRaw",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "modelCanonical",
+            "columnName": "modelCanonical",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "variant",
+            "columnName": "variant",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ramRaw",
+            "columnName": "ramRaw",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ramGb",
+            "columnName": "ramGb",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ramModuleGb",
+            "columnName": "ramModuleGb",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ramModuleCount",
+            "columnName": "ramModuleCount",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "storageRaw",
+            "columnName": "storageRaw",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "storageGb",
+            "columnName": "storageGb",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "color",
+            "columnName": "color",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "region",
+            "columnName": "region",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "publishedRaw",
+            "columnName": "publishedRaw",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "publishedValue",
+            "columnName": "publishedValue",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "publishedPrecision",
+            "columnName": "publishedPrecision",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tradeStatus",
+            "columnName": "tradeStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userRating",
+            "columnName": "userRating",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "innerScreen",
+            "columnName": "innerScreen",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "outerScreen",
+            "columnName": "outerScreen",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hinge",
+            "columnName": "hinge",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "repairHistory",
+            "columnName": "repairHistory",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "battery",
+            "columnName": "battery",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "conditionNote",
+            "columnName": "conditionNote",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "memo",
+            "columnName": "memo",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "specSource",
+            "columnName": "specSource",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savedAt",
+            "columnName": "savedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deletedAt",
+            "columnName": "deletedAt",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "price_observations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `listingId` TEXT NOT NULL, `priceState` TEXT NOT NULL, `amountKrw` INTEGER, `qualifier` TEXT NOT NULL, `rawText` TEXT, `shippingState` TEXT NOT NULL, `shippingKrw` INTEGER, `priceKind` TEXT NOT NULL, `currency` TEXT NOT NULL, `observedAt` INTEGER NOT NULL, `sourceKind` TEXT NOT NULL, `note` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`listingId`) REFERENCES `listings`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "listingId",
+            "columnName": "listingId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceState",
+            "columnName": "priceState",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountKrw",
+            "columnName": "amountKrw",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "qualifier",
+            "columnName": "qualifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawText",
+            "columnName": "rawText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "shippingState",
+            "columnName": "shippingState",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shippingKrw",
+            "columnName": "shippingKrw",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "priceKind",
+            "columnName": "priceKind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "currency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observedAt",
+            "columnName": "observedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceKind",
+            "columnName": "sourceKind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_price_observations_listingId",
+            "unique": false,
+            "columnNames": [
+              "listingId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_price_observations_listingId` ON `${TABLE_NAME}` (`listingId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "listings",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "listingId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "comparisons",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `listingIds` TEXT NOT NULL, `observationIds` TEXT NOT NULL, `budgetKrw` INTEGER, `notes` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "listingIds",
+            "columnName": "listingIds",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observationIds",
+            "columnName": "observationIds",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "budgetKrw",
+            "columnName": "budgetKrw",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'afacdf38a5d84be282b4c1a6a0173367')"
+    ]
+  }
+}
