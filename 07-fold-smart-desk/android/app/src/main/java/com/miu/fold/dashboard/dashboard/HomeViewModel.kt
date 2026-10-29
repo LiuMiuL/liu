@@ -72,6 +72,9 @@ class HomeViewModel(private val c: AppContainer) : ViewModel() {
 
     fun move(cardId: String, delta: Int) = updateDraft { LayoutEditor.move(it, cardId, delta) }
 
+    /** 드래그 중 손가락 아래 카드 자리로 옮긴다(초안만 바뀜, 저장 전까지 DB 불변). */
+    fun moveTo(cardId: String, index: Int) = updateDraft { LayoutEditor.moveTo(it, cardId, index) }
+
     fun setSpan(cardId: String, span: Int, typeId: String?) {
         val p = _edit.value?.profile ?: return
         updateDraft { LayoutEditor.setSpan(it, cardId, span, typeId, p) }

@@ -20,8 +20,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // 정식 서명키가 생기기 전까지는 디버그 키로 서명해 설치 가능하게만 한다(스토어 배포용 아님).
+            // 실제 배포 전 사용자 전용 키스토어로 바꿔야 한다. 키·비밀번호는 Git에 넣지 않는다.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

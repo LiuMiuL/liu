@@ -79,6 +79,23 @@ object LayoutEditor {
         return kept + added
     }
 
+    /**
+     * 순서를 바꾸지 않고 앞에서부터 한 줄(열 수)씩 채운다. 남은 칸보다 큰 카드는 다음 줄로 넘긴다.
+     * 같은 줄 카드는 높이를 맞춰 그린다.
+     */
+    fun packRows(items: List<Placement>, columns: Int): List<List<Placement>> {
+        val cols = columns.coerceAtLeast(1)
+        val rows = mutableListOf<MutableList<Placement>>()
+        var used = cols
+        for (p in items) {
+            val span = p.span.coerceIn(1, cols)
+            if (used + span > cols) { rows += mutableListOf<Placement>(); used = 0 }
+            rows.last() += p.copy(span = span)
+            used += span
+        }
+        return rows
+    }
+
     /** 렌더용: 보이는 카드만, 현재 열 수로 span을 자른다. */
     fun renderable(items: List<Placement>, columns: Int): List<Placement> =
         sorted(items).filter { it.visible }.map { it.copy(span = it.span.coerceIn(1, columns.coerceAtLeast(1))) }

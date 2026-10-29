@@ -76,6 +76,18 @@ class LayoutEditorTest {
         assertFalse(removed.any { it.cardId == "c0" })
     }
 
+    @Test fun packRowsKeepsOrderAndWraps() {
+        val items = listOf(Placement("a", 0, 1), Placement("b", 1, 2), Placement("c", 2, 1), Placement("d", 3, 1))
+        val rows = LayoutEditor.packRows(items, 2)
+        assertEquals(listOf(listOf("a"), listOf("b"), listOf("c", "d")), rows.map { r -> r.map { it.cardId } })
+        // 1열이면 한 줄에 하나, span은 1로 줄어든다
+        val one = LayoutEditor.packRows(items, 1)
+        assertEquals(4, one.size)
+        assertTrue(one.flatten().all { it.span == 1 })
+        assertEquals(listOf(listOf("a", "b"), listOf("c", "d")), LayoutEditor.packRows(items, 3).map { r -> r.map { it.cardId } })
+        assertTrue(LayoutEditor.packRows(emptyList(), 2).isEmpty())
+    }
+
     @Test fun gridPolicyUsesAvailableWidthNotDevice() {
         assertEquals(1, GridPolicy.columnsFor(360))
         assertEquals(1, GridPolicy.columnsFor(520, 600)) // 600dp 창 - 레일 80dp: 2열 최소 너비 미달
