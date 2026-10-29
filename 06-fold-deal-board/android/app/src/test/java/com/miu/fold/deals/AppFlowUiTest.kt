@@ -1,6 +1,7 @@
 package com.miu.fold.deals
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -78,6 +79,24 @@ abstract class AppFlowUiTestBase {
         rule.activityRule.scenario.recreate()
         waitText("비교 (2개)")
         rule.onNodeWithText("비교 (2개)").assertIsDisplayed()
+
+        // 보드 조건: RAM 16GB만 → 12GB 매물은 숨겨진다.
+        if (singlePane) rule.onNode(hasContentDescription("뒤로")).performClick()
+        rule.onNodeWithText("▼ 조건").performClick()
+        rule.onNode(hasText("16GB") and hasClickAction()).performScrollTo().performClick()
+        waitText("조건 충족 1개")
+        // 패널을 닫고 카드의 비교 체크박스 설명으로 목록 카드만 확인한다(비교 패널의 같은 이름과 구분).
+        rule.onNodeWithText("▲ 조건 (1)").performClick()
+        fun cardCount(name: String) =
+            rule.onAllNodes(hasContentDescription("$name 비교에", substring = true)).fetchSemanticsNodes().size
+        check(cardCount("Galaxy Z Fold6 · 16GB · 512GB") == 1)
+        check(cardCount("갤럭시 Z 폴드6 · 12GB · 512GB") == 0)
+        // 등록일을 입력하지 않았으므로 '일주일' 조건에서는 둘 다 확인 필요로 분리된다.
+        rule.onNodeWithText("▼ 조건 (1)").performClick()
+        rule.onNode(hasText("✓ 16GB") and hasClickAction()).performScrollTo().performClick()
+        // 등록일 줄이 가격 확인일 줄보다 먼저 나온다.
+        rule.onAllNodes(hasText("일주일") and hasClickAction())[0].performScrollTo().performClick()
+        waitText("조건 충족 0개 · 확인 필요 2개(숨김)")
     }
 }
 

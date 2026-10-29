@@ -115,9 +115,10 @@ private fun EditorFields(d: ListingDraft, update: ((ListingDraft) -> ListingDraf
     ChipGroup("거래 상태", TradeStatus.entries, d.tradeStatus, { it.label }) { v -> update { it.copy(tradeStatus = v) } }
     ChipGroup("내 평가", UserRating.entries, d.userRating, { it.label }) { v -> update { it.copy(userRating = v) } }
     Field("거래 지역", d.region) { v -> update { it.copy(region = v) } }
-    Field("등록일 (예: 2026-10-28, 모르면 비우기)", d.published) { v -> update { it.copy(published = v) } }
-    Hint(PublishedDateParser.parse(d.published).let { p ->
-        if (d.published.isBlank()) "등록일 미확인으로 저장" else p.value?.let { "해석: $it" } ?: "해석 불가 → 원문만 보존, 등록일 미확인"
+    Field("등록일 (예: 2026-10-28, 3일 전, 어제)", d.published) { v -> update { it.copy(published = v) } }
+    Hint(PublishedDateParser.parse(d.published, nowMs = System.currentTimeMillis()).let { p ->
+        if (d.published.isBlank()) "등록일 미확인으로 저장"
+        else p.value?.let { "해석: $it (상대 표현은 처음 저장한 시각 기준)" } ?: "해석 불가 → 원문만 보존, 등록일 미확인"
     })
 
     SectionTitle("상태 (판매자 설명 기준)")

@@ -81,11 +81,23 @@ class ListingDraftTest {
 
     // MKT-T08 저장은 오늘이어도 등록일 미상은 등록일 미확인
     @Test fun mkt_T08_unknownPublishedDateStaysUnknown() {
-        val l = ListingDraft(modelRaw = "Fold6", published = "방금 전").toListing("id", null, NOW)
+        val l = ListingDraft(modelRaw = "Fold6", published = "모름").toListing("id", null, NOW)
         assertEquals(NOW, l.savedAt)
         assertNull(l.publishedValue)
-        assertEquals("방금 전", l.publishedRaw)
+        assertEquals("모름", l.publishedRaw)
         val p = ListingDraft(modelRaw = "Fold6", price = "가격협의").toObservationIfChanged("id", "o", null, NOW)!!
         assertEquals(PriceState.NEGOTIABLE, p.priceState)
+    }
+
+    // 상대 등록일은 처음 저장 시각 기준으로 계산하고, 원문이 그대로면 나중에 수정해도 다시 계산하지 않는다.
+    @Test fun relativePublishedDateIsFixedAtFirstSave() {
+        val zone = java.time.ZoneId.systemDefault()
+        val first = ListingDraft(modelRaw = "Fold6", published = "3일 전").toListing("id", null, NOW)
+        val expected = java.time.Instant.ofEpochMilli(NOW).atZone(zone).toLocalDate().minusDays(3).toString()
+        assertEquals(expected, first.publishedValue)
+        assertEquals(DatePrecision.DAY, first.publishedPrecision)
+        val tenDaysLater = NOW + 10 * 86_400_000L
+        val edited = ListingDraft.fromListing(first, null).copy(memo = "메모").toListing("id", first, tenDaysLater)
+        assertEquals(expected, edited.publishedValue)
     }
 }

@@ -6,6 +6,8 @@
 - **1단계(수동 저장·공유 링크·상세·2~4개 비교)**: 핵심 흐름 구현, JVM/Robolectric 검증 통과. 스크린샷 첨부(MKT-02b)와 실기기 검증 남음.
 - 2단계 일부(관측 이력·표본 집계)를 1단계 비교 화면에 필요해서 함께 구현했다. 보드 엔터티·필터는 미구현.
 
+- **0.2.0 추가**: 보드 조건 필터(분류·기종·RAM·저장공간·등록일 N일 이내·가격 확인일 N일 이내), 미확인 값은 "확인 필요"로 분리, 상대 등록일("3일 전") 해석.
+
 마지막 갱신: 2026-10-30 (KST)
 
 ## 이번 작업에서 만든 것
@@ -21,9 +23,9 @@
 
 | 명령 | 결과 |
 |---|---|
-| `./gradlew testDebugUnitTest` | BUILD SUCCESSFUL, 34 tests, 0 failures |
+| `./gradlew testDebugUnitTest` | BUILD SUCCESSFUL, 42 tests, 0 failures (0.2.0 기준) |
 | `./gradlew lintDebug` | 0 errors, 31 warnings (새 버전 안내 30, DataExtractionRules 1 — DECISIONS D-10) |
-| `./gradlew assembleDebug` | `android/app/build/outputs/apk/debug/app-debug.apk` 생성 (25,184,079 bytes, SHA-256 `c81183fcc0eba600443af247348f46ff9ead2aa75d5f367f3bd52412a7ead209`) |
+| `./gradlew assembleDebug` | `android/app/build/outputs/apk/debug/app-debug.apk` 생성 — 0.2.0 체크섬은 TEST_REPORT.md 참고 |
 
 APK는 빌드 산출물이라 Git에 넣지 않는다. 위 명령으로 다시 만든다.
 
@@ -34,10 +36,11 @@ APK는 빌드 산출물이라 Git에 넣지 않는다. 위 명령으로 다시 �
 3. 한글 백틱 테스트 이름이 이 환경 파일 인코딩에서 클래스 파일 경로 오류 → ASCII 이름 + 한글 주석으로 변경.
 4. UI 테스트에서 발견: 하단 스낵바가 "매물 추가" 버튼을 가림 → 스낵바를 머리줄 아래(위쪽)로 이동. 위쪽 0dp 배치는 뒤로 버튼을 가려 64dp 아래로 조정.
 5. Robolectric에서 ExtendedFAB 텍스트가 의미 트리에 나타나지 않음 → 테스트는 `testTag("add-listing")`로 찾음.
+6. (0.2.0) 360dp에서 조건 패널을 펼치면 "조건 충족 N개" 요약이 화면 밖으로 밀림 → 요약을 패널 위로 이동, 보드 전체를 하나의 LazyColumn으로.
 
 ## 미구현·미검증·외부 설정 필요
 
-- 미구현(필수): 스크린샷 첨부, Board(예산·조건), 사양/날짜 필터, 조건 평가·알림, 체크리스트, 내보내기·백업, 테마 선택 → TASKS.md
+- 미구현(필수): 스크린샷 첨부, Board(예산·조건 저장, 재시작 후 조건 유지), 조건 평가·알림, 체크리스트, 내보내기·백업, 테마 선택 → TASKS.md
 - 미검증: 실기기·에뮬레이터 설치/실행, 실제 접기·펼치기·회전·분할 화면, 프로세스 종료 복원, 200% 글꼴, 다른 앱에서의 실제 공유
 - 외부 설정 필요(확장): 허용된 플랫폼 API/피드(MKT-X1), OCR·AI 서비스(MKT-X2)
 
@@ -45,7 +48,7 @@ APK는 빌드 산출물이라 Git에 넣지 않는다. 위 명령으로 다시 �
 
 1. 실기기(폴드) 또는 에뮬레이터에 설치해 1단계 흐름(매물 5개 입력 → 비교 → 재실행) 확인 후 TEST_REPORT 갱신.
 2. MKT-02b 스크린샷 첨부: `ActivityResultContracts.PickVisualMedia` → 앱 내부 파일 복사 + Attachment 엔터티(DB v2 마이그레이션 작성).
-3. MKT-04: Board 엔터티와 모델/RAM/용량·등록일·확인일 필터.
+3. MKT-04 나머지: Board 엔터티로 현재 조건(SpecFilter)·예산을 DB에 저장하고 여러 보드 전환.
 4. MKT-08/09: WatchRule·WatchEvaluation과 3값 평가, 중복 알림 방지 원장.
 
 ```bash

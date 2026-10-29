@@ -7,7 +7,10 @@ import com.miu.fold.deals.comparison.Comparison
 import com.miu.fold.deals.comparison.ComparisonCalculator
 import com.miu.fold.deals.comparison.ListingWithObservations
 import com.miu.fold.deals.data.ListingRepository
+import com.miu.fold.deals.listings.FilterFacets
 import com.miu.fold.deals.listings.ListingDraft
+import com.miu.fold.deals.listings.ListingFilter
+import com.miu.fold.deals.listings.SpecFilter
 import com.miu.fold.deals.listings.TradeStatus
 import com.miu.fold.deals.listings.UserRating
 import com.miu.fold.deals.observations.PriceKind
@@ -22,6 +25,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
 
 /** 화면 경로. SavedStateHandle에 문자열로 보관해 접기·펼치기·프로세스 재생성 후에도 복원한다. */
 sealed interface Route {
@@ -55,12 +60,18 @@ data class BoardFilter(
     val sort: SortOrder = SortOrder.SAVED_DESC,
     val onSaleOnly: Boolean = false,
     val hideExcluded: Boolean = true,
+    val spec: SpecFilter = SpecFilter(),
 )
 
 data class UiState(
     val loaded: Boolean = false,
     val all: List<ListingWithObservations> = emptyList(),
     val visible: List<ListingWithObservations> = emptyList(),
+    /** 조건 값이 미확인이라 "확인 필요"로 분리된 매물(includeUnknown이면 visible 뒤에도 포함). */
+    val needsCheck: List<ListingWithObservations> = emptyList(),
+    /** 확인 필요 매물 id → 미확인 조건 이름. */
+    val unknownFields: Map<String, List<String>> = emptyMap(),
+    val facets: FilterFacets = FilterFacets(emptyList(), emptyList(), emptyList()),
     val compareIds: List<String> = emptyList(),
     val comparisons: List<Comparison> = emptyList(),
 ) {
@@ -79,7 +90,8 @@ class AppViewModel(private val state: SavedStateHandle, private val repo: Listin
         state.getStateFlow(KEY_SORT, SortOrder.SAVED_DESC.name),
         state.getStateFlow(KEY_ON_SALE, false),
         state.getStateFlow(KEY_HIDE_EXCLUDED, true),
-    ) { q, s, onSale, hide -> BoardFilter(q, SortOrder.valueOf(s), onSale, hide) }
+        state.getStateFlow(KEY_SPEC, SpecFilter()),
+    ) { q, s, onSale, hide, spec -> BoardFilter(q, SortOrder.valueOf(s), onSale, hide, spec) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, BoardFilter())
 
     val budgetText: StateFlow<String> = state.getStateFlow(KEY_BUDGET, "")
@@ -96,11 +108,28 @@ class AppViewModel(private val state: SavedStateHandle, private val repo: Listin
 
     val ui: StateFlow<UiState> = combine(
         repo.allItems, filter, state.getStateFlow(KEY_COMPARE, arrayListOf<String>()), repo.comparisons,
-    ) { all, f, compareIds, comparisons ->
-        UiState(true, all, applyFilter(all, f), compareIds, comparisons)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UiState())
+    ) { all, f, compareIds, comparisons -> buildUi(all, f, compareIds, comparisons, repo.now()) }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UiState())
 
-    private fun applyFilter(all: List<ListingWithObservations>, f: BoardFilter): List<ListingWithObservations> {
+    private fun buildUi(
+        all: List<ListingWithObservations>, f: BoardFilter, compareIds: List<String>, comparisons: List<Comparison>, nowMs: Long,
+    ): UiState {
+        val base = applyBasicFilter(all, f)
+        val today = Instant.ofEpochMilli(nowMs).atZone(ZoneId.systemDefault()).toLocalDate()
+        val result = ListingFilter.apply(base, f.spec, today, nowMs)
+        val active = all.filter { it.listing.deletedAt == null }
+        return UiState(
+            loaded = true,
+            all = all,
+            visible = result.visible(f.spec.includeUnknown).map { it.item },
+            needsCheck = result.needsCheck.map { it.item },
+            unknownFields = result.needsCheck.associate { it.item.listing.id to it.unknownFields },
+            facets = ListingFilter.facets(active, f.spec),
+            compareIds = compareIds,
+            comparisons = comparisons,
+        )
+    }
+
+    private fun applyBasicFilter(all: List<ListingWithObservations>, f: BoardFilter): List<ListingWithObservations> {
         val q = f.query.trim().lowercase()
         return all.asSequence()
             .filter { it.listing.deletedAt == null }
@@ -139,6 +168,10 @@ class AppViewModel(private val state: SavedStateHandle, private val repo: Listin
     fun setSort(s: SortOrder) { state[KEY_SORT] = s.name }
     fun setOnSaleOnly(v: Boolean) { state[KEY_ON_SALE] = v }
     fun setHideExcluded(v: Boolean) { state[KEY_HIDE_EXCLUDED] = v }
+    fun updateSpec(transform: (SpecFilter) -> SpecFilter) {
+        state[KEY_SPEC] = transform(filter.value.spec)
+    }
+    fun clearSpec() { state[KEY_SPEC] = SpecFilter() }
     fun setBudget(v: String) { state[KEY_BUDGET] = v }
     fun setDiffOnly(v: Boolean) { state[KEY_DIFF_ONLY] = v }
     fun setIncludeUnknownRows(v: Boolean) { state[KEY_INCLUDE_UNKNOWN] = v }
@@ -298,6 +331,7 @@ class AppViewModel(private val state: SavedStateHandle, private val repo: Listin
         private const val KEY_SORT = "sort"
         private const val KEY_ON_SALE = "onSale"
         private const val KEY_HIDE_EXCLUDED = "hideExcluded"
+        private const val KEY_SPEC = "specFilter"
         private const val KEY_COMPARE = "compareIds"
         private const val KEY_BUDGET = "budget"
         private const val KEY_DIFF_ONLY = "diffOnly"

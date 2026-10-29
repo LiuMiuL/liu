@@ -6,7 +6,21 @@
 - KVM 없음 → **에뮬레이터·실기기 실행 불가**. UI는 Robolectric(SDK 34 런타임) + Compose UI Test로만 확인.
 - 빌드 종류: debug
 
-## 실제 실행한 명령과 결과
+## 0.2.0 (2026-10-29 UTC, 조건 필터 추가)
+
+```text
+./gradlew assembleDebug lintDebug testDebugUnitTest → BUILD SUCCESSFUL
+테스트: 42 tests / 0 failures (신규 ListingFilterTest 7개, ListingDraftTest +1, UI 흐름에 조건 필터 단계 추가)
+lint: 0 errors, 31 warnings (구성 동일)
+aapt2 dump badging → versionCode 2, versionName 0.2.0
+app-debug.apk 25,266,003 bytes, SHA-256 482c5866b77de86f9de411d83418a1f8c3b5b94f2f9c8c685faf0c8875036b57
+```
+
+추가 확인 내용:
+- ListingFilterTest: 일주일 경계(오늘−7일 통과, −8일 제외), 등록일 미상 → 확인 필요(MKT-T08), 연월 정밀도, 휴대폰 기종+저장공간 정확 일치(Fold SE·256GB·PC 부품 제외, 용량 미상 → 확인 필요), 확실한 불일치 우선, 가격 확인일 독립, 선택지 생성, 상대 날짜 해석
+- AppFlow*UiTest(360dp·900dp): 조건 열기 → RAM 16GB 선택 → "조건 충족 1개", 12GB 카드 숨김 → 일주일 조건 → "조건 충족 0개 · 확인 필요 2개(숨김)"
+
+## 0.1.0 실행 기록
 
 ```text
 ./gradlew testDebugUnitTest    → BUILD SUCCESSFUL, 34 tests / 0 failures / 0 skipped
@@ -28,6 +42,7 @@ sha256sum app-debug.apk        → c81183fcc0eba600443af247348f46ff9ead2aa75d5f3
 | DatabasePersistenceTest | 2 | Robolectric + Room 파일 DB | 매물 5개 저장·수정·삭제 → DB 닫고 다시 열어 데이터·가격 이력·비교 스냅샷 보존 확인, 관측 ID 중복 거절 |
 | AppFlowNarrowUiTest | 1 | Robolectric UI, 360×780dp | 빈 상태 → 매물 2개 입력·저장 → 상세 → 비교 선택 → 비교표(사양 다름·≠ RAM) → 액티비티 재생성 후 비교 유지, "자동 추적 없음" 문구 |
 | AppFlowWideUiTest | 1 | Robolectric UI, 900×700dp | 2패널 빈 상세 안내 확인 + 같은 흐름 |
+| ListingFilterTest (0.2.0) | 7 | JVM | 조건 필터·상대 등록일 |
 
 ## 검증하지 않은 항목 (N/A 또는 미실시)
 

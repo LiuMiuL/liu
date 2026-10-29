@@ -54,8 +54,13 @@ data class ListingDraft(
 
     fun toListing(id: String, existing: Listing?, now: Long): Listing {
         val ramSpec = SpecNormalizer.parseRam(ram)
-        val date = PublishedDateParser.parse(published)
         val base = existing ?: Listing(id = id, savedAt = now, updatedAt = now)
+        // 원문이 그대로면 처음 해석한 값을 유지한다. "3일 전"을 수정할 때마다 다시 계산하면 날짜가 밀린다.
+        val date = if (existing != null && existing.publishedRaw == published.n()) {
+            PublishedDateParser.Parsed(existing.publishedValue, existing.publishedPrecision)
+        } else {
+            PublishedDateParser.parse(published, nowMs = now)
+        }
         return base.copy(
             platform = platform.n(),
             originalUrl = url.n(),

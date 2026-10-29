@@ -11,7 +11,7 @@
 | MKT-02 | 링크 공유·직접 입력 | 필수 | IN_PROGRESS | — | ListingDraftTest(공유 텍스트), AppFlow*UiTest | 직접 입력·`ACTION_SEND text/plain` 수신 구현. **스크린샷 첨부 미구현(MKT-02b)** |
 | MKT-02b | 스크린샷 첨부(시스템 선택기, 앱 내부 복사) | 필수 | TODO | MKT-01 | — | Attachment 엔터티·해시·참조 무결성 필요 |
 | MKT-03 | 모델·RAM·용량·상태 | 필수 | IMPLEMENTED_UNVERIFIED | — | MKT-T01, T02, T03 | 원문 보존, 정규화 키 수정 가능. 판매자 주장/직접 확인 분리는 MKT-10 |
-| MKT-04 | 보드·필터·정렬 | 필수 | IN_PROGRESS | — | — | 검색·정렬 3종·판매 중만·제외 숨김 구현. **Board 엔터티(예산·필수/선호/제외 조건), 모델/RAM/용량 필터, 등록일·확인일 독립 필터 미구현** |
+| MKT-04 | 보드·필터·정렬 | 필수 | IN_PROGRESS | — | ListingFilterTest, AppFlow*UiTest | 검색·정렬 3종·판매 중만·제외 숨김, **조건 필터(분류·기종·RAM·저장공간·등록일 N일·가격 확인일 N일, 미확인=확인 필요) 구현(0.2.0)**. 남은 것: Board 엔터티(예산·필수/선호/제외 조건 저장, 여러 보드), 조건을 앱 재시작 후에도 유지 |
 | MKT-05 | 2~4개 비교 | 필수 | IMPLEMENTED_UNVERIFIED | MKT-03 | MKT-T02, AppFlow*UiTest | 고정 항목 열, 차이(≠)·미확인 표시, 다른 항목만, 가격/총비용 기준, 카드 대체, 예산 대비 |
 | MKT-06 | 가격 관측·협상 | 필수 | IMPLEMENTED_UNVERIFIED | MKT-01 | ListingDraftTest, DatabasePersistenceTest | 관측 추가 전용(ABORT). 협상은 `PriceKind.NEGOTIATION` 관측으로 기록(DECISIONS D-07) |
 | MKT-07 | 표본 집계 | 필수 | IMPLEMENTED_UNVERIFIED | MKT-06 | MKT-T05, T06, T07, T11, T13 | 매물당 최신 게시가 1개, 총비용 기준. 최신성 기준은 로직만 있고 UI 설정 없음 |
@@ -36,7 +36,7 @@
 | MKT-T05 배송비 미상 → 총비용 미확인 | 통과(JVM) | ComparisonCalculatorTest.mkt_T05_unknownShippingMeansUnknownTotal |
 | MKT-T06 605000/620000/625000 | 통과(JVM) | ComparisonCalculatorTest.mkt_T06_specExampleAggregate (fixture: tests/fixtures/aggregate_example.csv) |
 | MKT-T07 이력 10개 → 표본 1 | 통과(JVM) | ComparisonCalculatorTest.mkt_T07_tenObservationsCountAsOneSample |
-| MKT-T08 등록일 미상 분리 | 부분 | 등록일 미확인 저장은 통과(ListingDraftTest.mkt_T08_…). "최근 7일" 필터는 MKT-04 미구현 |
+| MKT-T08 등록일 미상 분리 | 통과(JVM·Robolectric UI) | ListingFilterTest.mkt_T08_publishedWithinWeekSeparatesUnknown, AppFlow*UiTest(일주일 조건 → 확인 필요 2개) |
 | MKT-T09·T10 알림 1회·중복 없음 | 미구현 | MKT-08/09 |
 | MKT-T11 필수 RAM 미확인 → 확인 필요 | 집계 부분 통과 | ComparisonCalculatorTest.mkt_T11_…; 조건 평가는 MKT-08 |
 | MKT-T12 가격 갱신 실패 | N/A | 자동 갱신 없음(MKT-X1) |
