@@ -1,24 +1,40 @@
 # TEST_REPORT
 
-실행일: 2026-10-29(UTC) · 환경: Linux 클라우드 컨테이너, OpenJDK 21, Gradle 8.14.3, Android SDK Platform 36 / Build-Tools 36.0.0
+실행일: 2026-10-29(UTC) · 0.2.0 재실행 반영 · 환경: Linux 클라우드 컨테이너, OpenJDK 21, Gradle 8.14.3, Android SDK Platform 36 / Build-Tools 36.0.0
 **에뮬레이터·실기기 없음**(KVM 없음) → 설치·실행·실제 폴드 검증은 하지 않았다.
 
 ## 실행한 명령과 결과
 
 ```bash
 cd 07-fold-smart-desk/android
-./gradlew clean :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew clean :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease :app:assembleDeviceTestAndroidTest
 ```
 
 | 항목 | 결과 |
 |---|---|
 | 빌드 | BUILD SUCCESSFUL |
-| 단위·Robolectric 테스트 | **48개 전부 통과**, 실패 0 |
-| Lint | 오류 0, 경고 17(모두 '더 새 라이브러리 버전 있음' 안내), 힌트 1 |
-| APK | `android/app/build/outputs/apk/debug/app-debug.apk` · 30,803,314 bytes · SHA-256 `77cf7cb9fc831350887139ab5ae0fe5e8c30422d77f206186638806db1f6d81c` · `com.miu.fold.dashboard` 0.1.0(1), 디버그 서명 |
+| 단위·Robolectric 테스트 | **57개 전부 통과**, 실패 0 |
+| Lint | 오류 0, 경고 21(모두 '더 새 라이브러리 버전 있음' 안내), 힌트 1 |
+| 디버그 APK | `android/app/build/outputs/apk/debug/app-debug.apk` · 30,951,570 bytes · SHA-256 `475fa235f5ff8c3cb67ca47ad712f841ec694e13eb856b49773640470ad4eacf` · 0.2.0(2) |
+| 릴리스 APK(R8 축소) | `android/app/build/outputs/apk/release/app-release.apk` · 3,167,546 bytes · SHA-256 `07d26137315f3d1d5f0f412985560cd7355404e58ffc8667b2a71ec059e49a9f` · 개발용 키 서명(인증서 SHA-256 `e219795e…4646b2`, 0.1.0과 동일 → 업데이트 설치 가능) |
+| 실기기 테스트 APK | `assembleDeviceTestAndroidTest` 빌드 성공. **실행은 안 함(기기 없음)** |
+
+0.1.0 결과(참고): 테스트 48개 통과, APK SHA-256 `77cf7cb9…d81c`.
 
 Lint로 잡아 고친 것: API 30~32에서 크래시할 `InputStream.readNBytes`, `PackageManager.ResolveInfoFlags` 사용(NewApi 3건), 백업 규칙 누락.
 UI 테스트로 잡아 고친 것: 첫 실행 시 기본 카드 생성 전에 배치를 구독해 "표시할 카드가 없습니다"가 뜨던 경쟁 상태.
+
+## 0.2.0에서 추가·변경한 테스트
+
+- `RepositoryTest`: 두 초안 동시 편집 시 재로드·충돌 사본, 다른 화면에서 휴지통 이동 시 초안 닫힘, 필터 화면 기준 할 일 이동, 메모→할 일 중복 방지, 타이머 알람 예약이 상태(시작·일시정지·재개·시각 변경·종료)를 따라감
+- `TimerEngineTest`: 늦게 확인해도 완료 기록의 종료 시각 = 실제 종료 시점
+- `LayoutEditorTest`: 줄 채우기(packRows)
+- `DateRulesTest`: 월 달력 칸(일요일 시작)
+- `HomeUiTest`: **손잡이 드래그로 순서 변경 → 저장 → 좁은 배치만 바뀜**
+- `ScreenshotTest`: 일정(월 달력) 화면 캡처 추가
+- `app/src/androidTest/DeviceSmokeTest`(실기기용 5개): 작성·빌드만, 미실행
+
+빌드 중 발견해 고친 것: 드래그 손잡이 접근성 노드 합쳐짐, 드래그 중 재배치로 제스처 끊김, 스크롤 밖 카드 위치 계산 오류.
 
 ## 테스트 클래스
 
@@ -43,7 +59,7 @@ UI 테스트로 잡아 고친 것: 첫 실행 시 기본 카드 생성 전에 �
 | T07 | JVM 통과(시뮬레이션) | 리소스 한정자 변경+Activity 재생성. 실제 접기 미검증 |
 | T08, T09, T12 | JVM 통과 | 가짜 Clock |
 | T10, T11 | JVM 통과 | 새 TimerController로 재생성 흉내 |
-| T13 | N/A | 알림·정확 알람 기능 미구현. 권한을 요청하지 않으므로 앱 내부 타이머는 권한과 무관하게 동작 |
+| T13 | 일부 | 알람 예약 로직 JVM 통과, 권한 거절 시 앱 안 타이머는 권한과 무관(코드상). 실제 권한 거절·지연 알림은 실기기 필요 |
 | T14 | 미검증 | 실행 불가 시 안내 코드는 있으나 실제 앱 삭제 후 확인은 기기 필요 |
 | T15 | JVM 통과 | URL·백업 바로가기·내부 목적지 검증 |
 | T16 | JVM 통과 | |
@@ -52,7 +68,7 @@ UI 테스트로 잡아 고친 것: 첫 실행 시 기본 카드 생성 전에 �
 | T19 | JVM 통과 | |
 | T20 | JVM 통과 | 타이머 '진행 중 세션'은 의도적으로 백업 제외 |
 
-## 미검증(실기기·에뮬레이터 필요)
+## 미검증(실기기·에뮬레이터 필요) — `tools/device-test.ps1`과 `docs/DEVICE_TEST.md`로 확인
 
 - 실제 폴드 접기/펼치기·회전·분할 화면·팝업 창, 힌지 위치
 - 글자 200%, TalkBack, 키보드 표시 시 입력칸 가림
@@ -60,3 +76,5 @@ UI 테스트로 잡아 고친 것: 첫 실행 시 기본 카드 생성 전에 �
 - 시스템 공유 시트 수신/발신, SAF 백업 파일 선택, 설치 앱 목록·실행
 - 대량 데이터(메모 수천 건) 성능, 앱 업데이트 후 DB 마이그레이션(아직 v1뿐)
 - 다크 테마 화면 확인
+- R8 축소 릴리스 APK 실행(직렬화·DB 클래스 보존은 APK 분석으로만 확인)
+- 화면 꺼짐·Doze 상태 종료 알림, 정확 알람 권한 미허용 시 지연 정도

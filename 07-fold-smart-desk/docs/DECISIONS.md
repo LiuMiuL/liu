@@ -29,7 +29,8 @@ Lint가 더 새 버전(AGP 9.5, Kotlin 2.4, BOM 2026.09 등)이 있다고 경고
 - 프로필은 2개: 1열이면 `좁은 화면`, 2열 이상이면 `넓은 화면`. 넓은 화면 배치의 3열 크기는 2열 창에서 2열로 줄여 표시하되 저장값은 유지.
 - **숨김은 프로필별**(`LayoutPlacement.visible`). 명세 4.1의 `DashboardCard.enabled`는 카드 자체 사용 여부로 남겼다(한 프로필에서 숨긴 카드가 다른 프로필에서 사라지지 않도록).
 - 편집 중 접기/펼치기: 편집 프로필을 시작 시점에 고정. 창이 바뀌면 안내 문구를 띄우고, 저장은 원래 프로필에만, 취소하면 DB는 손대지 않은 상태.
-- 드래그는 이번 단계에서 미구현. 명세가 요구하는 버튼 이동(앞/뒤/위/아래)만 제공.
+- 드래그: 편집 모드 손잡이(≡)를 끌면 카드가 떠서 따라오고, 놓을 때 한 번만 순서를 바꾼다(끄는 도중 재배치하면 제스처가 끊김). 버튼 이동도 유지.
+- 홈은 카드가 최대 6개라 지연 그리드 대신 줄 단위 배치(`LayoutEditor.packRows`) + `IntrinsicSize.Min`으로 같은 줄 카드 높이를 맞춘다. 카드가 많아지면 지연 목록으로 되돌림 검토.
 - 노트 화면 2패널: 가용 너비 ≥ 240 + 320 + 48dp일 때만.
 
 ## 타이머
@@ -39,7 +40,10 @@ Lint가 더 새 버전(AGP 9.5, Kotlin 2.4, BOM 2026.09 등)이 있다고 경고
 - 앱이 백그라운드로 갈 때(ON_STOP) 기준값 체크포인트 → 재부팅 시 잃는 시간을 마지막 체크포인트 이후로 한정. 재부팅 후에는 완료로 처리하지 않고 INTERRUPTED.
 - 완료 기록은 `focus_record.sessionId` 기본키 + INSERT IGNORE로 중복 제거.
 - 화면 갱신은 화면 구독 중에만 250ms 틱(WhileSubscribed). 백그라운드 폴링·포그라운드 서비스 없음.
-- 알림은 미구현(HOME-09). WorkManager는 쓰지 않을 것(명세 A7).
+- 종료 알림: AlarmManager `ELAPSED_REALTIME_WAKEUP`(부팅 기준)으로 종료 시각 예약 → 시스템 시각 변경 무관. 정확 알람 권한이 있으면 `setExactAndAllowWhileIdle`, 없으면 `setAndAllowWhileIdle`(지연 가능, 화면에 안내). WorkManager 미사용(명세 A7).
+- 재부팅하면 예약이 지워지지만, 재부팅 세션은 '중단됨' 정책이라 다시 예약하지 않는다(RECEIVE_BOOT_COMPLETED 불필요).
+- 앱이 화면에 보이면 시스템 알림 대신 앱 안 안내만(중복 방지). 알림 권한은 첫 타이머 시작 때 한 번만 묻는다.
+- 알림 수신기(TimerAlarmReceiver)도 reconcile을 거치므로 완료 기록은 여전히 세션당 1건.
 
 ## 데이터·저장
 
@@ -48,6 +52,17 @@ Lint가 더 새 버전(AGP 9.5, Kotlin 2.4, BOM 2026.09 등)이 있다고 경고
 - 첫 실행 기본 카드 생성이 끝난 뒤에만 배치를 구독(테스트 중 발견한 '카드 없음' 오표시 버그 수정).
 - 백업에서 진행 중 타이머 세션 제외(monotonic 값은 다른 부팅·기기에서 의미 없음). 집중 기록은 포함.
 - 백업 '새 데이터로 추가'는 카드/배치를 가져오지 않고, 현재 없는 카드 종류만 추가(기존 홈 배치 보존). '전체 교체'는 앱 내부 `files/backups/pre-restore-*.json`을 먼저 만든다.
+
+## 메모 동시 편집
+
+- 저장은 `UPDATE … WHERE revision = 읽은 revision`. 실패하면 덮어쓰지 않고 내 변경을 '(충돌 사본)' 새 메모로 저장 + 안내. 고친 게 없는 초안은 DB 변경을 자동으로 다시 불러온다.
+
+## 서명·배포
+
+- release는 R8 축소(minify+shrinkResources). 백업 직렬화 클래스·enum 이름 보존 규칙(`proguard-rules.pro`), APK 안에 `$$serializer`·`AppDatabase_Impl` 존재 확인. **축소 APK의 실행은 실기기에서만 확인 가능**.
+- 프로젝트에 `keystore/debug.keystore`(표준 개발용 키, 비밀번호 android)를 포함해 어느 PC에서 빌드해도 같은 서명 → 업데이트 설치 가능. 스토어 배포용 키는 따로 만들고 Git에 넣지 않는다.
+- 실기기 자동 테스트는 `testBuildType = deviceTest`(패키지 `.devtest`)로 분리. connectedAndroidTest는 끝나면 대상 앱을 지우므로 실제 앱 데이터 보호.
+- Windows 경로의 한글·공백 문제: 스크립트가 `subst`로 임시 드라이브를 만들어 빌드, `android.overridePathCheck=true`도 설정.
 
 ## 빌드 환경 메모
 

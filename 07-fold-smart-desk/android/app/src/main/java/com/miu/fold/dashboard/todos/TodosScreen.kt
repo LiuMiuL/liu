@@ -60,7 +60,14 @@ fun TodosScreen(vms: Vms, nav: Nav) {
     val filter by vm.filter.collectAsStateWithLifecycle()
     val today by vm.today.collectAsStateWithLifecycle()
     var title by rememberSaveable { mutableStateOf("") }
-    var due by rememberSaveable { mutableStateOf<String?>(today.toString()) }
+    // 날짜 값 대신 '오늘/내일/없음/특정 날짜' 선택을 기억해, 자정이 지나면 '오늘'이 새 날짜를 가리키게 한다.
+    var dueMode by rememberSaveable { mutableStateOf("today") }
+    val dueDate: LocalDate? = when (dueMode) {
+        "today" -> today
+        "tomorrow" -> today.plusDays(1)
+        "none" -> null
+        else -> TodoRules.parseDate(dueMode)
+    }
     var pickDue by rememberSaveable { mutableStateOf(false) }
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -78,20 +85,20 @@ fun TodosScreen(vms: Vms, nav: Nav) {
                     singleLine = true, placeholder = { Text("새 할 일") },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = {
-                        if (title.isNotBlank()) { vm.add(title, TodoRules.parseDate(due)); title = "" }
+                        if (title.isNotBlank()) { vm.add(title, dueDate); title = "" }
                     }),
                 )
-                IconButton(enabled = title.isNotBlank(), onClick = { vm.add(title, TodoRules.parseDate(due)); title = "" }) {
+                IconButton(enabled = title.isNotBlank(), onClick = { vm.add(title, dueDate); title = "" }) {
                     Icon(Icons.Filled.Add, contentDescription = "추가")
                 }
             }
             FlowRow(Modifier.padding(horizontal = Space.l), horizontalArrangement = Arrangement.spacedBy(Space.s)) {
-                val d = TodoRules.parseDate(due)
-                FilterChip(selected = d == today, onClick = { due = today.toString() }, label = { Text("오늘") })
-                FilterChip(selected = d == today.plusDays(1), onClick = { due = today.plusDays(1).toString() }, label = { Text("내일") })
-                FilterChip(selected = d != null && d != today && d != today.plusDays(1), onClick = { pickDue = true },
-                    label = { Text(if (d != null && d != today && d != today.plusDays(1)) Fmt.date(d) else "날짜 선택") })
-                FilterChip(selected = d == null, onClick = { due = null }, label = { Text("날짜 없음") })
+                val custom = dueMode !in setOf("today", "tomorrow", "none")
+                FilterChip(selected = dueMode == "today", onClick = { dueMode = "today" }, label = { Text("오늘") })
+                FilterChip(selected = dueMode == "tomorrow", onClick = { dueMode = "tomorrow" }, label = { Text("내일") })
+                FilterChip(selected = custom, onClick = { pickDue = true },
+                    label = { Text(if (custom && dueDate != null) Fmt.date(dueDate) else "날짜 선택") })
+                FilterChip(selected = dueMode == "none", onClick = { dueMode = "none" }, label = { Text("날짜 없음") })
             }
             val shown = items.filter { TodoRules.matches(filter, it.bucket) }
             LazyColumn(Modifier.weight(1f)) {
@@ -111,7 +118,9 @@ fun TodosScreen(vms: Vms, nav: Nav) {
             }
         }
     }
-    if (pickDue) LocalDatePickerDialog(TodoRules.parseDate(due) ?: today, onPick = { due = it.toString() }, onDismiss = { pickDue = false })
+    if (pickDue) LocalDatePickerDialog(dueDate ?: today, onPick = { d ->
+        dueMode = when (d) { today -> "today"; today.plusDays(1) -> "tomorrow"; else -> d.toString() }
+    }, onDismiss = { pickDue = false })
     editing?.let { id ->
         items.firstOrNull { it.todo.id == id }?.let { item ->
             TodoEditDialog(item.todo, nav, onSave = { vm.update(it) }, onDelete = {

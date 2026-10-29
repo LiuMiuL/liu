@@ -37,6 +37,12 @@ class TodosViewModel(private val c: AppContainer, private val saved: SavedStateH
     fun add(title: String, due: LocalDate?, priority: Int = 0, description: String = "", sourceNoteId: String? = null) =
         viewModelScope.launch { c.todos.add(title, description, due, priority, sourceNoteId) }
 
+    /** 메모에서 할 일 만들기. 결과(새로 만들었는지)를 알려준다. 원래 메모는 지우지 않는다. */
+    fun addFromNote(noteId: String?, title: String, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val created = if (noteId == null) c.todos.add(title) != null else c.todos.addFromNote(noteId, title)
+        onResult(created)
+    }
+
     fun update(t: TodoEntity) = viewModelScope.launch { c.todos.update(t) }
 
     /** 직렬화해서 연타해도 마지막 요청 상태가 최종 상태가 된다. */

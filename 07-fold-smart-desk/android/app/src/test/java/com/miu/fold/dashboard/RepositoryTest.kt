@@ -238,6 +238,17 @@ class RepositoryTest {
         assertEquals("2027-01-01", todos.get(t.id)!!.dueDate)
     }
 
+    @Test fun todoFromNoteIsNotDuplicated() = runTest {
+        val todos = TodoRepository(db, clock)
+        assertTrue(todos.addFromNote("note-1", "보고서 쓰기"))
+        assertFalse(todos.addFromNote("note-1", "보고서 쓰기")) // 연타
+        assertTrue(todos.addFromNote("note-2", "보고서 쓰기")) // 다른 메모는 별개
+        val first = todos.all.first().first { it.sourceNoteId == "note-1" }
+        todos.setDone(first.id, true)
+        assertTrue(todos.addFromNote("note-1", "보고서 쓰기")) // 완료 후 다시 만들기는 허용
+        assertEquals(3, todos.all.first().size)
+    }
+
     @Test fun todoMoveSwapsWithVisibleNeighbourOnly() = runTest {
         val todos = TodoRepository(db, clock)
         val today = LocalDate.of(2027, 1, 1)

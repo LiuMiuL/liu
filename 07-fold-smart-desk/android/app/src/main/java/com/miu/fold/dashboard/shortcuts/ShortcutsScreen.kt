@@ -80,7 +80,8 @@ fun ShortcutsScreen(vms: Vms, nav: Nav, onClose: () -> Unit) {
                 }
                 if (list.isEmpty()) item { EmptyState("바로가기가 없습니다.") }
                 items(list, key = { it.id }) { s ->
-                    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = Space.l), verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = Space.l), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s)) {
+                        ShortcutIcon(s)
                         Column(Modifier.weight(1f)) {
                             Text(s.label, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(typeLabel(s) + " · " + s.target, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)

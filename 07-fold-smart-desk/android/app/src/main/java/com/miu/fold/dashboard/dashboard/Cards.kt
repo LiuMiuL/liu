@@ -74,8 +74,9 @@ fun QuickNoteCard(vms: Vms, nav: Nav) {
                     val q = vms.notes.quick
                     q.flush().invokeOnCompletion {
                         val st = q.state.value
-                        vms.todos.add(NoteRules.suggestedTitle(st.title, st.body), null, sourceNoteId = st.id)
-                        nav.showMessage("할 일로 만들었습니다(원래 메모는 그대로).")
+                        vms.todos.addFromNote(st.id, NoteRules.suggestedTitle(st.title, st.body)) { created ->
+                            nav.showMessage(if (created) "할 일로 만들었습니다(원래 메모는 그대로)." else "이미 이 메모로 만든 할 일이 있습니다.")
+                        }
                     }
                 },
             ) { Text("할 일로 만들기") }
@@ -152,6 +153,9 @@ fun ShortcutsCard(vms: Vms, nav: Nav, span: Int) {
                 AssistChip(
                     onClick = { handleLaunch(context, s, vms, nav) { failed = it } },
                     label = { Text(s.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    leadingIcon = if (s.type == com.miu.fold.dashboard.shortcuts.ShortcutType.APP.name) {
+                        { com.miu.fold.dashboard.shortcuts.ShortcutIcon(s) }
+                    } else null,
                     modifier = Modifier.heightIn(min = 48.dp),
                 )
             }

@@ -14,11 +14,33 @@ android {
         applicationId = "com.miu.fold.dashboard"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // 프로젝트에 포함한 '개발용' 디버그 키(표준 비밀번호 android). 어느 PC에서 빌드해도 서명이 같아
+        // 이미 설치한 앱 위에 업데이트 설치가 된다. 스토어 배포용 키가 아니며, 배포용 키는 Git에 넣지 않는다.
+        getByName("debug") {
+            storeFile = rootProject.file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
+    // 실기기 자동 테스트는 패키지가 다른 테스트 전용 앱으로 돌린다.
+    // connectedAndroidTest는 끝나면 대상 앱을 지우므로, 실제 사용 중인 앱 데이터가 지워지지 않게 하기 위함.
+    testBuildType = "deviceTest"
+
     buildTypes {
+        create("deviceTest") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".devtest"
+            versionNameSuffix = "-devtest"
+            matchingFallbacks += listOf("debug")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -74,6 +96,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    "deviceTestImplementation"(libs.androidx.compose.ui.test.manifest)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -82,4 +105,11 @@ dependencies {
     testImplementation(libs.androidx.room.testing)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 }

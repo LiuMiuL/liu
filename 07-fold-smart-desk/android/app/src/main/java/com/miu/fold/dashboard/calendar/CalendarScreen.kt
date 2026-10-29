@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -81,6 +82,20 @@ fun CalendarScreen(vms: Vms, nav: Nav, available: Dp) {
             val dayEvents = vm.eventsOn(all, selected)
             val upcoming = (1..30L).map { selected.plusDays(it) }.map { d -> d to vm.eventsOn(all, d) }.filter { it.second.isNotEmpty() }
             LazyColumn(Modifier.weight(1f).padding(horizontal = Space.l)) {
+                item {
+                    // 월 달력: 화면이 넓어도 너무 커지지 않게 최대 너비를 둔다.
+                    androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        androidx.compose.foundation.layout.Box(Modifier.widthIn(max = 480.dp)) {
+                            MonthGrid(
+                                month = java.time.YearMonth.from(selected),
+                                selected = selected, today = today,
+                                hasEvents = { d -> vm.eventsOn(all, d).isNotEmpty() },
+                                onSelect = vm::select,
+                                onMonth = { m -> vm.select(m.atDay(minOf(selected.dayOfMonth, m.lengthOfMonth()))) },
+                            )
+                        }
+                    }
+                }
                 item { SectionTitle(Fmt.date(selected)) }
                 if (dayEvents.isEmpty()) item { EmptyState("이 날 일정이 없습니다.") }
                 items(dayEvents, key = { "d-" + it.id }) { e -> EventRow(e, vm) { editId = e.id; vm.opened(e.id) } }

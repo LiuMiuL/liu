@@ -2,8 +2,10 @@
 
 ## 권한
 
-- **요청하는 위험 권한 없음.** INTERNET, 위치, 연락처, 캘린더, 알림, 저장소 전체 접근, 접근성 서비스 모두 없음.
+- 선언 권한: `POST_NOTIFICATIONS`(타이머 종료 알림, 첫 타이머 시작 때 한 번만 묻고 거절해도 타이머 동작), `SCHEDULE_EXACT_ALARM`(정확한 종료 시각, Android 14+ 기본 꺼짐 — 사용자가 설정에서 켤 때만 사용, 강제 획득 없음).
+- INTERNET, 위치, 연락처, 캘린더, 저장소 전체 접근, 접근성 서비스, 부팅 수신 권한은 없음.
   (APK에 보이는 `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`은 AndroidX가 자동 추가하는 앱 내부 서명 권한)
+- 알림 수신기는 `exported=false`, PendingIntent는 `FLAG_IMMUTABLE`.
 - 설치 앱 조회: `QUERY_ALL_PACKAGES` 없음. 매니페스트 `<queries>`에 런처(MAIN/LAUNCHER)와 https 열기 인텐트만 선언.
 - 파일: 백업 내보내기/가져오기는 시스템 파일 선택기(SAF)로 사용자가 고른 파일만.
 
@@ -24,5 +26,5 @@
 
 ## 남은 위험·후속
 
-- 알림 기능 추가 시 POST_NOTIFICATIONS·SCHEDULE_EXACT_ALARM은 필요한 시점에만 요청하고 거절 시 대체 안내.
+- 저장소에 포함된 `keystore/debug.keystore`는 공개된 표준 비밀번호의 개발용 키다. 이 키로 서명한 APK를 스토어에 올리지 않는다.
 - 시스템 캘린더 연결은 별도 승인 전 구현하지 않는다.

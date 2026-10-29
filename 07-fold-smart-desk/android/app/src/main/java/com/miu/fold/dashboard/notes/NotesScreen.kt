@@ -189,8 +189,9 @@ private fun NoteEditor(vms: Vms, nav: Nav, modifier: Modifier, onClose: () -> Un
                     TextButton(enabled = !d.isEmpty, onClick = {
                         vms.notes.editor.flush().invokeOnCompletion {
                             val st = vms.notes.editor.state.value
-                            vms.todos.add(NoteRules.suggestedTitle(st.title, st.body), null, sourceNoteId = st.id)
-                            nav.showMessage("할 일로 만들었습니다(원래 메모는 그대로).")
+                            vms.todos.addFromNote(st.id, NoteRules.suggestedTitle(st.title, st.body)) { created ->
+                                nav.showMessage(if (created) "할 일로 만들었습니다(원래 메모는 그대로)." else "이미 이 메모로 만든 할 일이 있습니다.")
+                            }
                         }
                     }) { Text("할 일로 만들기") }
                 }

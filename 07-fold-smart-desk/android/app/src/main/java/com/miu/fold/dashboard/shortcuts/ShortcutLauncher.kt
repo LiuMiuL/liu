@@ -74,3 +74,4 @@ object ShortcutLauncher {
 
     private fun dummy(url: String) = ShortcutEntity("", ShortcutType.WEB.name, url, url, updatedAt = 0)
 }
+

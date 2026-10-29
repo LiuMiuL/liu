@@ -35,6 +35,14 @@ class TodoRepository(private val db: AppDatabase, private val clock: AppClock) {
         return todo
     }
 
+    /** 같은 메모에서 같은 제목의 미완료 할 일이 이미 있으면 만들지 않는다(버튼 연타·재실행 중복 방지). */
+    suspend fun addFromNote(noteId: String, title: String): Boolean {
+        val t = title.trim().take(300)
+        if (t.isEmpty()) return false
+        if (dao.all().any { it.sourceNoteId == noteId && it.doneAt == null && it.title == t }) return false
+        return add(t, sourceNoteId = noteId) != null
+    }
+
     suspend fun update(todo: TodoEntity) = dao.upsert(todo.copy(title = todo.title.trim().take(300), updatedAt = clock.nowMillis()))
 
     /** 원하는 최종 상태를 지정한다(토글 아님). 완료·되돌리기 연타에도 마지막 요청 상태로 수렴한다. */

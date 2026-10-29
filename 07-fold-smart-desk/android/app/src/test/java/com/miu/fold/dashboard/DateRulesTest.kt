@@ -75,6 +75,19 @@ class DateRulesTest {
         assertTrue(EventRules.build(false, LocalDate.of(2027, 5, 5), LocalDate.of(2027, 5, 6), "23:00", "01:00", seoul) is EventInputResult.Ok)
     }
 
+    @Test fun monthCellsStartOnSunday() {
+        // 2026-10-01은 목요일 → 앞에 빈칸 4개
+        val oct = com.miu.fold.dashboard.calendar.MonthRules.cells(java.time.YearMonth.of(2026, 10))
+        assertEquals(0, oct.size % 7)
+        assertEquals(4, oct.takeWhile { it == null }.size)
+        assertEquals(LocalDate.of(2026, 10, 1), oct[4])
+        assertEquals(31, oct.count { it != null })
+        // 2026-02-01은 일요일, 28일 → 정확히 4주
+        val feb = com.miu.fold.dashboard.calendar.MonthRules.cells(java.time.YearMonth.of(2026, 2))
+        assertEquals(28, feb.size)
+        assertEquals(LocalDate.of(2026, 2, 1), feb[0])
+    }
+
     @Test fun noteTitleSuggestion() {
         assertEquals("첫 줄", NoteRules.suggestedTitle("", "\n  첫 줄 \n둘째"))
         assertEquals("직접 제목", NoteRules.suggestedTitle(" 직접 제목 ", "본문"))

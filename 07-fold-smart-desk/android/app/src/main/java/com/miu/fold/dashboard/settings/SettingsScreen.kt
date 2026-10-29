@@ -94,7 +94,9 @@ fun SettingsScreen(vms: Vms, nav: Nav) {
                 style = MaterialTheme.typography.bodySmall,
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.s)) {
-                OutlinedButton(onClick = { exportLauncher.launch("fold-smart-desk-backup.json") }) { Text("백업 내보내기") }
+                OutlinedButton(onClick = { exportLauncher.launch(
+                    "fold-smart-desk-backup-" + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmm")) + ".json",
+                ) }) { Text("백업 내보내기") }
                 OutlinedButton(onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) { Text("백업 가져오기") }
             }
             HorizontalDivider()

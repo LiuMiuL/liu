@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.printToString
 import org.junit.Rule
 import org.junit.Test
@@ -21,8 +23,8 @@ import java.io.File
 class ScreenshotTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
-    private fun capture(name: String) {
-        runCatching { rule.waitUntil(20_000) { rule.onAllNodesWithText("빠른 메모").fetchSemanticsNodes().isNotEmpty() } }
+    private fun capture(name: String, waitFor: String = "빠른 메모") {
+        runCatching { rule.waitUntil(20_000) { rule.onAllNodesWithText(waitFor, substring = true).fetchSemanticsNodes().isNotEmpty() } }
             .onFailure { println(rule.onRoot(useUnmergedTree = true).printToString()) ; throw it }
         rule.waitForIdle()
         val view = rule.activity.window.decorView
@@ -35,4 +37,11 @@ class ScreenshotTest {
     @Test @Config(qualifiers = "w360dp-h780dp-xhdpi") fun folded() = capture("home_folded_360dp")
     @Test @Config(qualifiers = "w840dp-h900dp-xhdpi") fun unfolded() = capture("home_unfolded_840dp")
     @Test @Config(qualifiers = "w1280dp-h800dp-mdpi") fun large() = capture("home_large_1280dp")
+
+    @Test @Config(qualifiers = "w360dp-h780dp-xhdpi") fun calendar() {
+        rule.waitUntil(20_000) { rule.onAllNodesWithText("빠른 메모").fetchSemanticsNodes().isNotEmpty() }
+        rule.onAllNodesWithText("일정").onFirst().performClick()
+        rule.waitUntil(5_000) { rule.onAllNodesWithText("이 앱에만 저장되는", substring = true).fetchSemanticsNodes().isNotEmpty() }
+        capture("calendar_folded_360dp", waitFor = "이 앱에만 저장되는")
+    }
 }
