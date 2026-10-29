@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- 접힌/펼친 두 화면을 상징하는 두 개의 카드 -->
+    <path android:fillColor="#FFFFFF" android:pathData="M30,32h22v44h-22z" />
+    <path android:fillColor="#DCE4FF" android:pathData="M56,32h22v20h-22z" />
+    <path android:fillColor="#DCE4FF" android:pathData="M56,56h22v20h-22z" />
+</vector>

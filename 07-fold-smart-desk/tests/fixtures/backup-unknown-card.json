@@ -1,0 +1,22 @@
+{
+  "header": {
+    "appId": "com.miu.fold.dashboard",
+    "schemaVersion": 1,
+    "appVersion": "0.1.0",
+    "exportedAt": 1800000000000,
+    "recordCounts": { "cards": 1, "placements": 2, "notes": 1, "todos": 1, "events": 1, "shortcuts": 2, "focusRecords": 0 }
+  },
+  "cards": [ { "id": "future-card", "type": "pc_status_v9", "title": "PC 상태(예시)", "configJson": "{}", "enabled": true } ],
+  "placements": [
+    { "cardId": "future-card", "profile": "narrow", "orderKey": 0, "span": 1, "visible": true },
+    { "cardId": "future-card", "profile": "wide", "orderKey": 0, "span": 2, "visible": true }
+  ],
+  "notes": [ { "id": "n1", "title": "", "body": "예시 메모: 백업 가져오기 시험용", "pinned": false, "tags": "예시", "deletedAt": null, "createdAt": 1800000000000, "updatedAt": 1800000000000, "revision": 1 } ],
+  "todos": [ { "id": "t1", "title": "예시 할 일", "description": "", "dueDate": "2027-01-15", "dueInstant": null, "priority": 1, "doneAt": null, "orderKey": 1, "sourceNoteId": "n1", "createdAt": 1800000000000, "updatedAt": 1800000000000 } ],
+  "events": [ { "id": "e1", "title": "예시 종일 일정", "allDay": true, "localDateStart": "2027-01-15", "localDateEnd": "2027-01-15", "startInstant": null, "endInstant": null, "zoneId": null, "memo": "", "createdAt": 1800000000000, "updatedAt": 1800000000000 } ],
+  "shortcuts": [
+    { "id": "s1", "type": "WEB", "label": "Claude", "target": "https://claude.ai", "iconRef": null, "fallbackUrl": null, "orderKey": 1, "updatedAt": 1800000000000 },
+    { "id": "s2", "type": "WEB", "label": "위험한 예시", "target": "javascript:alert(1)", "iconRef": null, "fallbackUrl": null, "orderKey": 2, "updatedAt": 1800000000000 }
+  ],
+  "focusRecords": []
+}
