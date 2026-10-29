@@ -10,7 +10,8 @@
      옵션: -Target "다른\폴더"  -SkipUnitTests  -NoInstall  -Serial <기기ID>
 
 .안전장치
-  - 대상 폴더가 Git 저장소가 아니면서 비어 있지 않으면 아무것도 덮어쓰지 않고 멈춘다.
+  - ZIP으로 받아 넣은 폴더(07-fold-smart-desk\android가 있음)는 그대로 빌드한다(갱신 없음).
+  - 그 밖에 Git 저장소가 아니면서 비어 있지 않은 폴더는 아무것도 덮어쓰지 않고 멈춘다.
   - 자동 테스트는 별도 테스트 앱(com.miu.fold.dashboard.devtest)에서 돈다. 실제 앱 데이터는 건드리지 않는다.
   - 실제 앱 설치는 '업데이트 설치(-r)'만 한다. 서명이 달라 실패해도 자동으로 지우지 않는다.
 #>
@@ -55,8 +56,10 @@ function Save-Report {
 
 # ---------------------------------------------------------------- 1
 Step "1. 필요한 도구 확인"
-if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Fail "git이 없습니다. https://git-scm.com 에서 설치하세요." }
-Ok "git $(git --version)"
+$hasGit = [bool](Get-Command git -ErrorAction SilentlyContinue)
+$zipCopy = (Test-Path (Join-Path $Target "07-fold-smart-desk\android\gradlew.bat")) -and -not (Test-Path (Join-Path $Target ".git"))
+if (-not $hasGit -and -not $zipCopy) { Fail "git이 없습니다. https://git-scm.com 에서 설치하거나, GitHub에서 ZIP으로 받아 대상 폴더에 풀어 넣으세요." }
+if ($hasGit) { Ok "$(git --version)" } else { Ok "git 없음 — ZIP 사본으로 진행" }
 
 $sdk = $env:ANDROID_HOME
 if (-not $sdk) { $sdk = $env:ANDROID_SDK_ROOT }
@@ -88,6 +91,9 @@ if (Test-Path (Join-Path $Target ".git")) {
         if ($LASTEXITCODE -ne 0) { Fail "git pull 실패" }
         Ok "기존 저장소를 최신으로 갱신"
     }
+} elseif (Test-Path (Join-Path $Target "07-fold-smart-desk\android\gradlew.bat")) {
+    # GitHub에서 ZIP으로 받아 풀어 넣은 경우: 내려받기·갱신 없이 그대로 빌드한다.
+    Warn "Git 저장소가 아닌 폴더(ZIP으로 받은 것)입니다. 최신으로 갱신하지 않고 들어 있는 파일 그대로 진행합니다. 새 버전은 ZIP을 다시 받아 덮어쓰세요."
 } elseif ((Test-Path $Target) -and (Get-ChildItem -Force $Target | Select-Object -First 1)) {
     Fail "대상 폴더가 비어 있지 않고 Git 저장소도 아닙니다. 기존 파일을 지키기 위해 멈춥니다. 빈 폴더를 지정하거나(-Target) 기존 파일을 직접 옮긴 뒤 다시 실행하세요."
 } else {
@@ -96,7 +102,7 @@ if (Test-Path (Join-Path $Target ".git")) {
     if ($LASTEXITCODE -ne 0) { Fail "git clone 실패. 비공개 저장소면 GitHub 로그인(git credential)이 필요합니다." }
     Ok "저장소를 내려받음"
 }
-$Report.Add("- 커밋: $(git -C "$Target" rev-parse --short HEAD)")
+if (Test-Path (Join-Path $Target ".git")) { $Report.Add("- 커밋: $(git -C "$Target" rev-parse --short HEAD)") } else { $Report.Add("- 커밋: (ZIP 사본, Git 정보 없음)") }
 
 # ---------------------------------------------------------------- 3
 Step "3. 한글·공백 경로 우회(임시 드라이브 연결)"

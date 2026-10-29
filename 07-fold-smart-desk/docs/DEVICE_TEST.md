@@ -12,7 +12,7 @@ powershell -ExecutionPolicy Bypass -File tools\device-test.ps1
 
 스크립트가 하는 일
 1. git·JDK·Android SDK 확인
-2. 대상 폴더로 저장소 clone(이미 있으면 pull). **비어 있지 않은 일반 폴더면 덮어쓰지 않고 멈춤**
+2. 대상 폴더로 저장소 clone(이미 있으면 pull). GitHub ZIP을 풀어 넣은 폴더면 그대로 사용(Git 불필요). **그 밖에 비어 있지 않은 일반 폴더면 덮어쓰지 않고 멈춤**
 3. 한글·공백 경로 문제를 피하려고 임시 드라이브(subst X: 등)로 연결해 빌드
 4. PC 단위 테스트 + 디버그/릴리스 APK 빌드
 5. 연결된 기기 정보 기록(모델·Android 버전·화면 크기·밀도)
