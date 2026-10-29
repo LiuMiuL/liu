@@ -48,6 +48,8 @@ class TimerEngineTest {
         assertNotNull(record)
         assertEquals(FocusOutcome.COMPLETED, record!!.outcome)
         assertEquals(1 * min, record.elapsedMs)
+        // 5분 뒤에 확인했어도 종료 시각은 실제로 끝난 시점(시작 + 1분)
+        assertEquals(s.startedAt + 1 * min, record.endedAt)
         // 이미 완료된 세션을 다시 reconcile해도 기록이 또 생기지 않는다.
         assertNull(TimerEngine.reconcile(done, c).second)
     }

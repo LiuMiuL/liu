@@ -126,11 +126,14 @@ object TimerEngine {
         if (left > 0) return s to null
         val now = clock.nowMillis()
         val elapsed = s.focusElapsedMs + s.remainingMs
+        // 늦게 확인했더라도 종료 시각은 실제로 0이 된 순간(= 지금 − 초과 경과)으로 기록한다.
+        val overshoot = ((clock.elapsedRealtime() - s.monotonicAnchor) - s.remainingMs).coerceAtLeast(0)
+        val endedAt = now - overshoot
         val done = s.copy(
             state = TimerState.COMPLETED, remainingMs = 0, focusElapsedMs = elapsed,
             monotonicAnchor = clock.elapsedRealtime(), wallClockDeadline = null, updatedAt = now,
         )
-        return done to FocusResult(s.id, s.startedAt, now, elapsed, FocusOutcome.COMPLETED)
+        return done to FocusResult(s.id, s.startedAt, endedAt, elapsed, FocusOutcome.COMPLETED)
     }
 }
 

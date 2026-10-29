@@ -12,6 +12,7 @@ import com.miu.fold.dashboard.recent.RecentRepository
 import com.miu.fold.dashboard.search.SearchRepository
 import com.miu.fold.dashboard.settings.SettingsRepository
 import com.miu.fold.dashboard.shortcuts.ShortcutRepository
+import com.miu.fold.dashboard.timer.AndroidTimerAlarm
 import com.miu.fold.dashboard.timer.TimerController
 import com.miu.fold.dashboard.todos.TodoRepository
 import java.io.File
@@ -26,7 +27,7 @@ class AppContainer(context: Context, val clock: AppClock = AndroidClock(context.
     val shortcuts = ShortcutRepository(db, clock)
     val recent = RecentRepository(db, clock)
     val search = SearchRepository(db)
-    val timer = TimerController(db.timerDao(), clock)
+    val timer = TimerController(db.timerDao(), clock, AndroidTimerAlarm(context.applicationContext))
     val settings = SettingsRepository(context)
     val backup = BackupService(db, dashboard, clock, File(context.filesDir, "backups"))
 }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -140,10 +140,11 @@ private fun NoteRow(n: NoteEntity, inTrash: Boolean, onOpen: (String) -> Unit, o
 @Composable
 private fun NoteEditor(vms: Vms, nav: Nav, modifier: Modifier, onClose: () -> Unit, showBack: Boolean) {
     val d by vms.notes.editor.state.collectAsStateWithLifecycle()
+    LaunchedEffect(d.notice) { d.notice?.let { nav.showMessage(it); vms.notes.editor.consumeNotice() } }
     val notes by vms.notes.notes.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val current = notes.firstOrNull { it.id == d.id }
-    Column(modifier.imePadding()) {
+    Column(modifier) {
         Row(Modifier.fillMaxWidth().padding(horizontal = Space.s), verticalAlignment = Alignment.CenterVertically) {
             if (showBack) IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "목록으로") }
             Column(Modifier.weight(1f).padding(horizontal = Space.s)) { SaveStatusLabel(d.status, d.error, onRetry = { vms.notes.editor.retry() }) }

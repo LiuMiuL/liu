@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -66,7 +65,7 @@ fun TodosScreen(vms: Vms, nav: Nav) {
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
 
     ReadableWidth {
-        Column(Modifier.fillMaxSize().imePadding()) {
+        Column(Modifier.fillMaxSize()) {
             Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = Space.l), horizontalArrangement = Arrangement.spacedBy(Space.s)) {
                 TodoFilter.entries.forEach { f ->
                     val n = items.count { TodoRules.matches(f, it.bucket) }

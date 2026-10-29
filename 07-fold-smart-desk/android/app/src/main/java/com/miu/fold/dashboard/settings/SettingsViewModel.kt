@@ -35,6 +35,7 @@ class SettingsViewModel(private val c: AppContainer) : ViewModel() {
     fun setHideRecent(v: Boolean) = viewModelScope.launch { c.settings.setHideRecent(v) }
     fun setFocus(v: Int) = viewModelScope.launch { c.settings.setFocusMinutes(v) }
     fun setBreak(v: Int) = viewModelScope.launch { c.settings.setBreakMinutes(v) }
+    fun markNotificationAsked() = viewModelScope.launch { c.settings.setNotificationAsked() }
     fun clearRecent() = viewModelScope.launch { c.recent.clear(); _message.value = "최근 항목 기록을 지웠습니다. 메모·할 일은 그대로입니다." }
 
     fun export(open: () -> OutputStream?) = viewModelScope.launch {

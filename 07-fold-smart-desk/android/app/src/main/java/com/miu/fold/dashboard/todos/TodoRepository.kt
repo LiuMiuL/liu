@@ -1,5 +1,6 @@
 package com.miu.fold.dashboard.todos
 
+import androidx.room.withTransaction
 import com.miu.fold.dashboard.core.AppClock
 import com.miu.fold.dashboard.core.Ids
 import com.miu.fold.dashboard.data.AppDatabase
@@ -7,7 +8,7 @@ import com.miu.fold.dashboard.data.TodoEntity
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
-class TodoRepository(db: AppDatabase, private val clock: AppClock) {
+class TodoRepository(private val db: AppDatabase, private val clock: AppClock) {
     private val dao = db.todoDao()
 
     val all: Flow<List<TodoEntity>> = dao.observeAll()
@@ -44,13 +45,28 @@ class TodoRepository(db: AppDatabase, private val clock: AppClock) {
         dao.setDone(id, if (done) now else null, now)
     }
 
-    suspend fun move(id: String, delta: Int, ordered: List<TodoEntity>) {
-        val from = ordered.indexOfFirst { it.id == id }
-        if (from < 0) return
-        val to = (from + delta).coerceIn(0, ordered.lastIndex)
-        if (to == from) return
-        val list = ordered.toMutableList().also { val x = it.removeAt(from); it.add(to, x) }
-        list.forEachIndexed { i, t -> if (t.orderKey != i.toLong()) dao.setOrder(t.id, i.toLong()) }
+    /**
+     * 화면에 보이는 목록([visible], 필터 적용 후) 기준으로 바로 옆 항목과 자리를 바꾼다.
+     * 필터 때문에 안 보이는 항목과 바뀌어 '눌러도 변화 없음'이 되지 않게 한다. 숨은 항목들의 상대 순서는 유지.
+     */
+    suspend fun move(id: String, delta: Int, visible: List<TodoEntity>) = db.withTransaction {
+        val from = visible.indexOfFirst { it.id == id }
+        if (from < 0) return@withTransaction
+        val to = (from + delta).coerceIn(0, visible.lastIndex)
+        if (to == from) return@withTransaction
+        var all = dao.all().sortedWith(compareBy<TodoEntity>({ it.orderKey }, { it.createdAt }))
+        if (all.map { it.orderKey }.distinct().size != all.size) {
+            all.forEachIndexed { i, t -> dao.setOrder(t.id, i.toLong()) }
+            all = dao.all()
+        }
+        val keys = all.associate { it.id to it.orderKey }
+        val a = visible[from].id
+        val b = visible[to].id
+        val ka = keys[a] ?: return@withTransaction
+        val kb = keys[b] ?: return@withTransaction
+        // 보이는 목록에서 a와 b 사이의 항목(필터로 숨은 것 포함)은 그대로 두고 두 항목만 맞바꾼다.
+        dao.setOrder(a, kb)
+        dao.setOrder(b, ka)
     }
 
     suspend fun delete(id: String) = dao.delete(id)

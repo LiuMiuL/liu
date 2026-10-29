@@ -71,6 +71,10 @@ interface NoteDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertAll(notes: List<NoteEntity>)
 
+    /** 읽은 시점의 revision과 같을 때만 덮어쓴다. 0이면 다른 곳에서 바뀌었거나 휴지통으로 간 것. */
+    @Query("UPDATE note SET title = :title, body = :body, tags = :tags, updatedAt = :at, revision = revision + 1 WHERE id = :id AND revision = :expected AND deletedAt IS NULL")
+    suspend fun updateIfRevision(id: String, title: String, body: String, tags: String, at: Long, expected: Int): Int
+
     @Query("UPDATE note SET deletedAt = :at WHERE id = :id")
     suspend fun setDeleted(id: String, at: Long?)
 

@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +55,7 @@ import com.miu.fold.dashboard.ui.theme.Space
 @Composable
 fun QuickNoteCard(vms: Vms, nav: Nav) {
     val draft by vms.notes.quick.state.collectAsStateWithLifecycle()
+    LaunchedEffect(draft.notice) { draft.notice?.let { nav.showMessage(it); vms.notes.quick.consumeNotice() } }
     Column(verticalArrangement = Arrangement.spacedBy(Space.s)) {
         OutlinedTextField(
             value = draft.body,

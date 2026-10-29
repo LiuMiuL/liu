@@ -46,9 +46,10 @@ class TodosViewModel(private val c: AppContainer, private val saved: SavedStateH
     fun restore(t: TodoEntity) = viewModelScope.launch { c.todos.restore(t) }
     fun opened(id: String) = viewModelScope.launch { c.recent.record(RecentType.TODO, id) }
 
+    /** 현재 필터로 보이는 미완료 목록 기준으로 이동한다. */
     fun move(id: String, delta: Int) = viewModelScope.launch {
-        val open = items.value.filter { it.todo.doneAt == null }.map { it.todo }
-        c.todos.move(id, delta, open)
+        val visible = items.value.filter { it.todo.doneAt == null && TodoRules.matches(filter.value, it.bucket) }.map { it.todo }
+        c.todos.move(id, delta, visible)
     }
 
     companion object { private const val KEY_FILTER = "todoFilter" }

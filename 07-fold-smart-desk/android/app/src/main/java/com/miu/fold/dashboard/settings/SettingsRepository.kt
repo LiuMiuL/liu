@@ -21,6 +21,8 @@ data class AppSettings(
     val hideRecentContent: Boolean = false,
     val focusMinutes: Int = 25,
     val breakMinutes: Int = 5,
+    /** 알림 권한을 이미 한 번 물었는지(반복해서 묻지 않기 위함). 백업 대상 아님. */
+    val notificationAsked: Boolean = false,
 ) {
     val theme: ThemeMode get() = runCatching { ThemeMode.valueOf(themeMode) }.getOrDefault(ThemeMode.SYSTEM)
 }
@@ -33,6 +35,7 @@ class SettingsRepository(private val context: Context) {
         val hideRecent = booleanPreferencesKey("hide_recent_content")
         val focus = intPreferencesKey("focus_minutes")
         val brk = intPreferencesKey("break_minutes")
+        val notifAsked = booleanPreferencesKey("notification_asked")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data
@@ -43,6 +46,7 @@ class SettingsRepository(private val context: Context) {
                 hideRecentContent = p[Keys.hideRecent] ?: false,
                 focusMinutes = (p[Keys.focus] ?: 25).coerceIn(1, 180),
                 breakMinutes = (p[Keys.brk] ?: 5).coerceIn(1, 60),
+                notificationAsked = p[Keys.notifAsked] ?: false,
             )
         }
 
@@ -50,6 +54,8 @@ class SettingsRepository(private val context: Context) {
     suspend fun setHideRecent(v: Boolean) = context.dataStore.edit { it[Keys.hideRecent] = v }
     suspend fun setFocusMinutes(v: Int) = context.dataStore.edit { it[Keys.focus] = v.coerceIn(1, 180) }
     suspend fun setBreakMinutes(v: Int) = context.dataStore.edit { it[Keys.brk] = v.coerceIn(1, 60) }
+
+    suspend fun setNotificationAsked() = context.dataStore.edit { it[Keys.notifAsked] = true }
 
     suspend fun apply(s: AppSettings) = context.dataStore.edit {
         it[Keys.theme] = s.theme.name

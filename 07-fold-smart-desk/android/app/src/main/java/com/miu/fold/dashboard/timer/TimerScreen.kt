@@ -51,10 +51,7 @@ fun TimerCard(vms: Vms, nav: Nav) {
     Column(verticalArrangement = Arrangement.spacedBy(Space.s)) {
         TimerDisplay(ui)
         TimerControls(ui, settings.focusMinutes, settings.breakMinutes, vms, label = "집중")
-        Text(
-            "앱 밖에서는 종료 알림이 아직 없습니다. 돌아오면 실제 경과 시간으로 계산됩니다.",
-            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        TimerAlertStatus(compact = true)
         androidx.compose.material3.TextButton(onClick = nav.openTimer) { Text("타이머 상세·기록") }
     }
 }
@@ -88,6 +85,7 @@ private fun TimerDisplay(ui: TimerUi) {
 @Composable
 private fun TimerControls(ui: TimerUi, focusMin: Int, breakMin: Int, vms: Vms, label: String, todoId: String? = null) {
     val s = ui.snapshot
+    val startAsk = rememberStartWithNotificationAsk(vms)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.s), verticalArrangement = Arrangement.spacedBy(Space.s)) {
         when (s?.state) {
             TimerState.RUNNING -> {
@@ -105,8 +103,8 @@ private fun TimerControls(ui: TimerUi, focusMin: Int, breakMin: Int, vms: Vms, l
                 OutlinedButton(onClick = vms.timer::cancel) { Text("종료") }
             }
             else -> {
-                Button(onClick = { vms.timer.start(focusMin, label.ifBlank { "집중" }, todoId) }) { Text("집중 ${focusMin}분") }
-                OutlinedButton(onClick = { vms.timer.start(breakMin, "휴식", null) }) { Text("휴식 ${breakMin}분") }
+                Button(onClick = { startAsk { vms.timer.start(focusMin, label.ifBlank { "집중" }, todoId) } }) { Text("집중 ${focusMin}분") }
+                OutlinedButton(onClick = { startAsk { vms.timer.start(breakMin, "휴식", null) } }) { Text("휴식 ${breakMin}분") }
             }
         }
     }
@@ -123,6 +121,7 @@ fun TimerScreen(vms: Vms, onClose: () -> Unit) {
     var custom by rememberSaveable { mutableStateOf("") }
     var todoId by rememberSaveable { mutableStateOf<String?>(null) }
     val idle = ui.snapshot?.state?.isActive != true
+    val startAsk = rememberStartWithNotificationAsk(vms)
 
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
@@ -169,15 +168,16 @@ fun TimerScreen(vms: Vms, onClose: () -> Unit) {
                                 modifier = Modifier.weight(1f),
                             )
                             Button(
-                                onClick = { custom.toIntOrNull()?.let { vms.timer.start(it, label.ifBlank { "집중" }, todoId) } },
+                                onClick = { custom.toIntOrNull()?.let { m -> startAsk { vms.timer.start(m, label.ifBlank { "집중" }, todoId) } } },
                                 enabled = (custom.toIntOrNull() ?: 0) in 1..600,
                             ) { Text("시작") }
                         }
                     }
                 }
+                item { TimerAlertStatus(compact = false) }
                 item {
                     Text(
-                        "· 다음 세션 자동 시작: 꺼짐\n· 종료 알림(앱 밖)은 아직 구현되지 않았습니다(3단계).\n· 재부팅되면 완료로 처리하지 않고 '중단됨'으로 표시해 남은 시간 재개를 선택할 수 있습니다.",
+                        "· 다음 세션 자동 시작: 꺼짐\n· 재부팅되면 완료로 처리하지 않고 '중단됨'으로 표시해 남은 시간 재개를 선택할 수 있습니다(재부팅 중에는 알림 없음).",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }

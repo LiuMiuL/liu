@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -102,13 +104,34 @@ fun AppRoot(intake: IntakeViewModel) {
     var noteEditorOpen by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
+    // 어느 화면에 있든 타이머를 구독해 0이 되는 순간 완료 처리하고 안내한다(세션당 한 번).
+    val timerUi by vms.timer.ui.collectAsStateWithLifecycle()
+    var announcedTimer by rememberSaveable { mutableStateOf<String?>(null) }
+    val finished = timerUi.snapshot?.takeIf { it.state == com.miu.fold.dashboard.timer.TimerState.COMPLETED }
+    androidx.compose.runtime.LaunchedEffect(finished?.id) {
+        val f = finished ?: return@LaunchedEffect
+        // 앱을 새로 열었을 때 오래전 완료를 다시 알리지 않는다.
+        val fresh = System.currentTimeMillis() - f.updatedAt < 2 * 60_000
+        if (announcedTimer != f.id) {
+            announcedTimer = f.id
+            if (fresh) snackbar.showSnackbar("${f.label} ${f.plannedDurationMs / 60_000}분 끝! 수고했어요.", withDismissAction = true)
+        }
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        com.miu.fold.dashboard.timer.AppVisibility.visible = true
+    }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        // 앱에 돌아왔으면 이미 본 종료 알림은 치운다.
+        com.miu.fold.dashboard.timer.TimerNotifier.cancel(context)
         vms.timer.onAppResume()
         vms.todos.refreshToday()
         vms.events.refreshToday()
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        com.miu.fold.dashboard.timer.AppVisibility.visible = false
         // 화면 이탈 시 미저장 초안을 즉시 저장하고 타이머 기준값을 갱신한다.
         vms.notes.editor.flush()
         vms.notes.quick.flush()
@@ -191,7 +214,9 @@ fun AppRoot(intake: IntakeViewModel) {
                     }
                 },
             ) { padding ->
-                BoxWithConstraints(Modifier.padding(padding).fillMaxSize()) {
+                // Scaffold가 이미 적용한 시스템 바 여백은 소비 처리한 뒤 키보드(IME) 높이만큼만 더 비킨다.
+                // 홈 카드 입력칸 등 모든 화면이 키보드에 가려지지 않게 한다.
+                BoxWithConstraints(Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize()) {
                     val available = maxWidth
                     Box(Modifier.fillMaxSize()) {
                         when (overlay) {

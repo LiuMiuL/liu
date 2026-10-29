@@ -160,12 +160,61 @@ class RepositoryTest {
         kotlinx.coroutines.runBlocking { assertEquals(1, repo.active.first().size); assertEquals("abc", repo.get(id!!)!!.body) }
     }
 
+    /** 홈 빠른 메모와 편집기가 같은 메모를 잡고 있을 때 서로 덮어쓰지 않는다. */
+    @Test fun twoDraftsOnSameNoteNeverLoseEdits() {
+        val scope = TestScope(StandardTestDispatcher())
+        val repo = NoteRepository(db, clock)
+        val note = kotlinx.coroutines.runBlocking { repo.create("", "원본") }
+        val quick = NoteDraft(scope, repo)
+        val editor = NoteDraft(scope, repo)
+        quick.load(note); editor.load(note)
+        scope.runCurrent()
+
+        // 편집기가 먼저 저장 → 고친 게 없는 빠른 메모는 새 내용을 다시 불러온다
+        editor.edit(body = "편집기에서 고침")
+        editor.flush()
+        scope.settle { editor.state.value.status == SaveStatus.SAVED && quick.state.value.body == "편집기에서 고침" }
+        assertEquals("편집기에서 고침", quick.state.value.body)
+
+        // 둘 다 고친 상태에서 각각 저장 → 나중 저장은 충돌 사본이 된다
+        editor.edit(body = "편집기 2차")
+        quick.edit(body = "빠른 메모 2차")
+        editor.flush()
+        scope.settle { editor.state.value.status == SaveStatus.SAVED }
+        quick.flush()
+        scope.settle { quick.state.value.status == SaveStatus.SAVED }
+
+        val all = kotlinx.coroutines.runBlocking { repo.active.first() }
+        assertEquals(2, all.size)
+        assertEquals("편집기 2차", all.first { it.id == note.id }.body)
+        val copy = all.first { it.id != note.id }
+        assertEquals("빠른 메모 2차", copy.body)
+        assertTrue(copy.title.contains("충돌 사본"))
+        assertEquals(copy.id, quick.state.value.id)
+        assertNotNull(quick.state.value.notice)
+    }
+
+    @Test fun draftClosesWhenNoteTrashedElsewhere() {
+        val scope = TestScope(StandardTestDispatcher())
+        val repo = NoteRepository(db, clock)
+        val note = kotlinx.coroutines.runBlocking { repo.create("", "곧 삭제") }
+        val quick = NoteDraft(scope, repo)
+        quick.load(note)
+        scope.runCurrent()
+        kotlinx.coroutines.runBlocking { repo.moveToTrash(note.id) }
+        scope.settle { quick.state.value.id == null }
+        assertEquals(null, quick.state.value.id)
+        // 휴지통 메모는 그대로 남아 있다(복원 가능)
+        assertEquals(1, kotlinx.coroutines.runBlocking { repo.trash.first() }.size)
+    }
+
     @Test fun t03_saveFailureKeepsDraft() {
         val dispatcher = StandardTestDispatcher()
         val scope = TestScope(dispatcher)
         val full = object : com.miu.fold.dashboard.notes.NoteWriter {
             override suspend fun create(title: String, body: String, tags: String) = throw android.database.sqlite.SQLiteFullException("disk full")
-            override suspend fun save(id: String, title: String, body: String, tags: String) = throw android.database.sqlite.SQLiteFullException("disk full")
+            override suspend fun saveIfUnchanged(id: String, title: String, body: String, tags: String, expectedRevision: Int) = throw android.database.sqlite.SQLiteFullException("disk full")
+            override fun observe(id: String) = kotlinx.coroutines.flow.flowOf<com.miu.fold.dashboard.data.NoteEntity?>(null)
         }
         val draft = NoteDraft(scope, full)
         draft.edit(body = "잃으면 안 되는 초안")
@@ -189,6 +238,25 @@ class RepositoryTest {
         assertEquals("2027-01-01", todos.get(t.id)!!.dueDate)
     }
 
+    @Test fun todoMoveSwapsWithVisibleNeighbourOnly() = runTest {
+        val todos = TodoRepository(db, clock)
+        val today = LocalDate.of(2027, 1, 1)
+        val a = todos.add("오늘 A", dueDate = today)!!
+        todos.add("예정 X", dueDate = today.plusDays(5))
+        val b = todos.add("오늘 B", dueDate = today)!!
+        val ordered = { kotlinx.coroutines.runBlocking { todos.all.first() } }
+        // '오늘' 필터 화면: [A, B] — B를 위로 올리면 숨은 X를 건너뛰고 A와 바뀌어야 한다
+        val visible = ordered().filter { it.dueDate == today.toString() }
+        todos.move(b.id, -1, visible)
+        val after = ordered().map { it.title }
+        assertEquals(listOf("오늘 B", "예정 X", "오늘 A"), after)
+        // 맨 위에서 더 올려도 변화 없음
+        todos.move(b.id, -1, ordered().filter { it.dueDate == today.toString() })
+        assertEquals(after, ordered().map { it.title })
+        assertEquals(3, ordered().map { it.orderKey }.distinct().size)
+        assertEquals(a.id, ordered().last().id)
+    }
+
     @Test fun t10_t11_timerSingleSessionAndSingleRecord() = runTest {
         val timer = TimerController(db.timerDao(), clock)
         val a = timer.start(10 * 60_000, "a")
@@ -208,6 +276,31 @@ class RepositoryTest {
         restored.recordCompletion(dup); restored.recordCompletion(dup); restored.reconcile()
         assertEquals(1, db.timerDao().recordCount(a.id))
         assertEquals(0, db.timerDao().active().size)
+    }
+
+    @Test fun timerAlarmFollowsState() = runTest {
+        val calls = mutableListOf<Pair<TimerState?, Long?>>()
+        val alarm = object : com.miu.fold.dashboard.timer.TimerAlarm {
+            override fun sync(s: com.miu.fold.dashboard.timer.TimerSnapshot?) {
+                calls += (s?.state to s?.let { it.monotonicAnchor + it.remainingMs })
+            }
+        }
+        val timer = TimerController(db.timerDao(), clock, alarm)
+        val startElapsed = clock.elapsed
+        timer.start(10 * 60_000, "집중")
+        assertEquals(TimerState.RUNNING to startElapsed + 10 * 60_000, calls.last()) // 종료 시각(부팅 기준)에 예약
+        clock.advance(3 * 60_000)
+        timer.pause()
+        assertEquals(TimerState.PAUSED, calls.last().first) // 일시정지 → 예약 취소(RUNNING 아님)
+        clock.advance(60_000)
+        timer.resume()
+        assertEquals(TimerState.RUNNING to clock.elapsed + 7 * 60_000, calls.last())
+        // 시스템 시각을 바꿔도 예약 시각(부팅 기준)은 그대로
+        clock.now -= 3_600_000
+        timer.reconcile()
+        assertEquals(TimerState.RUNNING to clock.elapsed + 7 * 60_000, calls.last())
+        timer.cancel()
+        assertEquals(null to null, calls.last())
     }
 
     @Test fun shortcutRejectsUnsafe() = runTest {

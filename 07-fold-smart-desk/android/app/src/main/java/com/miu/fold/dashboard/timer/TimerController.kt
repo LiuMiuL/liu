@@ -14,7 +14,11 @@ import kotlinx.coroutines.sync.withLock
  * 활성 세션은 최대 1개. 모든 상태 변경은 Mutex로 직렬화해 시작 버튼 연타로 세션이 여러 개 생기지 않게 한다.
  * 완료 기록은 sessionId 기본키 + IGNORE로 세션당 1건만 저장된다.
  */
-class TimerController(private val dao: TimerDao, private val clock: AppClock) {
+class TimerController(
+    private val dao: TimerDao,
+    private val clock: AppClock,
+    private val alarm: TimerAlarm = TimerAlarm.None,
+) {
     private val mutex = Mutex()
 
     val active: Flow<TimerSnapshot?> = dao.observeActive().map { it?.toSnapshot() }
@@ -27,6 +31,7 @@ class TimerController(private val dao: TimerDao, private val clock: AppClock) {
         dao.active().firstOrNull()?.let { return@withLock it.toSnapshot() }
         val s = TimerEngine.start(clock, Ids.newId(), durationMs, label, linkedTodoId)
         dao.upsert(s.toEntity())
+        alarm.sync(s)
         s
     }
 
@@ -39,6 +44,7 @@ class TimerController(private val dao: TimerDao, private val clock: AppClock) {
         val (done, record) = TimerEngine.cancel(cur, clock) ?: return@withLock
         dao.upsert(done.toEntity())
         dao.insertRecord(record.toEntity())
+        alarm.sync(null)
     }
 
     /** 같은 설정으로 다시 시작: 현재 세션은 취소로 기록하고 새 세션을 만든다. */
@@ -55,10 +61,12 @@ class TimerController(private val dao: TimerDao, private val clock: AppClock) {
         list.drop(1).forEach { extra ->
             TimerEngine.cancel(extra.toSnapshot(), clock)?.let { (d, r) -> dao.upsert(d.toEntity()); dao.insertRecord(r.toEntity()) }
         }
-        val cur = list.firstOrNull()?.toSnapshot() ?: return@withLock null
+        val cur = list.firstOrNull()?.toSnapshot() ?: run { alarm.sync(null); return@withLock null }
         val (next, record) = TimerEngine.reconcile(cur, clock)
         if (next != cur) dao.upsert(next.toEntity())
         if (record != null) dao.insertRecord(record.toEntity())
+        // 앱 복귀·권한 변경 후에도 예약이 현재 상태와 맞도록 매번 다시 맞춘다(같은 요청 코드라 중복되지 않음).
+        alarm.sync(next)
         next
     }
 
@@ -73,6 +81,7 @@ class TimerController(private val dao: TimerDao, private val clock: AppClock) {
         val cur = dao.active().firstOrNull()?.toSnapshot() ?: return@withLock
         val next = f(cur)
         if (next != cur) dao.upsert(next.toEntity())
+        alarm.sync(next)
     }
 }
 
