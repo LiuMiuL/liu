@@ -1,0 +1,4 @@
+# yt-dlp 2026.10.26 실제 오류 출력(로컬 테스트 서버). 줄마다 하나.
+ERROR: Unsupported URL: http://127.0.0.1:8765/page.html
+ERROR: [generic] missing: Unable to download webpage: HTTP Error 404: File not found (caused by <HTTPError 404: File not found>)
+ERROR: [generic] video: Unable to download webpage: [Errno 111] Connection refused (caused by TransportError('[Errno 111] Connection refused'))

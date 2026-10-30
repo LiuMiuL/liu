@@ -1,0 +1,28 @@
+[generic] Extracting URL: http://127.0.0.1:8765/master.m3u8
+[generic] master: Downloading webpage
+[generic] master: Downloading m3u8 information
+[generic] master: Checking m3u8 live status
+[info] master: Downloading 1 format(s): aud-Korean
+[hlsnative] Downloading m3u8 manifest
+[hlsnative] Total fragments: 3
+[download] Destination: /data/user/0/com.miu.videograb/no_backup/downloads/audio/master [master].mp4
+[download]   1.0% of ~ 104.10KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]   2.8% of ~ 107.10KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]   6.2% of ~ 113.10KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]  12.0% of ~ 125.10KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]  11.0% of ~ 145.79KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]  12.1% of ~ 148.79KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]  21.5% of ~ 158.10KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]  18.3% of ~ 206.10KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]  19.5% of ~ 213.89KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]  22.0% of ~ 225.89KiB at      0.00B/s ETA Unknown (frag 0/3)
+[download]  19.6% of ~ 253.20KiB at      0.00B/s ETA Unknown (frag 1/3)
+[download]  52.6% of ~ 124.95KiB at      0.00B/s ETA Unknown (frag 1/3)
+[download]  66.7% of ~  99.65KiB at      0.00B/s ETA Unknown (frag 1/3)
+[download]  46.0% of ~ 150.05KiB at      0.00B/s ETA Unknown (frag 1/3)
+[download]  44.8% of ~ 153.94KiB at      0.00B/s ETA Unknown (frag 2/3)
+[download]  98.9% of ~  69.77KiB at      0.00B/s ETA Unknown (frag 3/3)
+[download] 100% of   69.03KiB in 00:00:00 at 3.26MiB/s
+[FixupM3u8] Fixing MPEG-TS in MP4 container of "/data/user/0/com.miu.videograb/no_backup/downloads/audio/master [master].mp4"
+[ExtractAudio] Destination: /data/user/0/com.miu.videograb/no_backup/downloads/audio/master [master].m4a
+Deleting original file /data/user/0/com.miu.videograb/no_backup/downloads/audio/master [master].mp4 (pass -k to keep)
