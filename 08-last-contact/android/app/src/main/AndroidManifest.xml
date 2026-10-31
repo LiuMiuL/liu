@@ -4,6 +4,8 @@
     <!-- 인터넷 권한 없음. 아래 권한은 모두 사용자가 해당 기능을 켤 때만 요청한다. -->
     <!-- 통화·문자 가져오기(번호·시각·종류만 읽고 문자 본문은 읽지 않음) -->
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <!-- 전화 기능이 없는 기기(태블릿 등)에도 설치되게: 통화·문자 기능은 선택 사항 -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <!-- 매일 연락 알림 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
