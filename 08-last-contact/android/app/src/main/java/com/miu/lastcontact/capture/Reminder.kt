@@ -60,16 +60,23 @@ object Reminders {
     private const val WORK = "daily_reminder"
     private const val CHANNEL = "reminder"
 
-    fun schedule(context: Context, hour: Int) {
+    /** 이미 예약돼 있으면 그대로 둔다(앱을 열 때마다 시각이 밀리지 않게). */
+    fun ensure(context: Context, hour: Int) = enqueue(context, hour, ExistingPeriodicWorkPolicy.KEEP)
+
+    /** 시각을 바꿨을 때: 새 시각으로 다시 예약. */
+    fun schedule(context: Context, hour: Int) = enqueue(context, hour, ExistingPeriodicWorkPolicy.UPDATE)
+
+    private fun enqueue(context: Context, hour: Int, policy: ExistingPeriodicWorkPolicy) {
         val now = LocalDateTime.now(ZoneId.systemDefault())
         var next = now.withHour(hour).withMinute(0).withSecond(0).withNano(0)
         if (!next.isAfter(now)) next = next.plusDays(1)
         val delay = Duration.between(now, next).toMinutes()
         val req = PeriodicWorkRequestBuilder<ReminderWorker>(1, TimeUnit.DAYS).setInitialDelay(delay, TimeUnit.MINUTES).build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE, req)
+        // WorkManager 초기화 실패 등으로 앱 실행 자체가 죽지 않게 한다(예약만 건너뜀).
+        runCatching { WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK, policy, req) }
     }
 
-    fun cancel(context: Context) = WorkManager.getInstance(context).cancelUniqueWork(WORK)
+    fun cancel(context: Context) { runCatching { WorkManager.getInstance(context).cancelUniqueWork(WORK) } }
 
     fun canNotify(context: Context): Boolean {
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return false

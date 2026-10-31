@@ -71,3 +71,5 @@ object ContactRules {
     /** 직접 기록 날짜 검증: 미래 날짜 거절. */
     fun validManualDay(day: LocalDate, today: LocalDate): Boolean = !day.isAfter(today)
 }
+
+data class ChannelLatestView(val channel: Channel, val day: LocalDate)

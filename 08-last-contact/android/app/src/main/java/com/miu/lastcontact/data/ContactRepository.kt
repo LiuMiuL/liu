@@ -99,6 +99,9 @@ class ContactRepository(private val db: AppDatabase, private val clock: AppClock
 
     suspend fun deleteEvent(id: String) = events.delete(id)
 
+    /** '오늘 연락함' 되돌리기: 그 버튼으로 새로 생긴 기록만 지운다. */
+    suspend fun deleteRecord(personId: String, day: LocalDate, channel: Channel) = events.deleteByKey(ContactRules.dedupeKey(personId, day, channel))
+
     suspend fun findByName(name: String): PersonEntity? {
         val k = Names.key(name)
         if (k.isEmpty()) return null

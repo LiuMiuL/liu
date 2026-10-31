@@ -72,6 +72,9 @@ interface EventDao {
 
     @Query("DELETE FROM contact_event WHERE id = :id")
     suspend fun delete(id: String)
+
+    @Query("DELETE FROM contact_event WHERE dedupeKey = :key")
+    suspend fun deleteByKey(key: String)
 }
 
 /** 미확인 이름별 요약 */

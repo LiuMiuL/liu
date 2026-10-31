@@ -1,6 +1,5 @@
 package com.miu.lastcontact.domain
 
-import java.io.BufferedReader
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -51,7 +50,39 @@ object KakaoExportParser {
 
     fun parse(text: String): ParseResult = parse(text.reader().buffered())
 
-    fun parse(reader: BufferedReader): ParseResult {
+    /**
+     * 글자를 읽어 나가며 줄을 만든다. 한 줄이 [MAX_LINE]을 넘으면 그 줄은 버리고(통째로 메모리에 올리지 않음),
+     * 전체가 [maxChars]를 넘으면 중단한다. 줄바꿈 없는 거대 파일·압축 폭탄으로 메모리가 부족해지지 않게 한다.
+     */
+    fun parse(reader: java.io.Reader, maxChars: Long = MAX_CHARS): ParseResult {
+        val st = State()
+        val buf = CharArray(8192)
+        val line = StringBuilder()
+        var overflow = false
+        var chars = 0L
+        reader.use { r ->
+            while (true) {
+                val n = r.read(buf)
+                if (n < 0) break
+                chars += n
+                if (chars > maxChars) return ParseResult.Error("파일이 너무 큽니다(텍스트 ${maxChars / 1024 / 1024}MB 초과).")
+                for (i in 0 until n) {
+                    val ch = buf[i]
+                    if (ch == '\n') {
+                        if (!overflow) st.handle(line.toString().removeSuffix("\r"))
+                        line.setLength(0)
+                        overflow = false
+                    } else if (!overflow) {
+                        if (line.length >= MAX_LINE) { overflow = true; line.setLength(0) } else line.append(ch)
+                    }
+                }
+            }
+        }
+        if (!overflow && line.isNotEmpty()) st.handle(line.toString().removeSuffix("\r"))
+        return st.result()
+    }
+
+    private class State {
         var chatTitle: String? = null
         var current: LocalDate? = null
         val count = HashMap<String, Int>()
@@ -59,64 +90,49 @@ object KakaoExportParser {
         val last = HashMap<String, LocalDateTime>()
         val dayToSenders = java.util.TreeMap<LocalDate, MutableSet<String>>()
         var total = 0
-        var chars = 0L
         var lineNo = 0
-        reader.useLines { lines ->
-            for (raw in lines) {
-                lineNo++
-                chars += raw.length + 1
-                if (chars > MAX_CHARS) return ParseResult.Error("파일이 너무 큽니다(텍스트 100MB 초과).")
-                if (raw.length > MAX_LINE) continue
-                val line = raw.trimStart('﻿')
-                if (lineNo <= 3 && chatTitle == null) {
-                    title.find(line)?.let { chatTitle = it.groupValues[1]; continue }
-                    titleEn.find(line)?.let { m -> m.groupValues.getOrNull(1)?.takeIf { it.isNotBlank() }?.let { chatTitle = it } }
-                }
-                dateHeader.find(line)?.let { m ->
-                    current = date(m.groupValues[1], m.groupValues[2], m.groupValues[3]); continue
-                }
-                val hit: Pair<String, LocalDateTime>? = bracket.find(line)?.let { m ->
-                    current?.let { d -> m.groupValues[1] to d.atTime(hour12(m.groupValues[2], m.groupValues[3]), m.groupValues[4].toInt()) }
-                } ?: bracket24.find(line)?.let { m ->
-                    current?.let { d -> m.groupValues[1] to d.atTime(m.groupValues[2].toInt().coerceIn(0, 23), m.groupValues[3].toInt()) }
-                } ?: krFull.find(line)?.let { m ->
-                    date(m.groupValues[1], m.groupValues[2], m.groupValues[3])?.let { d ->
-                        m.groupValues[7] to d.atTime(hour12(m.groupValues[4], m.groupValues[5]), m.groupValues[6].toInt())
-                    }
-                } ?: dots.find(line)?.let { m ->
-                    date(m.groupValues[1], m.groupValues[2], m.groupValues[3])?.let { d ->
-                        m.groupValues[7] to d.atTime(hour12(m.groupValues[4], m.groupValues[5]), m.groupValues[6].toInt())
-                    }
-                } ?: dots24.find(line)?.let { m ->
-                    date(m.groupValues[1], m.groupValues[2], m.groupValues[3])?.let { d ->
-                        m.groupValues[6] to d.atTime(m.groupValues[4].toInt().coerceIn(0, 23), m.groupValues[5].toInt())
-                    }
-                } ?: iso.find(line)?.let { m ->
-                    date(m.groupValues[1], m.groupValues[2], m.groupValues[3])?.let { d ->
-                        m.groupValues[6] to d.atTime(m.groupValues[4].toInt().coerceIn(0, 23), m.groupValues[5].toInt())
-                    }
-                }
-                if (hit != null) {
-                    val (sender, at) = hit
-                    val name = sender.trim()
-                    if (name.isEmpty() || name.length > 100) continue
-                    total++
-                    count[name] = (count[name] ?: 0) + 1
-                    days.getOrPut(name) { HashSet() } += at.toLocalDate()
-                    if (last[name]?.isBefore(at) != false) last[name] = at
-                    dayToSenders.getOrPut(at.toLocalDate()) { HashSet() } += name
-                }
+
+        fun handle(raw: String) {
+            lineNo++
+            val line = raw.trimStart('\uFEFF')
+            if (lineNo <= 3 && chatTitle == null) {
+                title.find(line)?.let { chatTitle = it.groupValues[1]; return }
+                titleEn.find(line)?.let { m -> m.groupValues.getOrNull(1)?.takeIf { it.isNotBlank() }?.let { chatTitle = it } }
             }
+            dateHeader.find(line)?.let { m -> current = date(m.groupValues[1], m.groupValues[2], m.groupValues[3]); return }
+            val hit: Pair<String, LocalDateTime> = bracket.find(line)?.let { m ->
+                current?.let { d -> m.groupValues[1] to d.atTime(hour12(m.groupValues[2], m.groupValues[3]), m.groupValues[4].toInt()) }
+            } ?: bracket24.find(line)?.let { m ->
+                current?.let { d -> m.groupValues[1] to d.atTime(m.groupValues[2].toInt().coerceIn(0, 23), m.groupValues[3].toInt()) }
+            } ?: krFull.find(line)?.let { m ->
+                date(m.groupValues[1], m.groupValues[2], m.groupValues[3])?.let { d -> m.groupValues[7] to d.atTime(hour12(m.groupValues[4], m.groupValues[5]), m.groupValues[6].toInt()) }
+            } ?: dots.find(line)?.let { m ->
+                date(m.groupValues[1], m.groupValues[2], m.groupValues[3])?.let { d -> m.groupValues[7] to d.atTime(hour12(m.groupValues[4], m.groupValues[5]), m.groupValues[6].toInt()) }
+            } ?: dots24.find(line)?.let { m ->
+                date(m.groupValues[1], m.groupValues[2], m.groupValues[3])?.let { d -> m.groupValues[6] to d.atTime(m.groupValues[4].toInt().coerceIn(0, 23), m.groupValues[5].toInt()) }
+            } ?: iso.find(line)?.let { m ->
+                date(m.groupValues[1], m.groupValues[2], m.groupValues[3])?.let { d -> m.groupValues[6] to d.atTime(m.groupValues[4].toInt().coerceIn(0, 23), m.groupValues[5].toInt()) }
+            } ?: return
+            val name = hit.first.trim()
+            if (name.isEmpty() || name.length > 100) return
+            val at = hit.second
+            total++
+            count[name] = (count[name] ?: 0) + 1
+            days.getOrPut(name) { HashSet() } += at.toLocalDate()
+            if (last[name]?.isBefore(at) != false) last[name] = at
+            dayToSenders.getOrPut(at.toLocalDate()) { HashSet() } += name
         }
-        if (total == 0) return ParseResult.Error("카카오톡 대화 내보내기 파일 형식이 아니거나, 대화가 없습니다.")
-        val senders = count.keys.map { SenderStats(it, count.getValue(it), days.getValue(it), last.getValue(it)) }
-            .sortedByDescending { it.count }
-        return ParseResult.Ok(ExportSummary(chatTitle, senders, dayToSenders, dayToSenders.firstKey(), dayToSenders.lastKey(), total))
+
+        fun result(): ParseResult {
+            if (total == 0) return ParseResult.Error("카카오톡 대화 내보내기 파일 형식이 아니거나, 대화가 없습니다.")
+            val senders = count.keys.map { SenderStats(it, count.getValue(it), days.getValue(it), last.getValue(it)) }.sortedByDescending { it.count }
+            return ParseResult.Ok(ExportSummary(chatTitle, senders, dayToSenders, dayToSenders.firstKey(), dayToSenders.lastKey(), total))
+        }
     }
 
-    private fun date(y: String, m: String, d: String): LocalDate? = runCatching { LocalDate.of(y.toInt(), m.toInt(), d.toInt()) }.getOrNull()
+    fun date(y: String, m: String, d: String): LocalDate? = runCatching { LocalDate.of(y.toInt(), m.toInt(), d.toInt()) }.getOrNull()
 
-    private fun hour12(ampm: String, h: String): Int {
+    fun hour12(ampm: String, h: String): Int {
         val hour = h.toInt().coerceIn(0, 12) % 12
         return if (ampm == "오후") hour + 12 else hour
     }
