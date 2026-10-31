@@ -34,25 +34,29 @@ class UiTest {
         rule.waitUntil(20_000) { rule.onAllNodesWithText(t, substring = sub).fetchSemanticsNodes().isNotEmpty() }
 
     @Test @Config(qualifiers = "w360dp-h780dp")
-    fun lc_t01_addPersonThenContactedTodayAndUndo() {
-        waitText("아직 등록한 사람이 없습니다", sub = true)
-        rule.onNodeWithText("사람 추가", useUnmergedTree = true).performClick()
-        // 대화상자 안 입력칸에 포커스를 주면 커서 깜빡임 때문에 Robolectric에서 idle이 되지 않아, 포커스 없이 값을 넣는다.
-        rule.onNode(hasText("이름") and hasSetTextAction()).performTextReplacement("엄마")
-        rule.onNodeWithText("2주").performClick()
-        rule.onNodeWithText("저장").performClick()
-        // 저장 후 상세 화면으로 이동
+    fun lc_t01_contactedTodayAndUndo() {
+        runBlocking { app.container.repo.savePerson(null, "엄마", "", "", "가족", 14, "") }
+        waitText("목표 14일 · 아직 기록 없음", sub = true)
+        rule.onNodeWithText("엄마").performClick()
         waitText("마지막 연락: 연락 기록 없음")
         rule.onNodeWithText("오늘 연락함").performClick()
         waitText("마지막 연락: 오늘", sub = true)
-        val p = runBlocking { app.container.repo.allPeople() }.single()
-        assertEquals(14, p.goalDays)
-        // 되돌리기
+        assertEquals(1, runBlocking { app.container.db.eventDao().all() }.size)
+        // 되돌리기 → 기록이 사라진다
         rule.onNodeWithText("되돌리기").performClick()
         waitText("마지막 연락: 연락 기록 없음")
-        // 목록으로
+        assertTrue(runBlocking { app.container.db.eventDao().all() }.isEmpty())
         rule.onNodeWithContentDescription("목록으로").performClick()
         waitText("목표 14일 · 아직 기록 없음", sub = true)
+        // 목록의 빠른 버튼
+        rule.onNodeWithContentDescription("엄마 오늘 연락함").performClick()
+        waitText("오늘 · ", sub = true)
+    }
+
+    @Test @Config(qualifiers = "w360dp-h780dp")
+    fun firstRunShowsEmptyGuide() {
+        waitText("아직 등록한 사람이 없습니다", sub = true)
+        rule.onNodeWithText("사람 추가", useUnmergedTree = true).assertIsDisplayed()
     }
 
     @Test @Config(qualifiers = "w360dp-h780dp")
@@ -83,7 +87,7 @@ class UiTest {
         waitText("민수")
         rule.onNodeWithText("왼쪽에서 사람을 고르세요.").assertIsDisplayed()
         rule.onAllNodesWithText("민수").onFirst().performClick()
-        waitText("마지막 연락: 40일", sub = true)
+        waitText("마지막 연락: 1개월 전 (40일)", sub = true)
         rule.onNodeWithText("⚠ 목표 30일 · 10일 지남").assertIsDisplayed() // 목록과 상세가 동시에 보임
     }
 }

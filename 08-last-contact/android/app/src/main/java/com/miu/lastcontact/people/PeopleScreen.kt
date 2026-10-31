@@ -313,7 +313,7 @@ internal fun PersonEditDialog(vm: PeopleViewModel, id: String?, onDone: (String?
         onDismissRequest = { onDone(null) },
         title = { Text(if (existing == null) "사람 추가" else "사람 편집") },
         text = {
-            // 내용이 화면보다 길 때 대화상자 높이가 정해지지 않고 계속 다시 재는 문제를 막기 위해 최대 높이를 둔다.
+            // 항목이 많아도 대화상자가 화면을 넘지 않도록 최대 높이 안에서 스크롤한다.
             Column(Modifier.heightIn(max = 520.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Space.s)) {
                 FilledTonalButton(onClick = { runCatching { pick.launch(Unit) } }) { Text("연락처에서 이름·번호 가져오기") }
                 OutlinedTextField(name, { name = it.take(60) }, label = { Text("이름") }, singleLine = true)
