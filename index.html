@@ -3,100 +3,230 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>15억분의 1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="지구의 개와 고양이 15억 마리 중 한 마리로 태어나 살아가는 통계 기반 생애 시뮬레이션">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#c96a1b">
+<meta name="theme-color" content="#17202b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="15억분의 1">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
-<title>15억분의 1</title>
-<meta name="description" content="지구의 개와 고양이 15억 마리 중 한 마리로 태어나 살아가는 통계 기반 생애 시뮬레이션">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
 <style>
-:root{--bg:#f6f0e7;--card:#fffaf2;--line:#e2d6c5;--ink:#2b2420;--mute:#7d6f61;--acc:#c96a1b;--accink:#fff;--good:#3d8b46;--bad:#c2452f;--fact:#efe4d3;--bar:#e6dac8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15110e;--card:#211b16;--line:#3a3028;--ink:#f3ebe1;--mute:#a8998a;--acc:#f0a35e;--accink:#221609;--good:#8fcf8a;--bad:#ee8375;--fact:#2b231c;--bar:#352c24}}
-:root[data-theme="dark"]{--bg:#15110e;--card:#211b16;--line:#3a3028;--ink:#f3ebe1;--mute:#a8998a;--acc:#f0a35e;--accink:#221609;--good:#8fcf8a;--bad:#ee8375;--fact:#2b231c;--bar:#352c24}
+/* 배치: 개체 기록 카드 한 장. 위에는 장면 창, 아래에는 수치와 장부. 사건은 아래에서 올라오는 선택 카드로 뜬다. */
+:root{
+  --paper:#edf2ee; --sheet:#f9fbf8; --ink:#17202b; --mute:#566473; --line:#c5d0c8; --field:#dde6df;
+  --you:#f6c833; --onyou:#17202b; --stamp:#c2362c; --ok:#1c7455; --veil:rgba(237,242,238,.74);
+  --artchip:rgba(250,250,246,.92); --onart:#17202b;
+  --f-story:"Gowun Batang","Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;
+  --f-ui:"IBM Plex Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1619; --sheet:#172024; --ink:#e9efe9; --mute:#9aa9a6; --line:#2d3a3e; --field:#202b2f;
+  --you:#f6c833; --onyou:#17202b; --stamp:#ff7466; --ok:#62d3a3; --veil:rgba(15,22,25,.76);
+  --artchip:rgba(250,250,246,.92); --onart:#17202b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1619; --sheet:#172024; --ink:#e9efe9; --mute:#9aa9a6; --line:#2d3a3e; --field:#202b2f;
+  --you:#f6c833; --onyou:#17202b; --stamp:#ff7466; --ok:#62d3a3; --veil:rgba(15,22,25,.76);
+  --artchip:rgba(250,250,246,.92); --onart:#17202b; color-scheme:dark}
 *{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;word-break:keep-all}
-#app{max-width:560px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top)) 16px calc(72px + env(safe-area-inset-bottom));min-height:100vh}
 [hidden]{display:none!important}
-.screen{display:none}.screen.on{display:block;animation:fade .45s ease}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-h1{font-size:44px;line-height:1.15;margin:8px 0 4px;letter-spacing:-1px}
-h2{font-size:22px;margin:0 0 8px}
-.sub{color:var(--mute);margin:0 0 20px}
-.hero{text-align:center;padding:36px 0 8px}.hero .paw{font-size:56px}
-.lead{font-size:17px;margin:18px 0}
-.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0}
-.trio div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;font-size:12px;color:var(--mute)}
-.trio b{display:block;font-size:20px;color:var(--ink)}
+html{height:100%;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{height:100%;margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+#app{height:100%;max-width:560px;margin:0 auto;position:relative}
+.screen{display:none;height:100%;overflow-y:auto;padding-block:22px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.screen.on{display:block}
+#game.on{display:flex;flex-direction:column;overflow:hidden;padding-block:10px 0;position:relative}
+img,svg{max-width:100%}
 button{font:inherit;color:inherit;cursor:pointer}
-.btn{display:block;width:100%;padding:15px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:16px;text-align:left;margin-top:10px;transition:transform .08s,border-color .15s}
-.btn:hover{border-color:var(--acc)}.btn:active{transform:scale(.985)}
-.btn.main{background:var(--acc);color:var(--accink);border-color:var(--acc);text-align:center;font-weight:700;font-size:17px}
-.btn .k{display:inline-block;width:22px;height:22px;line-height:20px;text-align:center;border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--mute);margin-right:10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-top:14px}
-.story{font-size:17px;margin:0 0 14px;white-space:pre-line}
-.fact{background:var(--fact);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mute);margin:0 0 6px}
-.fact b{color:var(--ink);font-weight:600}
-.tag{font-size:12px;color:var(--acc);font-weight:700;letter-spacing:.5px;margin-bottom:6px}
-.hud{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.who{display:flex;align-items:center;gap:10px;min-width:0}
-.av{font-size:38px;line-height:1}
-.who b{display:block;font-size:17px}.who small,.age small{display:block;color:var(--mute);font-size:12px}
-.age{text-align:right;font-size:20px;font-weight:700;white-space:nowrap}
-.place{display:inline-block;margin-top:10px;font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
-.bars{display:grid;gap:7px;margin-top:12px}
-.bar{display:grid;grid-template-columns:64px 1fr 30px;align-items:center;gap:8px;font-size:12px;color:var(--mute)}
-.bar i{display:block;height:8px;border-radius:99px;background:var(--bar);overflow:hidden}
-.bar i u{display:block;height:100%;border-radius:99px;background:var(--acc);transition:width .5s}
-.bar.low i u{background:var(--bad)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 4px}
-.chip{font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--line)}
-.chip.up{color:var(--good)}.chip.dn{color:var(--bad)}
-.reveal{display:flex;justify-content:space-between;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line);opacity:0;animation:fade .5s ease forwards}
-.reveal span{color:var(--mute);font-size:13px;white-space:nowrap}.reveal b{text-align:right}.reveal em{display:block;font-style:normal;font-size:12px;color:var(--mute);font-weight:400}
-.btn.reveal{display:block;padding:15px 16px;border:1px solid var(--acc)}
-.odds{margin-top:16px;font-size:15px}
-.odds b{color:var(--acc)}
-.tomb{text-align:center;padding:14px 0 4px}.tomb .av{font-size:60px}
-.tomb h2{font-size:26px;margin-top:8px}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0}
-.kv dt{color:var(--mute)}.kv dd{margin:0;text-align:right}
-.log{list-style:none;padding:0;margin:0;font-size:14px}
-.log li{display:grid;grid-template-columns:76px 1fr;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
-.log li span{color:var(--mute);font-size:12px;padding-top:2px}
-details{margin-top:18px;font-size:13px;color:var(--mute)}
-details a{color:var(--acc)}summary{cursor:pointer}
-.foot{margin-top:26px;font-size:12px;color:var(--mute);text-align:center}
-.best{font-size:13px;color:var(--mute);text-align:center;margin-top:14px}
+button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--you);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+
+h1{font-family:var(--f-story);font-weight:700;font-size:clamp(42px,13vw,60px);line-height:1.05;letter-spacing:-.02em;margin:6px 0 0;text-wrap:balance}
+h2{font-family:var(--f-story);font-weight:700;font-size:27px;line-height:1.25;margin:4px 0 0;text-wrap:balance}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.14em;color:var(--mute);margin:0}
+.eyebrow.sec{margin-top:26px;padding-top:12px;border-top:1.5px solid var(--ink)}
+.lede{color:var(--mute);margin:6px 0 0;font-size:15px}
+.story{font-family:var(--f-story);font-size:17.5px;line-height:1.75;margin:14px 0 0}
+.story.dim{color:var(--mute);font-size:16px}
+.cta{display:block;width:100%;margin-top:18px;padding:15px 18px;border:0;border-radius:6px;background:var(--you);color:var(--onyou);font-weight:700;font-size:16.5px;letter-spacing:.02em}
+.cta:active{transform:translateY(1px)}
+.ghost{display:block;width:100%;margin-top:10px;padding:13px 18px;border:1.5px solid var(--ink);border-radius:6px;background:transparent;font-weight:500}
+.foot,.best{font-size:12.5px;color:var(--mute);margin:14px 0 0}
+
+/* 점 1,500개 */
+.census{margin:20px 0 0}
+.census figcaption{font-size:12.5px;color:var(--mute);margin-top:8px}
+.dots{display:block;width:100%;height:auto}
+.dots .d{fill:var(--ink);opacity:.42}
+.dots .c{fill:none;stroke:var(--ink);stroke-width:1.2;opacity:.5}
+.dots .s{fill:var(--you);stroke:var(--ink);stroke-width:.7;opacity:1}
+.dots .y{fill:var(--you);stroke:var(--ink);stroke-width:1.6;opacity:1}
+.key{display:inline-flex;align-items:center;gap:5px;margin-right:12px;white-space:nowrap}
+.key i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.key .kd{background:var(--ink);opacity:.5}.key .kc{border:1.5px solid var(--ink);opacity:.6}.key .ky{background:var(--you);border:1.5px solid var(--ink)}
+
+/* 사진 */
+.trip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0 0}
+.trip figure,.photo{margin:0}
+.trip img,.photo img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1.5px solid var(--ink);background:var(--field)}
+.photo img{aspect-ratio:16/9}
+.trip figcaption{font-size:12px;font-weight:700;letter-spacing:.08em;margin-top:5px}
+.photo{margin-top:18px}
+.photo figcaption{font-size:12px;color:var(--mute);margin-top:6px}
+.tripnote{font-size:12.5px;color:var(--mute);margin:8px 0 0}
+
+/* 기록표 */
+.rec{margin:16px 0 0;border-top:1.5px solid var(--ink)}
+.rec div{display:grid;grid-template-columns:88px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);animation:rise .5s ease both}
+.rec dt{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--mute);padding-top:3px}
+.rec dd{margin:0;text-align:right;font-weight:700;font-size:16px}
+.rec dd small{display:block;font-weight:400;font-size:12.5px;color:var(--mute)}
+.odds{font-family:var(--f-story);font-size:17px;line-height:1.7;margin:14px 0 0}
+.odds b{background:var(--you);color:var(--onyou);padding:0 5px;border-radius:2px;font-family:var(--f-num);font-weight:600}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* 장면 창 */
+.stage{position:relative;flex:none;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden;aspect-ratio:16/10;max-height:38vh;width:100%;background:var(--field)}
+.scene{display:block;width:100%;height:100%}
+.chip{position:absolute;background:var(--artchip);color:var(--onart);border-radius:3px;line-height:1.2}
+.chip.place{left:10px;top:10px;padding:4px 9px;font-size:12px;font-weight:700;letter-spacing:.1em;border:1.5px solid var(--onart);transform:rotate(-2deg)}
+.chip.age{right:10px;top:10px;padding:5px 10px;text-align:right}
+.chip.age b{display:block;font-family:var(--f-num);font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
+.chip.age span{display:block;font-size:11px;letter-spacing:.08em;font-weight:700;opacity:.75}
+.chip.flow{left:50%;bottom:10px;transform:translateX(-50%);padding:4px 12px;font-size:12px;font-weight:700;letter-spacing:.1em;opacity:0;transition:opacity .2s}
+.chip.flow.on{opacity:1}
+.medal{position:absolute;left:12px;bottom:12px;width:30%;max-width:120px;border-radius:50%;border:2.5px solid var(--artchip);overflow:hidden;line-height:0}
+.portrait{display:block;width:100%;height:auto}
+
+/* 수치 */
+.dash{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.idline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:10px}
+.idline b{font-size:18px;font-family:var(--f-story)}
+.idline span{font-size:12.5px;color:var(--mute);min-width:0}
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.meter-t{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--mute);font-weight:500}
+.meter-t .num{color:var(--ink);font-size:13px}
+.meter-t i{font-style:normal;font-size:11px;margin-left:4px}
+.meter-t i.up{color:var(--ok)}.meter-t i.dn{color:var(--stamp)}
+.meter-b{height:7px;border-radius:2px;background:var(--field);overflow:hidden;margin-top:3px}
+.meter-b span{display:block;height:100%;background:var(--ink);transition:width .5s ease}
+.meter.low .meter-b span{background:var(--stamp)}
+.ruler{position:relative;height:46px;margin:12px 14px 0 8px}
+.ruler-track{position:absolute;left:0;right:0;top:25px;height:2px;background:var(--ink)}
+.tick{position:absolute;top:22px;transform:translateX(-50%);font-family:var(--f-num);font-size:10.5px;color:var(--mute);padding-top:9px;white-space:nowrap}
+.tick i{position:absolute;left:50%;top:0;width:1.5px;height:8px;background:var(--ink)}
+.ref{position:absolute;top:17px;height:8px;background:var(--line)}
+.ref.pt{width:2px;margin-left:-1px;background:var(--mute);top:13px;height:13px}
+.ref em{position:absolute;left:0;bottom:100%;font-style:normal;font-size:10.5px;color:var(--mute);white-space:nowrap;padding-bottom:2px}
+.ref.pt em{left:50%;transform:translateX(-50%)}
+.now{position:absolute;top:19px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--you);border:2px solid var(--ink);transition:left .6s ease;z-index:2}
+
+/* 장부 */
+.ledger{flex:1;min-height:0;overflow-y:auto;margin-top:8px;border-top:1.5px solid var(--ink);padding:8px 0 24px}
+.log{list-style:none;margin:6px 0 0;padding:0;font-size:14px}
+.log li{display:grid;grid-template-columns:70px 1fr;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);animation:rise .4s ease both}
+.log li>.num{font-size:11.5px;color:var(--mute);padding-top:3px}
+.log li.soft>div{color:var(--mute)}
+.log li.key>div{font-weight:700}
+.log li.end>div{color:var(--stamp);font-weight:700}
+.log.static li{animation:none}
+
+/* 선택 카드 */
+.veil{position:absolute;inset:0;background:var(--veil);opacity:0;pointer-events:none;transition:opacity .25s;z-index:3}
+.veil.on{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;background:var(--sheet);border-top:2px solid var(--ink);border-radius:14px 14px 0 0;
+  padding:16px max(16px,env(safe-area-inset-left,0px)) 20px max(16px,env(safe-area-inset-right,0px));max-height:calc(100% - 96px);overflow-y:auto;
+  box-shadow:0 -12px 32px rgba(0,0,0,.16);transform:translateY(104%);visibility:hidden;transition:transform .3s cubic-bezier(.2,.8,.2,1),visibility 0s .3s}
+.sheet.open{transform:none;visibility:visible;transition:transform .3s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.sheet .story{margin-top:8px}
+.sheet .eyebrow.fin{color:var(--stamp)}
+.fact{background:var(--field);border-radius:4px;padding:10px 12px;font-size:13px;line-height:1.55;color:var(--mute);margin:12px 0 0}
+.fact b{color:var(--ink);font-weight:700}
+.fact-k{display:block;font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--ink);margin-bottom:2px}
+.fact.has-ph{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:start}
+.fact img{display:block;width:86px;height:86px;object-fit:cover;border-radius:3px;border:1.5px solid var(--ink)}
+.fact small{display:block;font-size:11px;margin-top:5px;opacity:.85}
+.choices{display:grid;gap:8px;margin-top:14px}
+.choice{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:13px 14px;border:1.5px solid var(--ink);border-radius:6px;background:var(--sheet);font-weight:500;font-size:15.5px;line-height:1.45;transition:background .12s,color .12s}
+.choice kbd{flex:none;width:22px;height:22px;border:1.5px solid currentColor;border-radius:3px;font-family:var(--f-num);font-size:12px;line-height:19px;text-align:center}
+.choice span{min-width:0}
+.choice:hover,.choice:focus-visible{background:var(--you);color:var(--onyou)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;min-height:4px}
+.dchip{font-size:12px;font-weight:700;padding:2px 8px;border-radius:3px;border:1.5px solid currentColor}
+.dchip.up{color:var(--ok)}.dchip.dn{color:var(--stamp)}
+
+/* 수명 비교 */
+.chart{margin-top:12px;display:grid;gap:8px}
+.crow{display:grid;grid-template-columns:118px 1fr 74px;gap:10px;align-items:center;font-size:12.5px}
+.crow .ct{color:var(--mute);min-width:0}
+.crow .cb{position:relative;height:12px;background:var(--field);border-radius:2px}
+.crow .cb i{position:absolute;top:0;bottom:0;background:var(--mute);border-radius:2px;min-width:3px}
+.crow .cv{text-align:right;font-size:12px}
+.crow.you .ct{color:var(--ink);font-weight:700}
+.crow.you .cb i{background:var(--you);outline:1.5px solid var(--ink)}
+.chartnote{font-size:12.5px;color:var(--mute);margin:10px 0 0}
+
+.src{margin-top:26px;font-size:13px;color:var(--mute);border-top:1px solid var(--line);padding-top:12px}
+.src summary{cursor:pointer;font-weight:700;color:var(--ink)}
+.src a{color:var(--ink)}
+.src ul{padding-left:18px;margin:8px 0}
+.src li{margin:4px 0}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div id="app">
 <section id="start" class="screen on">
-  <div class="hero"><div class="paw">🐾</div><h1>15억분의 1</h1><p class="sub">개나 고양이로 태어난다면</p></div>
-  <p class="lead">지구에는 약 9억 마리의 개와 6억 마리의 고양이가 산다.<br>그 대부분에게는 이름이 없다.</p>
-  <p class="lead">당신은 그중 한 마리로 태어난다. 어느 땅에서, 누구의 곁에서 태어날지는 고를 수 없다. 고를 수 있는 것은 그다음부터다.</p>
-  <div class="trio"><div><b>9억</b>전 세계 개</div><div><b>6억</b>전 세계 고양이</div><div><b>12.5년</b>반려견 중앙 수명</div></div>
-  <button class="btn main" id="go">태어나기</button>
-  <button class="btn" id="inst" hidden style="text-align:center">📲 앱으로 설치하기</button>
-  <div class="best" id="best"></div>
-  <details><summary>이 게임이 쓰는 자료</summary>
+  <p class="eyebrow">개체 기록 · 전 세계의 개와 고양이</p>
+  <h1>15억분의 1</h1>
+  <p class="lede">개나 고양이로 태어난다면</p>
+  <figure class="census"><div id="census0"></div>
+    <figcaption><span class="key"><i class="kd"></i>개 9억</span><span class="key"><i class="kc"></i>고양이 6억</span><span class="key"><i class="ky"></i>당신</span><br>점 하나가 100만 마리다.</figcaption></figure>
+  <p class="story">지구에는 약 9억 마리의 개와 6억 마리의 고양이가 산다. 그 대부분에게는 이름이 없다.</p>
+  <p class="story">당신은 그중 한 마리로 태어난다. 어느 땅에서, 누구의 곁에서 태어날지는 고를 수 없다. 고를 수 있는 것은 그다음부터다.</p>
+  <div class="trip" id="trip"></div>
+  <p class="tripnote" id="tripnote" hidden>같은 종이어도 태어난 자리에 따라 삶이 갈린다. 사진은 실제 모습이다.</p>
+  <button class="cta" id="go">태어나기</button>
+  <button class="ghost" id="inst" hidden>앱으로 설치하기</button>
+  <p class="best" id="best"></p>
+  <details class="src"><summary>자료와 사진 출처</summary>
   <p>출생 확률과 사건의 결과는 아래 통계를 바탕으로 만든 근사 모형이다. 지역별 분포처럼 정확한 수치가 없는 부분은 게임용 추정치를 썼다.</p>
   <ul>
   <li>전 세계 개·고양이 개체 수와 떠돌이 비율 추정: <a href="https://wellbeingintl.org/global-dog-populations-2/" target="_blank" rel="noopener">Wellbeing International</a>, <a href="https://www.worldatlas.com/articles/how-many-dogs-are-there-in-the-world.html" target="_blank" rel="noopener">WorldAtlas</a></li>
   <li>개 품종·체형별 수명(영국 58만 마리, 2024): <a href="https://phys.org/news/2024-02-small-nosed-dogs-longest.amp" target="_blank" rel="noopener">McMillan 외, Scientific Reports</a></li>
   <li>어린 고양이의 사망 원인(영국 브리스톨 코호트): <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12033825/" target="_blank" rel="noopener">PMC12033825</a></li>
   <li>강아지·새끼 고양이 초기 사망률: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10845399" target="_blank" rel="noopener">PMC10845399</a>, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10251906" target="_blank" rel="noopener">PMC10251906</a></li>
+  <li>성장 단계(눈 뜨는 시기, 젖떼기, 영구치): <a href="https://www.royalcanin.com/sa/en-sa/dogs/puppy/puppy-development-from-birth-to-adulthood" target="_blank" rel="noopener">Royal Canin 강아지</a>, <a href="https://www.royalcanin.com/sa/en-sa/cats/kitten/kitten-development-from-birth-to-adulthood" target="_blank" rel="noopener">Royal Canin 새끼 고양이</a>, <a href="https://www.hillspet.com/dog-care/new-pet-parent/puppy-growth-timeline" target="_blank" rel="noopener">Hill's</a></li>
+  <li>사람 나이 환산: <a href="https://AAHA.org/globalassets/02-guidelines/canine-life-stage-2019/canine_and_feline_age_chart_poster.pdf" target="_blank" rel="noopener">AAHA 개·고양이 나이표</a></li>
   <li>개의 사망 원인(일본 동물병원): <a href="https://www.jstage.jst.go.jp/article/jvma/75/6/75_e128/_article/-char/en" target="_blank" rel="noopener">일본수의사회지</a></li>
   <li>미국 보호소 통계: <a href="https://www.aspca.org/helping-people-pets/shelter-intake-and-surrender/pet-statistics" target="_blank" rel="noopener">ASPCA</a>, <a href="https://www.shelteranimalscount.org/wp-content/uploads/YearEndReport_3.13_Website_FINAL.pdf" target="_blank" rel="noopener">Shelter Animals Count 2024</a></li>
   <li>한국 유기동물·반려동물 통계(2024): <a href="https://www.dailyvet.co.kr/news/policy/248072" target="_blank" rel="noopener">데일리벳(검역본부 실태조사)</a>, <a href="https://www.dailyvet.co.kr/?p=234742" target="_blank" rel="noopener">양육 현황</a>, <a href="https://www.segye.com/newsView/20250122513043" target="_blank" rel="noopener">양육비(농식품부 조사 보도)</a></li>
-  </ul></details>
+  </ul>
+  <div id="credits"></div>
+  </details>
 </section>
 <section id="birth" class="screen"></section>
-<section id="game" class="screen"></section>
+<section id="game" class="screen">
+  <div class="stage"><div id="scene" style="height:100%"></div>
+    <div class="chip place" id="hud-place"></div>
+    <div class="chip age"><b id="hud-age"></b><span id="hud-stage"></span></div>
+    <div class="chip flow" id="hud-flow">시간이 흐른다</div>
+  </div>
+  <div class="dash">
+    <div class="idline"><b id="hud-name"></b><span id="hud-sub"></span></div>
+    <div class="meters" id="hud-meters"></div>
+    <div class="ruler" id="hud-ruler" aria-hidden="true"></div>
+    <div class="ledger" id="ledger"><p class="eyebrow">생애 기록</p><ol class="log" id="hud-log"></ol></div>
+    <div class="veil" id="veil"></div>
+  </div>
+  <div class="sheet" id="sheet" role="dialog" aria-label="사건과 선택"></div>
+</section>
 <section id="end" class="screen"></section>
 </div>
 <script>
@@ -110,21 +240,21 @@ function wpick(items,wf){let t=0;const ws=items.map(i=>{const w=Math.max(0,wf(i)
 /* ---------- 세계 ---------- */
 const POP={dog:9e8,cat:6e8};
 const REGIONS=[
-{k:'kr',n:'대한민국',e:'🇰🇷',dog:.006,cat:.006,ds:.08,cs:.40,mill:.35},
-{k:'na',n:'북아메리카',e:'🌎',dog:.09,cat:.16,ds:.04,cs:.40,mill:.25},
-{k:'eu',n:'유럽',e:'🌍',dog:.09,cat:.19,ds:.12,cs:.30,mill:.15},
-{k:'la',n:'중남미',e:'🌎',dog:.15,cat:.08,ds:.65,cs:.50,mill:.05},
-{k:'ea',n:'중국·동아시아',e:'🌏',dog:.12,cat:.15,ds:.65,cs:.45,mill:.20},
-{k:'sa',n:'인도·남아시아',e:'🌏',dog:.18,cat:.07,ds:.92,cs:.70,mill:.02},
-{k:'se',n:'동남아시아',e:'🌏',dog:.12,cat:.10,ds:.85,cs:.60,mill:.03},
-{k:'af',n:'아프리카',e:'🌍',dog:.18,cat:.09,ds:.92,cs:.70,mill:.01},
-{k:'me',n:'중동·중앙아시아',e:'🌍',dog:.064,cat:.154,ds:.80,cs:.65,mill:.03}];
+{k:'kr',n:'대한민국',dog:.006,cat:.006,ds:.08,cs:.40,mill:.35},
+{k:'na',n:'북아메리카',dog:.09,cat:.16,ds:.04,cs:.40,mill:.25},
+{k:'eu',n:'유럽',dog:.09,cat:.19,ds:.12,cs:.30,mill:.15},
+{k:'la',n:'중남미',dog:.15,cat:.08,ds:.65,cs:.50,mill:.05},
+{k:'ea',n:'중국·동아시아',dog:.12,cat:.15,ds:.65,cs:.45,mill:.20},
+{k:'sa',n:'인도·남아시아',dog:.18,cat:.07,ds:.92,cs:.70,mill:.02},
+{k:'se',n:'동남아시아',dog:.12,cat:.10,ds:.85,cs:.60,mill:.03},
+{k:'af',n:'아프리카',dog:.18,cat:.09,ds:.92,cs:.70,mill:.01},
+{k:'me',n:'중동·중앙아시아',dog:.064,cat:.154,ds:.80,cs:.65,mill:.03}];
 const NAMES=['코코','보리','초코','콩이','두부','망고','호두','루이','모카','달이','별이','레오','나비','치즈','까미','밤이','구름','라떼','마루','해피'];
 const DOGB={소형:['몰티즈','푸들','포메라니안','치와와','미니어처 닥스훈트'],중형:['비글','웰시코기','보더콜리','시바견'],대형:['래브라도 리트리버','골든 리트리버','저먼 셰퍼드','진돗개']};
 const DOGBR={소형:['퍼그','시추','프렌치 불도그'],중형:['불도그','보스턴 테리어'],대형:['복서']};
 const CATB=['페르시안','러시안 블루','브리티시 숏헤어','스코티시 폴드','샴','먼치킨'];
 const CATC=['치즈','고등어','턱시도','삼색','올블랙','젖소'];
-const PLACE={home:'🏠 사람의 집',street:'🛣️ 길 위',shelter:'🏚️ 보호소',shop:'🪟 펫숍 진열장',mill:'⛓️ 번식장'};
+const PLACE={home:'사람의 집',street:'길 위',shelter:'보호소',shop:'펫숍 진열장',mill:'번식장'};
 const ORIGIN={home:'가정집',street:'길 위',mill:'번식장(강아지·고양이 공장)'};
 
 const isDog=s=>s.sp==='dog', yr=s=>s.age/12, senior=s=>yr(s)>=s.life-4;
@@ -170,13 +300,12 @@ function birth(){
 
 /* ---------- 상태 변화 ---------- */
 function chg(s,o){for(const k of ['h','f','b']){if(!o[k])continue;const b=s[k];s[k]=clamp(s[k]+o[k],0,100);s.d[k]=(s.d[k]||0)+(s[k]-b)}}
-function note(s,t){s.log.push({age:s.age,t})}
+function note(s,t){s.log.push({age:s.age,t});if(typeof onNote==='function')onNote(s,t)}
 function die(s,cause,epi){if(!s.alive)return;s.alive=false;s.cause=cause;s.epi=epi||null;note(s,'생을 마쳤다 — '+cause)}
 function adopt(s,how){s.place='home';s.everHome=true;s.lost=false;s.shTurns=0;if(!s.name){s.name=pick(NAMES);note(s,`${how} 처음으로 이름이 생겼다: ${s.name}`)}else note(s,`${how} 새 가족이 생겼다`);chg(s,{b:25,f:20})}
 function fmtAge(m){if(m<=0)return '태어난 지 며칠';if(m<12)return m+'개월';return Math.floor(m/12)+'살'+(m%12?' '+(m%12)+'개월':'')}
 function stage(s){const a=s.age;if(a<3)return '신생아기';if(a<12)return '성장기';if(senior(s))return '노년기';if(yr(s)<3)return '청년기';return '장년기'}
 function humanAge(s){const a=yr(s);if(a<=1)return Math.round(a*15);if(a<=2)return Math.round(15+(a-1)*9);const per=s.sp==='cat'?4:(s.size==='대형'?6:s.size==='중형'?5:4);return Math.round(24+(a-2)*per)}
-function avatar(s){return isDog(s)?(s.age<12?'🐶':'🐕'):(s.age<12?'🐱':'🐈')}
 function who(s){return s.name||('이름 없는 '+spn(s))}
 
 /* ---------- 보호소 ---------- */
@@ -195,7 +324,7 @@ function shelterRoll(s,boost){
   if(r==='adopt'){adopt(s,'보호소에서 입양되어');return `누군가 당신의 철창 앞에 오래 서 있다가 서류에 서명한다. 낯선 차, 낯선 집, 낯선 방석. ${s.name}. 이제 그것이 당신의 이름이다.`}
   if(r==='nat'){die(s,'보호소 안에서의 자연사(질병)','공고 번호 하나가 기록으로 남았다.');return `옆 칸에서 기침 소리가 옮아왔다. 며칠 뒤 당신은 일어나지 못했다.`}
   if(r==='eu'){die(s,'보호소 안락사','공고 기간이 끝났고, 아무도 오지 않았다.');return `공고 기간이 끝났다. 수의사가 조용히 당신을 안아 올린다. 주삿바늘은 아프지 않았다.`}
-  if(r==='rel'){s.place='street';s.neutered=true;s.vax=true;s.shTurns=0;chg(s,{h:6});note(s,'중성화·접종 뒤 살던 곳에 풀려났다');return `수술과 예방접종을 받은 뒤, 당신은 붙잡혔던 그 골목에 다시 풀려났다.`}
+  if(r==='rel'){s.place='street';s.neutered=true;if(!isDog(s))s.tip=true;s.vax=true;s.shTurns=0;chg(s,{h:6});note(s,'중성화·접종 뒤 살던 곳에 풀려났다');return `수술과 예방접종을 받은 뒤, 당신은 붙잡혔던 그 골목에 다시 풀려났다.`}
   s.shTurns++;chg(s,{h:-8,b:-3});return `오늘도 통로를 지나는 발걸음은 당신 앞에서 멈추지 않았다.`
 }
 
@@ -334,7 +463,7 @@ E({id:'tnr',once:1,when:s=>onSt(s)&&!isDog(s)&&s.age>=6&&!s.neutered,
  text:s=>`낯선 철제 틀 안에서 참치 냄새가 난다.`,
  fact:s=>`한쪽 귀 끝이 잘린 길고양이는 중성화 수술을 받고 제자리에 방사(TNR)된 고양이라는 표시다.`,
  choices:[
- {label:'들어가서 먹는다',run:s=>{s.neutered=true;s.vax=true;chg(s,{h:6,f:15});note(s,'포획되어 중성화 수술을 받고 방사되었다(TNR)');return `철컥. 문이 닫혔다. 사흘 뒤, 당신은 귀 끝이 조금 잘린 채 같은 골목에 풀려났다.`}},
+ {label:'들어가서 먹는다',run:s=>{s.neutered=true;s.vax=true;chg(s,{h:6,f:15});s.tip=true;note(s,'포획되어 중성화 수술을 받고 방사되었다(TNR)');return `철컥. 문이 닫혔다. 사흘 뒤, 당신은 귀 끝이 조금 잘린 채 같은 골목에 풀려났다.`}},
  {label:'수상하다. 지나친다',run:s=>{chg(s,{f:-5});return `참치 냄새가 오래 코에 남았다.`}}]});
 E({id:'winter',when:s=>onSt(s)&&s.age>=3&&!['sa','se','af'].includes(s.reg.k),
  text:s=>`기온이 영하로 떨어졌다. 물이 얼었다.`,
@@ -413,11 +542,314 @@ E({id:'last',once:1,when:s=>atHome(s)&&yr(s)>=s.life-1&&s.b>=55,
  {label:'손을 핥는다',run:s=>{chg(s,{b:12});return `가족이 당신의 이름을 부른다. ${s.name||''}. 평생 수만 번 들은 소리다.`}},
  {label:'무릎에 턱을 올리고 잠든다',run:s=>{chg(s,{b:12,h:2});return `심장 소리가 들린다. 처음 이 집에 온 날에도 이 소리를 들었다.`}}]});
 
+
+/* ---------- 그림: 개체와 장면을 SVG로 그린다 ---------- */
+const Art=(()=>{
+let uid=0;
+const INK='#2a2422',PINK='#eea09a',WHITE='#f8f5ef',LIGHT='#ebe4d8';
+const hx=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+const shade=(h,a)=>'#'+hx(h).map(v=>Math.max(0,Math.min(255,Math.round(a<0?v*(1+a):v+(255-v)*a))).toString(16).padStart(2,'0')).join('');
+const lum=h=>{const c=hx(h);return (.299*c[0]+.587*c[1]+.114*c[2])/255};
+const mir=s=>s?`<g transform="matrix(-1 0 0 1 200 0)">${s}</g>`:'';
+const rnd=seed=>()=>(seed=(seed*16807)%2147483647)/2147483647;
+function scallop(cx,cy,r,n,fill,stroke,br){let s='';for(let i=0;i<n;i++){const a=i/n*6.2832;s+=`<circle cx="${(cx+Math.cos(a)*r).toFixed(1)}" cy="${(cy+Math.sin(a)*r).toFixed(1)}" r="${br||(r*.34).toFixed(1)}" fill="${fill}" stroke="${stroke}" stroke-width="2.2"/>`}return s+`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}"/>`}
+function eyes(x1,x2,y,e){
+  const r=e.cat?(e.big?8.4:7.3):(e.big?6.3:5.3);let s='';
+  [x1,x2].forEach((x,i)=>{
+    if(e.mood==='sleep')s+=`<path d="M${x-7} ${y} Q${x} ${y+6.5} ${x+7} ${y}" fill="none" stroke="${e.F}" stroke-width="2.6" stroke-linecap="round"/>`;
+    else if(e.mood==='happy')s+=`<path d="M${x-7} ${y+2.5} Q${x} ${y-7} ${x+7} ${y+2.5}" fill="none" stroke="${e.F}" stroke-width="2.8" stroke-linecap="round"/>`;
+    else if(e.mood==='hurt'){const d=i?-1:1;s+=`<path d="M${x-6*d} ${y-5} L${x+5*d} ${y} L${x-6*d} ${y+5}" fill="none" stroke="${e.F}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`}
+    else if(e.cat)s+=`<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r+.6}" fill="${e.col}" stroke="${INK}" stroke-width="1.6"/><ellipse cx="${x}" cy="${y}" rx="${(r*.36).toFixed(1)}" ry="${(r*.82).toFixed(1)}" fill="#16110f"/><circle cx="${x-2.2}" cy="${y-3}" r="1.9" fill="#fff"/>`;
+    else s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${e.dark?'#7a4f2a':'#231c19'}"${e.dark?' stroke="#efe6d8" stroke-width="1.3"':''}/><circle cx="${x}" cy="${y}" r="${(r*.52).toFixed(1)}" fill="#120e0c"/><circle cx="${x-1.8}" cy="${y-2}" r="1.7" fill="#fff"/>`;
+  });
+  return s;
+}
+function cat(L,o,age){
+  const id='p'+(++uid),B=L.base,dark=lum(B)<.3,O=shade(B,dark?.3:-.4),W=L.belly||B,F=dark?LIGHT:INK;
+  const pat=L.pat,pt=L.point||B,baby=age==='baby',sen=age==='senior';
+  const whitePaw=pat==='tux'||pat==='bicolor'||pat==='cow'||pat==='calico';
+  const paw=whitePaw?WHITE:pat==='point'?pt:B,tailC=pat==='point'?pt:B,legC=pat==='point'?shade(pt,.12):B;
+  const st=`stroke="${O}" stroke-width="2.4" stroke-linejoin="round"`;
+  const tailD='M132 194 C174 196 182 152 160 132';
+  let b=`<path d="${tailD}" fill="none" stroke="${O}" stroke-width="17.4" stroke-linecap="round"/><path d="${tailD}" fill="none" stroke="${tailC}" stroke-width="12.6" stroke-linecap="round"/>`;
+  if(pat==='tabby')b+=`<path d="M170 180 l9 5 M177 163 l10 1 M172 146 l9 -4" stroke="${L.stripe}" stroke-width="3.6" stroke-linecap="round"/>`;
+  if(whitePaw&&pat!=='calico'&&pat!=='cow')b+=`<circle cx="160" cy="132" r="6.3" fill="${WHITE}"/>`;
+  const bodyD='M64 205 C54 152 70 108 100 108 C130 108 146 152 136 205 Z';
+  b+=`<ellipse cx="68" cy="196" rx="15" ry="10" fill="${B}" ${st}/><ellipse cx="132" cy="196" rx="15" ry="10" fill="${B}" ${st}/>`;
+  b+=`<clipPath id="${id}b"><path d="${bodyD}"/></clipPath><path d="${bodyD}" fill="${B}" ${st}/>`;
+  let m='';
+  if(W!==B)m+=`<ellipse cx="100" cy="134" rx="23" ry="30" fill="${W}"/>`;
+  if(pat==='tabby')m+=`<path d="M60 150 q10 -4 17 1 M58 167 q10 -4 17 1 M60 184 q9 -4 15 1 M140 150 q-10 -4 -17 1 M142 167 q-10 -4 -17 1 M140 184 q-9 -4 -15 1" fill="none" stroke="${L.stripe}" stroke-width="3.8" stroke-linecap="round"/>`;
+  if(pat==='calico')m+=`<ellipse cx="128" cy="150" rx="20" ry="27" fill="#e39a45"/><ellipse cx="70" cy="178" rx="16" ry="21" fill="#3a332f"/>`;
+  if(pat==='cow')m+=`<ellipse cx="72" cy="150" rx="19" ry="25" fill="#2b2b30"/><ellipse cx="132" cy="186" rx="15" ry="17" fill="#2b2b30"/>`;
+  b+=`<g clip-path="url(#${id}b)">${m}</g>`;
+  b+=`<rect x="85" y="152" width="14.5" height="52" rx="7" fill="${legC}" stroke="${O}" stroke-width="2"/><rect x="100.5" y="152" width="14.5" height="52" rx="7" fill="${legC}" stroke="${O}" stroke-width="2"/>`;
+  b+=`<ellipse cx="92" cy="201" rx="9.4" ry="5.6" fill="${paw}" stroke="${O}" stroke-width="2"/><ellipse cx="108" cy="201" rx="9.4" ry="5.6" fill="${paw}" stroke="${O}" stroke-width="2"/>`;
+  const rx=L.round?44:41,ry=L.round?36:34,cy=74;
+  const eL=pat==='calico'?'#e39a45':pat==='point'?pt:B,eR=(pat==='calico'||pat==='cow')?'#2f2b2b':pat==='point'?pt:B;
+  let h='';
+  if(L.ear==='fold')h+=`<path d="M63 58 L68 35 L94 44 Z" fill="${eL}" ${st}/><path d="M137 58 L132 35 L106 44 Z" fill="${eR}" ${st}/><path d="M68 35 L80 47 M132 35 L120 47" stroke="${O}" stroke-width="2" stroke-linecap="round"/>`;
+  else{
+    h+=`<path d="${o.tip?'M63 60 L65 31 L74 25 L95 46 Z':'M63 60 L66 20 L95 46 Z'}" fill="${eL}" ${st}/><path d="M137 60 L134 20 L105 46 Z" fill="${eR}" ${st}/>`;
+    h+=`<path d="${o.tip?'M71 54 L71.5 37 L76 34 L87 47 Z':'M71 54 L72 32 L87 47 Z'}" fill="${PINK}" opacity=".8"/><path d="M129 54 L128 32 L113 47 Z" fill="${PINK}" opacity=".8"/>`;
+  }
+  if(L.fluff)h+=`<path d="M62 66 L43 80 L58 86 L47 99 L70 98 Z" fill="${B}" ${st}/><path d="M138 66 L157 80 L142 86 L153 99 L130 98 Z" fill="${B}" ${st}/>`;
+  h+=`<clipPath id="${id}h"><ellipse cx="100" cy="${cy}" rx="${rx}" ry="${ry}"/></clipPath><ellipse cx="100" cy="${cy}" rx="${rx}" ry="${ry}" fill="${B}" ${st}/>`;
+  let f='';
+  if(pat==='tabby'){f+=`<path d="M90 43 l2 12 M100 41 l0 13 M110 43 l-2 12 M59 76 l12 -1 M60 87 l11 -3 M141 76 l-12 -1 M140 87 l-11 -3" stroke="${L.stripe}" stroke-width="3.6" stroke-linecap="round"/>`;if(W!==B)f+=`<ellipse cx="100" cy="94" rx="19" ry="13" fill="${W}"/>`}
+  if(pat==='tux'||pat==='bicolor')f+=`<path d="M100 50 C97 62 95 72 92 80 C82 86 76 94 79 101 C88 114 112 114 121 101 C124 94 118 86 108 80 C105 72 103 62 100 50 Z" fill="${WHITE}"/>`;
+  if(pat==='calico')f+=`<path d="M54 36 h46 v32 q-22 14 -46 4 Z" fill="#e39a45"/><path d="M108 34 h42 v42 q-24 6 -42 -14 Z" fill="#3a332f"/>`;
+  if(pat==='cow')f+=`<path d="M106 34 h44 v38 q-26 8 -44 -12 Z" fill="#2b2b30"/><ellipse cx="70" cy="96" rx="13" ry="9" fill="#2b2b30"/>`;
+  if(pat==='point')f+=`<ellipse cx="100" cy="84" rx="26" ry="22" fill="${pt}" opacity=".9"/>`;
+  if(sen)f+=`<ellipse cx="100" cy="95" rx="21" ry="12" fill="#fff" opacity=".42"/>`;
+  h+=`<g clip-path="url(#${id}h)">${f}</g>`;
+  h+=eyes(84,116,76,{cat:1,col:L.eye||'#d9b23a',mood:o.mood,big:baby,F:(dark||pat==='point')?LIGHT:INK});
+  const ny=L.flat?84:87,lightMuz=pat==='tux'||pat==='bicolor'||(pat==='tabby'&&W!==B),Fm=pat==='point'?LIGHT:lightMuz?INK:F;
+  h+=`<path d="M95.5 ${ny} h9 l-4.5 5.4 Z" fill="${pat==='point'?'#c58d84':PINK}" stroke="${INK}" stroke-width="1" stroke-linejoin="round"/>`;
+  h+=`<path d="M100 ${ny+5.4} Q96 ${ny+12} 90 ${ny+9} M100 ${ny+5.4} Q104 ${ny+12} 110 ${ny+9}" fill="none" stroke="${Fm}" stroke-width="1.8" stroke-linecap="round"/>`;
+  const wc=(dark||pat==='point')?LIGHT:INK;
+  h+=`<path d="M73 ${ny+3} L49 ${ny-2} M73 ${ny+8} L49 ${ny+10} M127 ${ny+3} L151 ${ny-2} M127 ${ny+8} L151 ${ny+10}" stroke="${wc}" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>`;
+  if(o.collar)h+=`<path d="M77 ${cy+ry-7} Q100 ${cy+ry+12} 123 ${cy+ry-7}" fill="none" stroke="${o.collar}" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="${cy+ry+6}" r="4.6" fill="#f6c833" stroke="#8a6a12" stroke-width="1.3"/>`;
+  const bt=baby?' transform="translate(100 205) scale(.94 .8) translate(-100 -205)"':'';
+  const ht=baby?' transform="translate(0 19) translate(100 108) scale(1.2) translate(-100 -108)"':'';
+  return `<g${bt}>${b}</g><g${ht}>${h}</g>`;
+}
+function dog(L,o,age){
+  const id='p'+(++uid),B=L.base,dark=lum(B)<.3,O=shade(B,dark?.3:-.4),W=L.belly||null,F=dark?LIGHT:INK;
+  const baby=age==='baby',sen=age==='senior';
+  const earC=L.earc||shade(B,dark?.12:-.16),muzC=L.mask||L.muzc||W||shade(B,dark?.22:.32);
+  const st=`stroke="${O}" stroke-width="2.4" stroke-linejoin="round"`;
+  const tailD=L.curl?'M136 180 C166 176 168 142 147 142 C134 143 135 159 147 158':'M136 190 C164 188 172 162 163 141';
+  const tw=L.fluff>=2?15:10.5;
+  let b=`<path d="${tailD}" fill="none" stroke="${O}" stroke-width="${tw+4.8}" stroke-linecap="round"/><path d="${tailD}" fill="none" stroke="${L.tailc||B}" stroke-width="${tw}" stroke-linecap="round"/>`;
+  const bodyD='M58 205 C50 152 66 108 100 108 C134 108 150 152 142 205 Z';
+  b+=`<ellipse cx="66" cy="196" rx="16" ry="10" fill="${B}" ${st}/><ellipse cx="134" cy="196" rx="16" ry="10" fill="${B}" ${st}/>`;
+  b+=`<clipPath id="${id}b"><path d="${bodyD}"/></clipPath><path d="${bodyD}" fill="${B}" ${st}/>`;
+  let m='';
+  if(L.saddle)m+=`<path d="M40 96 h120 v44 q-60 -26 -120 0 Z" fill="${L.saddle}"/>`;
+  if(W)m+=`<path d="M80 205 C74 162 84 124 100 116 C116 124 126 162 120 205 Z" fill="${W}"/>`;
+  if(L.patch)m+=`<ellipse cx="134" cy="158" rx="18" ry="27" fill="${L.patch}"/>`;
+  b+=`<g clip-path="url(#${id}b)">${m}</g>`;
+  if(L.fluff||L.curly)b+=`<path d="M78 121 l7 14 l7 -9 l8 12 l8 -12 l7 9 l7 -14 q-22 -12 -44 0 Z" fill="${W||shade(B,dark?.18:.24)}"/>`;
+  const legC=L.legc||B,pawC=L.pawc||W||legC;
+  b+=`<rect x="82" y="150" width="15.5" height="54" rx="7.5" fill="${legC}" stroke="${O}" stroke-width="2"/><rect x="102.5" y="150" width="15.5" height="54" rx="7.5" fill="${legC}" stroke="${O}" stroke-width="2"/>`;
+  b+=`<ellipse cx="89.7" cy="201" rx="10.4" ry="6" fill="${pawC}" stroke="${O}" stroke-width="2"/><ellipse cx="110.3" cy="201" rx="10.4" ry="6" fill="${pawC}" stroke="${O}" stroke-width="2"/>`;
+  const wide=L.flat||L.wide,rx=wide?44:39,ry=wide?35:36,cy=72;
+  let h='',eb='',ef='';
+  const E=L.ear;
+  if(E==='point')eb=`<path d="M66 56 L60 15 L93 40 Z" fill="${earC}" ${st}/><path d="M70 50 L66.5 27 L86 42 Z" fill="${PINK}" opacity=".7"/>`;
+  else if(E==='bat')eb=`<path d="M65 54 C50 30 55 7 70 9 C85 13 95 30 93 44 Z" fill="${earC}" ${st}/><path d="M69 48 C60 32 63 18 71 19 C80 22 87 33 87 42 Z" fill="${PINK}" opacity=".65"/>`;
+  else if(E==='semi')eb=`<path d="M66 56 L61 24 L91 40 Z" fill="${earC}" ${st}/><path d="M61 24 L81 27 L70 42 Z" fill="${shade(earC,dark?.15:-.18)}" ${st}/>`;
+  else if(E==='rose')eb=`<path d="M64 50 C48 42 50 27 64 29 C75 31 82 40 82 48 Z" fill="${earC}" ${st}/>`;
+  else ef=L.longear?`<path d="M67 42 C44 44 35 92 47 118 C62 114 75 84 75 56 Z" fill="${earC}" ${st}/>`:`<path d="M67 42 C46 44 39 84 50 105 C63 102 74 80 75 56 Z" fill="${earC}" ${st}/>`;
+  if(L.fluff===3)h+=scallop(100,78,47,13,B,O);
+  h+=eb+mir(eb);
+  h+=`<clipPath id="${id}h"><ellipse cx="100" cy="${cy}" rx="${rx}" ry="${ry}"/></clipPath><ellipse cx="100" cy="${cy}" rx="${rx}" ry="${ry}" fill="${B}" ${st}/>`;
+  const my=L.muz==='long'?96:L.flat?90:92,mrx=L.flat?23:L.muz==='long'?17:19,mry=L.flat?13:L.muz==='long'?19:15;
+  let f='';
+  if(L.patch)f+=`<path d="M104 28 h52 v50 q-32 8 -52 -16 Z" fill="${L.patch}"/>`;
+  if(L.eyemask)f+=`<ellipse cx="100" cy="74" rx="33" ry="15" fill="${L.eyemask}" opacity=".5"/>`;
+  if(L.blaze)f+=`<path d="M100 36 C96 52 94 66 88 78 C80 88 80 100 100 106 C120 100 120 88 112 78 C106 66 104 52 100 36 Z" fill="${W||WHITE}"/>`;
+  if(L.cheek)f+=`<ellipse cx="74" cy="90" rx="16" ry="13" fill="${W}"/><ellipse cx="126" cy="90" rx="16" ry="13" fill="${W}"/>`;
+  if(L.brow)f+=`<circle cx="85" cy="58.5" r="3.6" fill="${L.brow}"/><circle cx="115" cy="58.5" r="3.6" fill="${L.brow}"/>`;
+  h+=`<g clip-path="url(#${id}h)">${f}</g>`;
+  if(L.curly)h+=scallop(100,42,19,9,B,O,7);
+  if(L.knot)h+=`<circle cx="100" cy="35" r="9" fill="${B}" ${st}/><path d="M92 43 l-8 -5 l1 10 Z M108 43 l8 -5 l-1 10 Z" fill="#d2463a"/><circle cx="100" cy="43.5" r="2.8" fill="#d2463a"/>`;
+  h+=ef+mir(ef);
+  if(L.curly)h+=scallop(51,99,10,8,earC,O,5)+scallop(149,99,10,8,earC,O,5);
+  const mO=shade(muzC,lum(muzC)<.3?.25:-.22);
+  h+=`<ellipse cx="100" cy="${my}" rx="${mrx}" ry="${mry}" fill="${muzC}" stroke="${mO}" stroke-width="1.3"/>`;
+  if(sen)h+=`<ellipse cx="100" cy="${my}" rx="${mrx-1.5}" ry="${mry-1.5}" fill="#fff" opacity=".48"/>`;
+  if(L.flat)h+=`<path d="M87 ${my-15} q13 -6 26 0" fill="none" stroke="${O}" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>`;
+  const nY=my-mry*.5,mF=lum(muzC)<.35?LIGHT:INK,mo=nY+5.4;
+  h+=`<ellipse cx="100" cy="${nY}" rx="7.6" ry="5.4" fill="#231c19"/><ellipse cx="98" cy="${nY-1.7}" rx="2.4" ry="1.1" fill="#fff" opacity=".45"/>`;
+  if(o.mood==='happy')h+=`<path d="M91.5 ${mo+5} Q100 ${mo+19} 108.5 ${mo+5} Z" fill="#6e2a2a" stroke="${mF}" stroke-width="1.4" stroke-linejoin="round"/><ellipse cx="100" cy="${mo+11}" rx="4.4" ry="4" fill="#f0908c"/>`;
+  h+=`<path d="M100 ${mo} V${mo+4.6} M100 ${mo+4.6} Q95 ${mo+9.6} 89.5 ${mo+5.4} M100 ${mo+4.6} Q105 ${mo+9.6} 110.5 ${mo+5.4}" fill="none" stroke="${mF}" stroke-width="1.9" stroke-linecap="round"/>`;
+  h+=eyes(84,116,70,{mood:o.mood,big:baby,F,dark:dark||!!L.eyemask});
+  if(o.collar)h+=`<path d="M76 ${cy+ry-6} Q100 ${cy+ry+13} 124 ${cy+ry-6}" fill="none" stroke="${o.collar}" stroke-width="6.4" stroke-linecap="round"/><circle cx="100" cy="${cy+ry+7}" r="4.8" fill="#f6c833" stroke="#8a6a12" stroke-width="1.3"/>`;
+  const bt=baby?' transform="translate(100 205) scale(.94 .8) translate(-100 -205)"':'';
+  const ht=baby?' transform="translate(0 19) translate(100 108) scale(1.2) translate(-100 -108)"':'';
+  return `<g${bt}>${b}</g><g${ht}>${h}</g>`;
+}
+function pet(L,o){
+  o=o||{};const age=o.age||'adult',k=(o.k||1)*(L.k||1)*(age==='baby'?.64:1);
+  return `<g transform="translate(${((o.x||200)-100*k).toFixed(1)} ${((o.y||225)-205*k).toFixed(1)}) scale(${k.toFixed(3)})">${L.sp==='cat'?cat(L,o,age):dog(L,o,age)}</g>`;
+}
+/* 한배 형제: 웅크리고 자는 작은 덩어리 */
+function sib(x,y,c,flip,dog){const O=shade(c,lum(c)<.3?.3:-.4);
+  return `<g transform="translate(${x} ${y}) scale(${flip?-1:1} 1)"><ellipse cx="0" cy="0" rx="25" ry="14" fill="${c}" stroke="${O}" stroke-width="2"/><circle cx="-19" cy="-5" r="11" fill="${c}" stroke="${O}" stroke-width="2"/>${dog?`<ellipse cx="-28" cy="-8" rx="5" ry="8.5" transform="rotate(26 -28 -8)" fill="${shade(c,-.14)}" stroke="${O}" stroke-width="2"/><ellipse cx="-11" cy="-12" rx="5" ry="8.5" transform="rotate(-30 -11 -12)" fill="${shade(c,-.14)}" stroke="${O}" stroke-width="2"/>`:`<path d="M-27 -12 l2 -9 l7 6 Z M-15 -15 l5 -8 l4 9 Z" fill="${c}" stroke="${O}" stroke-width="2" stroke-linejoin="round"/>`}<path d="M-25 -4 q3 3 6 0 M-17 -3 q3 3 6 0" fill="none" stroke="${lum(c)<.3?LIGHT:INK}" stroke-width="1.6" stroke-linecap="round"/></g>`}
+const SC={
+ home(o){const n=o.night,wall=n?'#3d4b57':'#d7e3da',floor=n?'#6b5a48':'#c9a67c';
+  let bg=`<rect width="400" height="172" fill="${wall}"/><rect y="172" width="400" height="78" fill="${floor}"/><rect y="168" width="400" height="6" fill="${n?'#2f3a44':'#f4f1ea'}"/>`;
+  bg+=`<path d="M0 198 H400 M0 226 H400 M60 174 V198 M180 174 V198 M300 174 V198 M120 198 V226 M250 198 V226 M40 226 V250 M200 226 V250 M340 226 V250" stroke="${n?'#5a4b3c':'#b8946a'}" stroke-width="1.5" fill="none"/>`;
+  bg+=`<rect x="34" y="28" width="112" height="104" rx="4" fill="${n?'#1b2740':'#bfe1ef'}" stroke="#f4f1ea" stroke-width="7"/>`;
+  bg+=n?`<circle cx="112" cy="58" r="13" fill="#f3e9c2"/><circle cx="60" cy="50" r="1.5" fill="#fff"/><circle cx="72" cy="100" r="1.5" fill="#fff"/><circle cx="126" cy="106" r="1.2" fill="#fff"/>`:`<circle cx="114" cy="56" r="15" fill="#fbe38a"/><path d="M38 114 q28 -22 54 -6 q26 -20 50 2 V128 H38 Z" fill="#9ccf9a"/>`;
+  bg+=`<path d="M90 28 V132 M34 82 H146" stroke="#f4f1ea" stroke-width="5"/>`;
+  if(o.bird&&!n)bg+=`<g transform="translate(62 70)"><ellipse cx="0" cy="0" rx="10" ry="7" fill="#5d6b7a"/><circle cx="8" cy="-6" r="5" fill="#5d6b7a"/><path d="M12 -6 l7 1.5 l-7 2 Z" fill="#e9a23b"/><path d="M-9 0 l-10 -3 l2 7 Z" fill="#4a5663"/><circle cx="9.5" cy="-7" r="1.1" fill="#fff"/></g>`;
+  bg+=`<path d="M20 20 h30 q-6 60 -14 124 h-16 Z" fill="${n?'#5d4d6b':'#e9c7b0'}"/><path d="M160 20 h-30 q6 60 14 124 h16 Z" fill="${n?'#5d4d6b':'#e9c7b0'}"/><rect x="14" y="15" width="152" height="6" rx="3" fill="${n?'#2b3440':'#8a6f52'}"/>`;
+  if(!n)bg+=`<path d="M64 250 L150 176 H252 L196 250 Z" fill="#fff3b8" opacity=".36"/>`;
+  bg+=`<rect x="262" y="96" width="150" height="84" rx="14" fill="${n?'#3f5560':'#6f93a0'}"/><rect x="250" y="140" width="170" height="52" rx="12" fill="${n?'#4a6370':'#84a8b4'}"/><rect x="250" y="124" width="26" height="68" rx="11" fill="${n?'#3f5560':'#6f93a0'}"/><rect x="298" y="110" width="52" height="40" rx="9" fill="${n?'#b98e56':'#f0c987'}"/><rect x="266" y="190" width="8" height="12" fill="#5a4636"/><rect x="386" y="190" width="8" height="12" fill="#5a4636"/>`;
+  bg+=`<ellipse cx="190" cy="228" rx="122" ry="20" fill="${n?'#7d4a44':'#d9785f'}"/><ellipse cx="190" cy="228" rx="106" ry="14" fill="none" stroke="${n?'#a0685f':'#f3c9a8'}" stroke-width="2.5"/>`;
+  bg+=`<path d="M22 222 h44 l-6 16 h-32 Z" fill="${n?'#7a8a94':'#e3e8ea'}"/><ellipse cx="44" cy="222" rx="22" ry="5" fill="${n?'#5d6b74':'#b9c4ca'}"/><ellipse cx="44" cy="222" rx="16" ry="3" fill="#8a5a3c"/>`;
+  if(o.boxes)bg+=`<rect x="306" y="170" width="64" height="54" fill="#c9a26b" stroke="#a07c4a" stroke-width="2"/><path d="M306 188 h64 M338 170 v18" stroke="#a07c4a" stroke-width="2"/><rect x="322" y="122" width="54" height="48" fill="#d4ae78" stroke="#a07c4a" stroke-width="2"/><path d="M322 138 h54 M349 122 v16" stroke="#a07c4a" stroke-width="2"/><rect x="232" y="196" width="50" height="40" fill="#d4ae78" stroke="#a07c4a" stroke-width="2"/><path d="M232 210 h50" stroke="#a07c4a" stroke-width="2"/>`;
+  if(o.empty)bg+=`<ellipse cx="190" cy="228" rx="56" ry="13" fill="#e2d3ba"/><ellipse cx="190" cy="224" rx="46" ry="9.5" fill="#f6eddd"/><ellipse cx="184" cy="222" rx="13" ry="4.6" fill="none" stroke="${o.collar||'#d2463a'}" stroke-width="3.6"/><circle cx="198" cy="225" r="3.4" fill="#f6c833" stroke="#8a6a12" stroke-width="1"/>`;
+  return {bg,fg:n?`<rect width="400" height="250" fill="#0c1424" opacity=".26"/>`:'',x:190,y:234,k:.72}},
+ nest(o){
+  let bg=`<rect width="400" height="250" fill="#e3d6c2"/><rect y="178" width="400" height="72" fill="#c9a67c"/><circle cx="200" cy="150" r="160" fill="#fff4cf" opacity=".5"/>`;
+  bg+=`<path d="M44 206 q10 -66 156 -66 q146 0 156 66 Z" fill="#a9793f"/><path d="M62 204 q16 -46 138 -46 q122 0 138 46 q-138 26 -276 0 Z" fill="#f2e6d2"/><path d="M96 190 q40 -14 80 -4 M230 184 q40 -8 70 10" stroke="#dfd0b6" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const fg=`<path d="M40 204 q160 48 320 0 v12 q-160 46 -320 0 Z" fill="#b98548"/><path d="M40 210 q160 46 320 0 M70 213 v14 M110 221 v14 M150 226 v14 M200 228 v14 M250 226 v14 M290 221 v14 M330 213 v14" stroke="#946a35" stroke-width="2" fill="none"/>`;
+  return {bg,fg,x:200,y:216,k:.9,sibs:[[112,196,0],[290,196,1]]}},
+ street(o){const n=o.night,sky=n?'#1a2336':'#cfe3ea',far=n?'#27304a':'#aebec4',wall=n?'#4a4d59':'#bfb8ab',gr=n?'#2e3038':'#75757a';
+  let bg=`<rect width="400" height="250" fill="${sky}"/>`;
+  bg+=n?`<circle cx="318" cy="32" r="13" fill="#f1e7c3"/><circle cx="311" cy="28" r="12" fill="${sky}"/><circle cx="150" cy="22" r="1.4" fill="#fff"/><circle cx="210" cy="40" r="1.2" fill="#fff"/><circle cx="96" cy="14" r="1.2" fill="#fff"/>`:`<circle cx="336" cy="34" r="16" fill="#fbe9a6"/>`;
+  bg+=`<rect x="0" y="34" width="74" height="80" fill="${far}"/><rect x="66" y="54" width="62" height="60" fill="${shade(far,n?.1:-.07)}"/><rect x="236" y="26" width="84" height="90" fill="${far}"/><rect x="312" y="50" width="88" height="66" fill="${shade(far,n?.1:-.07)}"/>`;
+  [[10,46,1],[30,46,0],[50,46,1],[10,66,0],[50,66,1],[78,64,1],[100,64,0],[250,38,1],[272,38,1],[296,38,0],[250,60,0],[296,60,1],[326,62,0],[352,62,1],[378,62,0]].forEach(w=>{bg+=`<rect x="${w[0]}" y="${w[1]}" width="9" height="11" fill="${n?(w[2]?'#f3d27a':'#1b2338'):(w[2]?'#e3edf0':'#93a5ac')}"/>`});
+  bg+=`<rect y="100" width="400" height="98" fill="${wall}"/><rect y="96" width="400" height="7" fill="${shade(wall,-.2)}"/>`;
+  bg+=`<path d="M0 132 H400 M0 164 H400 M50 103 V132 M150 103 V132 M250 103 V132 M350 103 V132 M100 132 V164 M200 132 V164 M300 132 V164 M50 164 V198 M150 164 V198 M250 164 V198 M350 164 V198" stroke="${shade(wall,-.1)}" stroke-width="1.3" fill="none"/>`;
+  bg+=`<g transform="rotate(-4 265 134)"><rect x="248" y="112" width="34" height="44" fill="${n?'#8a8f9a':'#f0e9da'}"/><path d="M254 124 h22 M254 132 h22 M254 140 h14" stroke="${n?'#5d6270':'#b7ad9b'}" stroke-width="2.5"/></g>`;
+  bg+=`<rect y="198" width="400" height="52" fill="${gr}"/><rect y="196" width="400" height="6" fill="${shade(gr,.22)}"/><ellipse cx="92" cy="230" rx="22" ry="6" fill="${shade(gr,-.25)}"/>`;
+  bg+=`<rect x="22" y="0" width="9" height="200" fill="${n?'#2b2f3a':'#6d665c'}"/><rect x="12" y="26" width="34" height="5" fill="${n?'#2b2f3a':'#6d665c'}"/><path d="M0 14 Q200 46 400 10 M0 24 Q200 58 400 20" stroke="${n?'#0f1420':'#5a5650'}" stroke-width="1.4" fill="none"/>`;
+  if(n)bg+=`<rect x="31" y="40" width="28" height="5" fill="#2b2f3a"/><path d="M60 46 L6 200 H156 Z" fill="#ffdf8a" opacity=".15"/><circle cx="60" cy="45" r="5.5" fill="#ffe7a0"/>`;
+  bg+=`<ellipse cx="340" cy="198" rx="26" ry="22" fill="${n?'#20232b':'#3d4047'}"/><path d="M333 178 l7 -9 l7 9 Z" fill="${n?'#20232b':'#3d4047'}"/><ellipse cx="374" cy="206" rx="20" ry="17" fill="${n?'#2d4a63':'#4f86b3'}"/><path d="M369 191 l5 -8 l5 8 Z" fill="${n?'#2d4a63':'#4f86b3'}"/><rect x="300" y="206" width="12" height="16" rx="2" fill="${n?'#7c7c82':'#c2c2c6'}"/>`;
+  if(o.den)bg+=`<path d="M124 150 l-16 -18 h36 l14 18 Z M276 150 l16 -18 h-36 l-14 18 Z" fill="#b98f57" stroke="#9d7a48" stroke-width="2.5" stroke-linejoin="round"/><path d="M124 150 h152 v74 h-152 Z" fill="#c9a26b" stroke="#9d7a48" stroke-width="2.5"/><rect x="134" y="160" width="132" height="64" fill="#6f5432" opacity=".6"/>`;
+  if(o.bowl)bg+=`<path d="M92 218 h40 l-5 14 h-30 Z" fill="#ece7de" stroke="#a9a397" stroke-width="2"/><ellipse cx="112" cy="218" rx="20" ry="4.5" fill="#a9763f"/>`;
+  return {bg,fg:n?`<rect width="400" height="250" fill="#0a1020" opacity=".16"/>`:'',x:o.den?200:206,y:o.den?226:238,k:o.den?.9:.7,sibs:o.den?[[158,214,0],[246,214,1]]:null}},
+ rain(o){const s=SC.street({night:1,den:o.den});const r=rnd(7);let fg=s.fg;
+  for(let i=0;i<46;i++){const x=r()*420,y=r()*250;fg+=`<path d="M${x.toFixed(0)} ${y.toFixed(0)} l-6 19" stroke="#cfe0ff" stroke-width="1.5" stroke-linecap="round" opacity=".42"/>`}
+  s.bg+=`<ellipse cx="70" cy="236" rx="34" ry="6" fill="#4a5a78" opacity=".7"/><ellipse cx="330" cy="240" rx="40" ry="6" fill="#4a5a78" opacity=".7"/><path d="M52 235 h14 M318 239 h18" stroke="#9fb3d6" stroke-width="1.4"/>`;
+  s.fg=fg;return s},
+ winter(o){
+  let bg=`<rect width="400" height="250" fill="#dbe4ea"/><rect x="0" y="40" width="80" height="76" fill="#bcc8cf"/><rect x="70" y="58" width="60" height="58" fill="#c7d2d8"/><rect x="250" y="30" width="80" height="86" fill="#bcc8cf"/><rect x="322" y="54" width="78" height="62" fill="#c7d2d8"/>`;
+  bg+=`<rect y="102" width="400" height="96" fill="#b9b5ad"/><rect y="98" width="400" height="8" fill="#f6f9fb"/><path d="M0 134 H400 M0 166 H400 M60 106 V134 M180 106 V134 M300 106 V134 M120 134 V166 M240 134 V166 M360 134 V166" stroke="#a9a59d" stroke-width="1.3" fill="none"/>`;
+  bg+=`<rect y="196" width="400" height="54" fill="#f4f7f9"/><path d="M0 200 q50 -12 100 0 q60 -10 110 2 q50 -12 100 0 q50 -8 90 -2 V214 H0 Z" fill="#fff"/><path d="M40 226 q20 -4 40 0 M260 232 q24 -5 48 0" stroke="#d5dfe6" stroke-width="2" fill="none"/>`;
+  bg+=`<g transform="translate(236 130)"><path d="M4 62 q0 -22 22 -24 l14 -26 q4 -6 12 -6 h56 q8 0 12 6 l14 26 q26 2 26 24 v14 h-156 Z" fill="#7b3f3a"/><path d="M46 36 l11 -21 h27 v21 Z M90 36 v-21 h24 l11 21 Z" fill="#cfe0ea"/><path d="M44 8 q42 -14 82 0 q4 4 -2 5 h-78 q-6 -1 -2 -5 Z" fill="#fff"/><circle cx="40" cy="78" r="15" fill="#2b2b30"/><circle cx="40" cy="78" r="6" fill="#9aa0a6"/><circle cx="126" cy="78" r="15" fill="#2b2b30"/><circle cx="126" cy="78" r="6" fill="#9aa0a6"/><rect x="0" y="60" width="10" height="7" rx="2" fill="#f3e3a2"/></g>`;
+  const r=rnd(11);let fg='';for(let i=0;i<34;i++)fg+=`<circle cx="${(r()*400).toFixed(0)}" cy="${(r()*240).toFixed(0)}" r="${(1.4+r()*1.8).toFixed(1)}" fill="#fff" opacity=".9"/>`;
+  return {bg,fg,x:150,y:232,k:.7}},
+ road(o){
+  let bg=`<rect width="400" height="250" fill="#161d2e"/><rect x="0" y="30" width="90" height="70" fill="#232b42"/><rect x="100" y="14" width="70" height="86" fill="#1f2740"/><rect x="190" y="40" width="100" height="60" fill="#232b42"/><rect x="300" y="22" width="100" height="78" fill="#1f2740"/>`;
+  [[14,42],[40,42],[14,64],[66,64],[112,28],[136,28],[112,54],[150,74],[206,52],[240,52],[264,70],[316,36],[344,36],[372,60],[316,74]].forEach((w,i)=>{bg+=`<rect x="${w[0]}" y="${w[1]}" width="10" height="12" fill="${i%3?'#f3d27a':'#141a2b'}"/>`});
+  bg+=`<rect y="100" width="400" height="16" fill="#3d4150"/><rect y="116" width="400" height="134" fill="#262830"/><path d="M0 172 h44 M84 172 h44 M168 172 h44 M252 172 h44 M336 172 h44" stroke="#d8d2bd" stroke-width="5"/><rect y="226" width="400" height="24" fill="#3d4150"/><rect y="222" width="400" height="5" fill="#565b6c"/>`;
+  bg+=`<path d="M262 150 L20 118 V196 Z" fill="#ffe39a" opacity=".2"/><g transform="translate(250 112)"><path d="M6 56 q0 -20 20 -22 l12 -22 q4 -6 12 -6 h52 q8 0 12 6 l12 22 q24 2 24 22 v12 h-144 Z" fill="#c9cdd6"/><path d="M42 32 l10 -18 h24 v18 Z M82 32 v-18 h22 l10 18 Z" fill="#33405c"/><circle cx="38" cy="70" r="14" fill="#101218"/><circle cx="38" cy="70" r="5.5" fill="#7d838c"/><circle cx="118" cy="70" r="14" fill="#101218"/><circle cx="118" cy="70" r="5.5" fill="#7d838c"/><rect x="2" y="52" width="12" height="8" rx="2" fill="#fff2b8"/></g>`;
+  bg+=`<path d="M84 214 h30 l-4 12 h-22 Z" fill="#b9814e" opacity=".0"/>`;
+  return {bg,fg:`<rect width="400" height="250" fill="#0a1020" opacity=".12"/>`,x:92,y:244,k:.62}},
+ shelter(o){
+  let bg=`<rect width="400" height="250" fill="#c4cac5"/><path d="M0 44 H400 M0 92 H400 M0 140 H400 M70 0 V44 M210 0 V44 M340 0 V44 M140 44 V92 M280 44 V92 M70 92 V140 M210 92 V140 M340 92 V140 M140 140 V188 M280 140 V188" stroke="#aeb5b0" stroke-width="2" fill="none"/><rect y="188" width="400" height="62" fill="#8d948e"/><rect y="186" width="400" height="5" fill="#737a75"/>`;
+  bg+=`<rect x="258" y="26" width="104" height="70" rx="3" fill="#f7f7f2" stroke="#8c938d" stroke-width="2"/><rect x="266" y="34" width="30" height="30" fill="#d8ddd8"/><path d="M304 40 h48 M304 50 h48 M304 60 h30 M266 74 h86 M266 84 h60" stroke="#9aa19b" stroke-width="3"/><rect x="298" y="20" width="24" height="10" rx="2" fill="#c8372d"/>`;
+  bg+=`<path d="M40 214 q60 -18 130 -6 q10 14 -8 22 q-70 10 -126 0 q-12 -8 4 -16 Z" fill="#5f8f96"/><path d="M52 218 q56 -12 108 -4" stroke="#7fb0b6" stroke-width="2.5" fill="none"/><path d="M318 214 h46 l-6 18 h-34 Z" fill="#b9c1c6"/><ellipse cx="341" cy="214" rx="23" ry="5" fill="#8f999f"/><ellipse cx="341" cy="214" rx="17" ry="3" fill="#6fa3c9"/>`;
+  let fg='';for(let x=14;x<400;x+=34)fg+=`<rect x="${x}" y="0" width="7" height="250" fill="#56636a"/><rect x="${x+1.5}" y="0" width="1.6" height="250" fill="#8a989f"/>`;
+  fg+=`<rect width="400" height="11" fill="#48545a"/><rect y="239" width="400" height="11" fill="#48545a"/><rect x="354" y="104" width="24" height="34" rx="3" fill="#3d484d"/><circle cx="366" cy="121" r="4" fill="#9aa7ad"/>`;
+  return {bg,fg,x:200,y:232,k:.7}},
+ shop(o){
+  let bg=`<rect width="400" height="250" fill="#f4e8d4"/><rect width="400" height="150" fill="#f8efdf"/><ellipse cx="200" cy="0" rx="190" ry="90" fill="#fff9e2" opacity=".85"/><rect y="196" width="400" height="54" fill="#eadcc2"/>`;
+  const r=rnd(5);for(let i=0;i<70;i++){const x=r()*400,y=198+r()*50,a=r()*180;bg+=`<path d="M${x.toFixed(0)} ${y.toFixed(0)} l12 0" stroke="${i%2?'#d9c7a6':'#cdb890'}" stroke-width="3" stroke-linecap="round" transform="rotate(${a.toFixed(0)} ${x.toFixed(0)} ${y.toFixed(0)})"/>`}
+  bg+=`<g transform="rotate(8 330 60)"><path d="M300 36 h60 v44 h-60 l-12 -22 Z" fill="#fffdf6" stroke="#b9ab90" stroke-width="2"/><circle cx="298" cy="58" r="3" fill="#b9ab90"/><path d="M312 50 h38 M312 60 h38 M312 70 h22" stroke="#c8372d" stroke-width="3.2" stroke-linecap="round"/></g><path d="M292 0 q-6 30 4 56" stroke="#b9ab90" stroke-width="1.6" fill="none"/>`;
+  bg+=`<path d="M40 216 h44 l-5 14 h-34 Z" fill="#dfe6ea"/><ellipse cx="62" cy="216" rx="22" ry="5" fill="#aab6bd"/>`;
+  const fg=`<path d="M60 0 L150 0 L20 250 L0 250 L0 120 Z" fill="#fff" opacity=".17"/><path d="M190 0 L230 0 L110 250 L70 250 Z" fill="#fff" opacity=".12"/><rect x="6" y="6" width="388" height="238" fill="none" stroke="#3d3027" stroke-width="12"/><rect x="0" y="0" width="400" height="250" fill="none" stroke="#2a211b" stroke-width="3"/>`;
+  return {bg,fg,x:200,y:228,k:.7}},
+ mill(o){
+  let bg=`<rect width="400" height="250" fill="#26221e"/><circle cx="200" cy="10" r="120" fill="#ffd98a" opacity=".13"/><path d="M200 0 v16" stroke="#6f6557" stroke-width="2"/><circle cx="200" cy="22" r="7" fill="#ffe9b0"/>`;
+  [[10,34],[140,34],[270,34]].forEach((c,i)=>{bg+=`<rect x="${c[0]}" y="${c[1]}" width="120" height="74" fill="#1a1714" stroke="#6f6557" stroke-width="3"/><path d="M${c[0]} ${c[1]+60} h120" stroke="#6f6557" stroke-width="2"/><circle cx="${c[0]+48+i*8}" cy="${c[1]+38}" r="2.4" fill="#d9c98a"/><circle cx="${c[0]+60+i*8}" cy="${c[1]+38}" r="2.4" fill="#d9c98a"/>`;for(let x=c[0]+15;x<c[0]+120;x+=15)bg+=`<path d="M${x} ${c[1]} v74" stroke="#4d453b" stroke-width="1.4"/>`});
+  bg+=`<rect x="24" y="120" width="352" height="118" fill="#332d27" stroke="#7b705f" stroke-width="4"/><path d="M24 214 h352" stroke="#7b705f" stroke-width="3"/>`;
+  for(let x=44;x<376;x+=20)bg+=`<path d="M${x} 214 v24" stroke="#5d5447" stroke-width="1.6"/>`;
+  bg+=`<path d="M52 196 h40 l-5 14 h-30 Z" fill="#6f6a62"/><ellipse cx="72" cy="196" rx="20" ry="4.5" fill="#4d4943"/>`;
+  let fg='';for(let x=44;x<376;x+=22)fg+=`<path d="M${x} 122 v114" stroke="#8c8171" stroke-width="1.7" opacity=".8"/>`;
+  for(let y=142;y<236;y+=22)fg+=`<path d="M26 ${y} h348" stroke="#8c8171" stroke-width="1.7" opacity=".8"/>`;
+  return {bg,fg,x:200,y:214,k:.62}},
+ vet(o){
+  let bg=`<rect width="400" height="250" fill="#dcebf0"/><rect y="200" width="400" height="50" fill="#b7c8ce"/><rect y="196" width="400" height="6" fill="#f3f8fa"/>`;
+  bg+=`<rect x="28" y="26" width="64" height="64" rx="10" fill="#fff"/><path d="M60 40 v36 M42 58 h36" stroke="#3aa57a" stroke-width="11" stroke-linecap="round"/>`;
+  bg+=`<rect x="292" y="20" width="96" height="150" rx="4" fill="#f5f9fa" stroke="#b9cbd2" stroke-width="2"/><path d="M292 68 h96 M292 118 h96" stroke="#b9cbd2" stroke-width="2"/><rect x="304" y="42" width="12" height="26" rx="3" fill="#e9a23b"/><rect x="322" y="48" width="12" height="20" rx="3" fill="#6fa3c9"/><rect x="342" y="38" width="14" height="30" rx="3" fill="#f6f6f0" stroke="#b9cbd2"/><rect x="306" y="94" width="30" height="24" rx="3" fill="#c8372d" opacity=".8"/><rect x="346" y="88" width="12" height="30" rx="3" fill="#8fc7a8"/><rect x="304" y="140" width="60" height="30" rx="3" fill="#dfe9ed"/>`;
+  bg+=`<rect x="120" y="212" width="12" height="38" fill="#9fb0b7"/><rect x="268" y="212" width="12" height="38" fill="#9fb0b7"/><rect x="92" y="196" width="216" height="18" rx="5" fill="#cbd6db" stroke="#9fb0b7" stroke-width="2"/><rect x="100" y="198" width="200" height="4" rx="2" fill="#eef4f6"/>`;
+  bg+=`<g transform="translate(104 180) rotate(-14)"><rect x="0" y="0" width="34" height="8" rx="2" fill="#f4f8fa" stroke="#8ea1a9" stroke-width="1.5"/><rect x="34" y="2.5" width="14" height="3" fill="#8ea1a9"/><rect x="-8" y="2" width="8" height="4" fill="#8ea1a9"/><rect x="6" y="1.5" width="14" height="5" fill="#6fa3c9" opacity=".7"/></g>`;
+  return {bg,fg:'',x:206,y:198,k:.62}},
+ park(o){const hot=o.hot;
+  let bg=`<rect width="400" height="250" fill="${hot?'#f6dfa4':'#bfe4f3'}"/>`;
+  bg+=hot?`<circle cx="318" cy="52" r="34" fill="#fff3c4" opacity=".7"/><circle cx="318" cy="52" r="24" fill="#f9c74f"/><path d="M318 8 v-8 M318 104 v-8 M274 52 h-10 M372 52 h-10 M287 21 l-7 -7 M356 90 l-7 -7 M287 83 l-7 7 M356 14 l-7 7" stroke="#f9c74f" stroke-width="4" stroke-linecap="round"/>`:`<circle cx="324" cy="46" r="18" fill="#fbe9a6"/><path d="M60 56 q10 -16 28 -8 q14 -12 28 2 q18 0 14 14 h-74 q-10 -2 4 -8 Z" fill="#fff" opacity=".9"/>`;
+  bg+=`<path d="M0 150 q80 -44 170 -14 q90 -40 230 4 V200 H0 Z" fill="${hot?'#b9cf7c':'#a7d48a'}"/>`;
+  bg+=`<rect x="52" y="96" width="10" height="70" fill="#7a5a3c"/><circle cx="57" cy="84" r="34" fill="${hot?'#7da85a':'#6fae6a'}"/><circle cx="34" cy="100" r="20" fill="${hot?'#8bb565':'#7dbb76'}"/><rect x="348" y="110" width="9" height="60" fill="#7a5a3c"/><circle cx="352" cy="100" r="28" fill="${hot?'#7da85a':'#5d9c5b'}"/>`;
+  bg+=`<rect y="180" width="400" height="70" fill="${hot?'#9dbb62':'#8fc673'}"/><path d="M0 232 q120 -44 220 -34 q100 8 180 -20 v36 q-90 22 -180 14 q-100 -8 -220 30 Z" fill="${hot?'#efd9a8':'#ead9b5'}"/>`;
+  bg+=`<g transform="translate(232 150)"><rect x="0" y="14" width="74" height="7" rx="2" fill="#8a6238"/><rect x="0" y="0" width="74" height="6" rx="2" fill="#8a6238"/><path d="M8 0 v40 M66 0 v40" stroke="#5a4636" stroke-width="5"/></g>`;
+  let fg='';if(hot)fg=`<path d="M40 178 q10 -6 20 0 t20 0 t20 0 M150 170 q10 -6 20 0 t20 0 t20 0 M270 182 q10 -6 20 0 t20 0 t20 0" stroke="#fff" stroke-width="2" fill="none" opacity=".55"/><rect width="400" height="250" fill="#ffb347" opacity=".08"/>`;
+  return {bg,fg,x:150,y:236,k:.72}}
+};
+const MEMO=`<rect width="400" height="250" fill="#0c1220" opacity=".34"/><circle cx="236" cy="38" r="15" fill="#f6c833" opacity=".18"/><circle cx="236" cy="38" r="4" fill="#f6c833"/>`;
+function scene(kind,L,o){
+  o=o||{};const sc=(SC[kind]||SC.home)(o);let mid='';
+  if(sc.sibs&&!o.empty&&o.litter>1)sc.sibs.slice(0,Math.min(2,o.litter-1)).forEach((p,i)=>{mid+=sib(p[0],p[1],shade(L.base,i?-.1:.08),p[2],L.sp==='dog')});
+  if(!o.empty)mid+=pet(L,{x:sc.x,y:sc.y,k:sc.k,age:o.age,mood:o.mood,collar:o.collar,tip:o.tip});
+  return `<svg class="scene" viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${o.label||'장면'}">${sc.bg}${mid}${sc.fg||''}${o.empty?MEMO:''}</svg>`;
+}
+function portrait(L,o){o=o||{};return `<svg class="portrait" viewBox="0 0 200 200" role="img" aria-label="${o.label||'초상'}"><circle cx="100" cy="100" r="100" fill="${o.bg||'#d7e3da'}"/><clipPath id="pc${++uid}"><circle cx="100" cy="100" r="100"/></clipPath><g clip-path="url(#pc${uid})">${pet(L,{x:100,y:214,k:.98/(L.k||1),age:o.age,mood:o.mood,collar:o.collar,tip:o.tip})}</g></svg>`}
+return {scene,portrait,pet,shade,KINDS:Object.keys(SC)};
+})();
+
+/* ---------- 생김새 ---------- */
+const DOGLOOK={
+ '몰티즈':{base:'#faf8f3',ear:'drop',longear:1,fluff:2,knot:1,muzc:'#ffffff'},
+ '푸들':{base:['#c48a58','#f4efe6','#3a3432','#8a5a3c'],ear:'drop',curly:1},
+ '포메라니안':{base:'#e7a55c',belly:'#f6dcb4',ear:'point',fluff:3,curl:1},
+ '치와와':{base:'#dfb685',belly:'#f6e7d0',ear:'bat'},
+ '미니어처 닥스훈트':{base:'#9c5a32',ear:'drop',longear:1,muz:'long'},
+ '비글':{base:'#b9773d',belly:'#faf6ee',ear:'drop',longear:1,blaze:1,saddle:'#2f2a28',earc:'#a3642f'},
+ '웰시코기':{base:'#e2964a',belly:'#faf6ee',ear:'point',blaze:1},
+ '보더콜리':{base:'#2c2c30',belly:'#faf6ee',ear:'semi',blaze:1,fluff:1},
+ '시바견':{base:'#d98b45',belly:'#fbefdc',ear:'point',cheek:1,curl:1,brow:'#fbefdc'},
+ '래브라도 리트리버':{base:['#e9d09c','#2b2a2c','#6b4630'],ear:'drop'},
+ '골든 리트리버':{base:'#d9a25a',belly:'#ecca92',ear:'drop',fluff:1},
+ '저먼 셰퍼드':{base:'#c08a4e',ear:'point',mask:'#2c2826',saddle:'#2c2826',eyemask:'#2c2826',earc:'#3a322c'},
+ '진돗개':{base:['#f3ebdc','#e0b57a'],ear:'point',curl:1},
+ '퍼그':{base:'#dcc19c',ear:'rose',mask:'#2f2a27',flat:1,earc:'#2f2a27',curl:1},
+ '시추':{base:'#f6f1e8',patch:'#b98a58',ear:'drop',longear:1,flat:1,fluff:2,knot:1,earc:'#b98a58'},
+ '프렌치 불도그':{base:['#c9aa85','#3a3533','#efe6d6'],ear:'bat',flat:1},
+ '불도그':{base:'#f3ede2',patch:'#b9814e',ear:'rose',flat:1},
+ '보스턴 테리어':{base:'#28282c',belly:'#faf6ee',ear:'bat',flat:1,blaze:1},
+ '복서':{base:'#b97f4a',belly:'#faf6ee',ear:'semi',mask:'#2c2826',flat:1}
+};
+const MIXLOOK=[
+ {base:'#e3bf8a',belly:'#f5e6cc',ear:'semi',curl:1},{base:'#f4eee2',ear:'point',curl:1},
+ {base:'#2e2b2a',belly:'#c98f55',ear:'semi',brow:'#c98f55',muzc:'#c98f55'},
+ {base:'#8a5d3b',belly:'#e9d7bd',ear:'drop'},{base:'#c9a06a',belly:'#f7f1e6',ear:'drop',blaze:1},
+ {base:'#f1eadc',patch:'#6b4a33',ear:'semi'},{base:'#5a5a5e',belly:'#d9d4cb',ear:'point'}];
+const CATLOOK={
+ '치즈':{base:'#e8a04c',belly:'#fbe9cf',pat:'tabby',stripe:'#c8782a',eye:'#d9b23a'},
+ '고등어':{base:'#8f8778',belly:'#ebe4d6',pat:'tabby',stripe:'#4e483f',eye:'#a3c76d'},
+ '턱시도':{base:'#2b2b30',belly:'#f8f5ef',pat:'tux',eye:'#d9c23a'},
+ '삼색':{base:'#f7f2e8',pat:'calico',eye:'#d9b23a'},
+ '올블랙':{base:'#27272c',pat:'solid',eye:'#e3c53f'},
+ '젖소':{base:'#f7f4ee',pat:'cow',eye:'#a3c76d'},
+ '페르시안':{base:'#f1eadc',pat:'solid',fluff:1,flat:1,round:1,eye:'#e39a3b'},
+ '러시안 블루':{base:'#7f8fa3',pat:'solid',eye:'#7fc77a'},
+ '브리티시 숏헤어':{base:'#8a93a3',pat:'solid',round:1,eye:'#e39a3b'},
+ '스코티시 폴드':{base:'#b9b3a8',belly:'#ece6da',pat:'tabby',stripe:'#7d776c',ear:'fold',round:1,eye:'#e3b23b'},
+ '샴':{base:'#efe3cf',pat:'point',point:'#5a4335',eye:'#5aa7e0'},
+ '먼치킨':{base:'#e8a04c',belly:'#f8f5ef',pat:'bicolor',eye:'#d9b23a'}
+};
+function makeLook(s){
+  let L;
+  if(s.sp==='dog'){
+    const src=s.pure?DOGLOOK[s.breed]:(s.reg.k==='kr'?MIXLOOK[Math.floor(Math.random()*3)]:MIXLOOK[Math.floor(Math.random()*MIXLOOK.length)]);
+    L=Object.assign({sp:'dog'},src||MIXLOOK[0]);
+    L.k=s.size==='소형'?.84:s.size==='대형'?1.06:.95;
+  }else{
+    L=Object.assign({sp:'cat'},CATLOOK[s.pure?s.breed:s.breed.split(' ')[0]]||CATLOOK['고등어']);
+    L.k=.88;
+  }
+  if(Array.isArray(L.base))L.base=L.base[Math.floor(Math.random()*L.base.length)];
+  L.collar=['#d2463a','#2f7f8f','#3f6fc0','#7a4fb0','#2f8f5f'][Math.floor(Math.random()*5)];
+  return L;
+}
+
+/* ---------- 사진 (실제 사진, 출처는 첫 화면의 "자료와 사진 출처") ---------- */
+const PHOTOS={"home_dog":{"src":"img/home_dog.jpg","alt":"소파 위에 누워 사람 손에 쓰다듬을 받는 흰 강아지","cap":"소파에서 쓰다듬을 받는 반려견","by":"nomao saeki saekinomao, CC0","page":"https://commons.wikimedia.org/wiki/File:Stroking_a_yawning_dog_(Unsplash).jpg"},"home_cat":{"src":"img/home_cat.jpg","alt":"비 오는 창가에 앉아 있는 주황색과 흰색 털의 고양이","cap":"창가에 앉은 집고양이","by":"0x0077BE, CC0","page":"https://commons.wikimedia.org/wiki/File:Ruby_-_Bicolor_cat_on_windowsill.jpg"},"street_dog":{"src":"img/street_dog.jpg","alt":"보도 위에 서 있는 흰색과 갈색 털의 떠돌이 개","cap":"인도 푸네의 거리에서 사는 개","by":"AVasanth (WMF), CC BY 4.0","page":"https://commons.wikimedia.org/wiki/File:Stray_dog_in_the_streets_of_Pune.jpg"},"street_cat":{"src":"img/street_cat.jpg","alt":"아스팔트 위에 앉아 있는 검은색과 흰색 털의 길고양이","cap":"길 위에 앉아 있는 길고양이","by":"Tokumeigakarinoaoshima, CC0","page":"https://commons.wikimedia.org/wiki/File:Stray_cat_standing_in_the_street.JPG"},"feeder":{"src":"img/feeder.jpg","alt":"담장 위에 모여 사료를 먹는 길고양이 여러 마리","cap":"담장 위에서 사료를 먹는 길고양이들","by":"lienyuan lee, CC BY 3.0","page":"https://commons.wikimedia.org/wiki/File:%E8%A1%97%E8%B2%93_Stray_Cats_-_panoramio_(1).jpg"},"newborn":{"src":"img/newborn.jpg","alt":"어미 품에서 젖을 먹는 갓 태어난 강아지들","cap":"젖을 먹는 갓 태어난 강아지들","by":"SapphireDreamPhotography, CC BY 3.0","page":"https://commons.wikimedia.org/wiki/File:Newborn_Golden_Retriever_Puppies.JPG","sp":"dog"},"petshop":{"src":"img/petshop.jpg","alt":"철망 우리와 새장이 늘어선 펫숍 안, 우리 안에 강아지들이 있다","cap":"키프로스 리마솔의 펫숍","by":"Alan Samuel from Cardiff, Wales, CC BY 2.0","page":"https://commons.wikimedia.org/wiki/File:Paphos_March_2013_283_(10126299215).jpg"},"mill":{"src":"img/mill.jpg","alt":"좁은 철망 우리 안에 갇힌 소형견 여러 마리","cap":"번식장 철망 우리 안의 소형견들","by":"PETA, 퍼블릭 도메인","page":"https://commons.wikimedia.org/wiki/File:Puppy_mill_01.jpg"}};
+const EVPHOTO={milk:'newborn',shelter:'shelter',shop:'petshop',millbox:'mill',mill:'mill',vax:'vet',check:'vet',road:'street',hand:'street',trash:'street',night:'street',pack:'street',catcher:'street',winter:'street',feeder:'feeder',tnr:'eartip',sun:'home',treat:'home',door:'home',alone:'home'};
+function photoKey(k,s){return (k==='street'||k==='home')?k+'_'+s.sp:k}
+function photoFor(id,s){const k=EVPHOTO[id];if(!k)return null;const key=photoKey(k,s),p=PHOTOS[key];if(!p||(p.sp&&p.sp!==s.sp))return null;s.ph=s.ph||{};if(s.ph[key])return null;s.ph[key]=1;return p}
+
 /* ---------- 진행 ---------- */
-let S=null,CUR=null,LAST=null;
+let S=null,CUR=null,LAST=null,PHASE='idle',YOU=-1,RT=null;
 function pickEvent(s){
   let pool=EV.filter(e=>!(e.once&&s.seen[e.id])&&e.when(s));
-  if(pool.length>1&&LAST)pool=pool.filter(e=>e.id!==LAST)||pool;
+  if(pool.length>1&&LAST)pool=pool.filter(e=>e.id!==LAST);
   if(!pool.length)pool=EV.filter(e=>e.gen&&e.when(s));
   if(!pool.length)return null;
   return wpick(pool,e=>e.gen?.5:(s.seen[e.id]?1:3));
@@ -442,72 +874,182 @@ function hazard(s,m){
   else if(s.place==='mill')h+=.1;else if(s.place==='home'){h+=.008;if(a<1)h+=.03}
   if(a<1&&!isDog(s)&&s.pure)h+=.12;if(s.h<30)h+=(30-s.h)/90;if(s.f<15)h+=.15;
   return 1-Math.pow(1-clamp(h,0,.97),m/12)}
-function advance(){
-  const s=S;if(!s.alive)return showEnd();
-  const m=stepMonths(s);s.age+=m;s.turns++;s.d={};
-  const y=m/12;
+const lab=(c,s)=>c.dyn?c.dyn(s):c.label;
+function jong(w){const m=String(w).replace(/[^가-힣]+$/,'');if(!m)return 0;return (m.charCodeAt(m.length-1)-0xAC00)%28}
+const ro=w=>w+((jong(w)===0||jong(w)===8)?'로':'으로');
+const eun=w=>w+(jong(w)?'은':'는');
+const first=t=>{const m=String(t).match(/^[^.!?]*[.!?]/);return m?m[0]:t};
+const calm=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
+
+/* 시간이 흐르는 동안 저절로 일어나는 일. 수치가 들어간 문장은 출처가 있는 것만 쓴다. */
+function passive(s,from,m){
+  const to=s.age,L=[];
+  if(from<3&&to>=3)L.push(isDog(s)?'눈을 뜨고, 걷고, 젖을 뗐다. 강아지는 생후 10~14일에 눈을 뜨고 8주 무렵 젖을 뗀다.':'눈을 뜨고, 걷고, 젖을 뗐다. 새끼 고양이는 생후 7~10일에 눈을 뜨고 7~8주 무렵 젖을 뗀다.');
+  if(from<6&&to>=6)L.push(isDog(s)?'젖니가 빠지고 있다. 강아지의 영구치는 7개월 무렵 다 난다.':'젖니가 빠지고 영구치가 났다. 고양이의 영구치는 6개월 무렵 다 난다.');
+  if(from<12&&to>=12)L.push(`한 살이 되었다. 사람 나이로 약 ${humanAge(s)}세.`);
+  else if(to>=24&&m>=12)L.push(`${m>=24?'두 해가':'한 해가'} 지났다. 사람 나이로 약 ${humanAge(s)}세.`);
+  if(!s._sen&&to>=12&&senior(s)){s._sen=1;L.push('노년기에 들어섰다.')}
+  const fl={home:['밥은 제때 나왔고 잠자리는 따뜻했다.','가족의 발소리를 구별하게 되었다.','창밖의 계절이 바뀌었다.'],
+    street:['먹을 것을 찾아 하루 대부분을 걸었다.','비를 피할 곳을 몇 군데 알게 되었다.','골목의 소리와 냄새를 익혔다.'],
+    shelter:['철창 안에서 석 달이 지났다.'],shop:['진열장 안에서 석 달이 지났다.'],mill:['철창 밖으로는 한 번도 나가지 못했다.']};
+  if(!L.length||s.place!=='home')L.push(pick(fl[s.place]||fl.home));
+  return L;
+}
+
+/* ---------- 장면 ---------- */
+const EVSCENE={milk:s=>s.place==='home'?['nest',{}]:['street',{den:1}],rain:['rain',{den:1}],millbox:['mill',{}],shop:['shop',{}],mill:['mill',{}],shelter:['shelter',{}],
+ vax:['vet',{}],check:['vet',{}],neuter:['home',{}],social:['home',{}],door:['home',{}],treat:['home',{}],alone:['home',{}],move:['home',{boxes:1}],bigdog:['park',{}],window:['home',{bird:1}],sun:['home',{}],
+ road:['road',{}],hand:['street',{}],feeder:['street',{bowl:1}],tnr:['street',{night:1}],winter:['winter',{}],pack:['street',{}],trash:['street',{}],catcher:['street',{}],night:['street',{night:1}],
+ sick:s=>s.place==='home'?['home',{night:1}]:['street',{night:1}],heat:['park',{hot:1}],bigsize:['park',{}],cost:['home',{}],joint:['home',{}],kidney:['home',{}],last:['home',{}]};
+function placeScene(s){return s.place==='home'?['home',{}]:s.place==='street'?['street',{night:s.turns%2===1}]:s.place==='shelter'?['shelter',{}]:s.place==='shop'?['shop',{}]:['mill',{}]}
+function sceneFor(e,s){const v=EVSCENE[e.id];return v?(typeof v==='function'?v(s):v):placeScene(s)}
+function petState(s){return {age:s.age<9?'baby':senior(s)?'senior':'adult',collar:(s.place==='home'&&s.age>=3)?s.look.collar:null,tip:!!s.tip,litter:s.litter}}
+function sceneLabel(s){return `${PLACE[s.place]}에 있는 ${s.breed}`}
+function drawScene(kind,o,extra){$('scene').innerHTML=Art.scene(kind,S.look,Object.assign({label:sceneLabel(S)},petState(S),o||{},extra||{}))}
+
+/* ---------- 수치와 장부 ---------- */
+const METERS=[['건강','h'],['배부름','f'],['유대','b']];
+function buildHud(){
+  $('hud-meters').innerHTML=METERS.map(m=>`<div class="meter" id="m-${m[1]}"><div class="meter-t"><span class="mn">${m[0]}</span><span class="num"><span class="mv">0</span><i></i></span></div><div class="meter-b"><span></span></div></div>`).join('');
+  $('hud-log').innerHTML='';
+}
+function drawRuler(){
+  const s=S,max=Math.max(20,Math.ceil(yr(s)/5)*5),pos=v=>(v/max*100).toFixed(2)+'%';
+  let h='<div class="ruler-track"></div>';
+  for(let t=0;t<=max;t+=5)h+=`<span class="tick" style="left:${pos(t)}"><i></i>${t}${t===max?'년':''}</span>`;
+  const refs=isDog(s)?[{a:12.5,b:12.5,t:'반려견 중앙 수명 12.5년'}]:[{a:2,b:5,t:'길고양이 2~5년'},{a:10,b:15,t:'실내 고양이 10~15년'}];
+  refs.forEach(r=>{h+=r.a===r.b?`<span class="ref pt" style="left:${pos(r.a)}"><em>${r.t}</em></span>`:`<span class="ref" style="left:${pos(r.a)};width:${pos(r.b-r.a)}"><em>${r.t}</em></span>`});
+  h+=`<span class="now" style="left:${pos(yr(s))}"></span>`;
+  $('hud-ruler').innerHTML=h;
+}
+function drawHud(flash){
+  const s=S;
+  $('hud-place').textContent=PLACE[s.place];$('hud-age').textContent=fmtAge(s.age);$('hud-stage').textContent=stage(s);
+  $('hud-name').textContent=who(s);$('hud-sub').textContent=`${s.breed} · ${s.female?'암컷':'수컷'} · ${s.reg.n}`;
+  METERS.forEach(m=>{const el=$('m-'+m[1]);if(!el)return;const v=Math.round(s[m[1]]),d=flash?Math.round(s.d[m[1]]||0):0;
+    el.classList.toggle('low',v<25);el.querySelector('.mv').textContent=v;el.querySelector('.meter-b span').style.width=v+'%';
+    const i=el.querySelector('i');i.textContent=d?(d>0?'+':'')+d:'';i.className=d>0?'up':'dn';
+    if(m[1]==='b')el.querySelector('.mn').textContent=s.everHome?'유대':'사람 신뢰'});
+  drawRuler();
+}
+function logLine(age,text,cls){const li=document.createElement('li');if(cls)li.className=cls;li.innerHTML=`<span class="num">${age?fmtAge(age):'탄생'}</span><div>${text}</div>`;$('hud-log').appendChild(li);const b=$('ledger');b.scrollTop=b.scrollHeight}
+function onNote(s,t){if($('game').classList.contains('on'))logLine(s.age,t,/^생을 마쳤다/.test(t)?'end':'key')}
+function soft(s,t){s.log.push({age:s.age,t,soft:1});logLine(s.age,t,'soft')}
+function chips(d){const N={h:'건강',f:'배부름',b:S.everHome?'유대':'사람 신뢰'};return Object.keys(N).filter(k=>d[k]&&Math.round(d[k])).map(k=>`<span class="dchip ${d[k]>0?'up':'dn'}">${N[k]} ${d[k]>0?'+':''}${Math.round(d[k])}</span>`).join('')}
+function factBox(txt,ph){return `<aside class="fact${ph?' has-ph':''}">${ph?`<img src="${ph.src}" alt="${ph.alt}">`:''}<div><span class="fact-k">자료</span>${txt}${ph?`<small>실제 사진 · ${ph.cap} (${ph.by})</small>`:''}</div></aside>`}
+
+/* ---------- 선택 카드 ---------- */
+function openSheet(){const sh=$('sheet');sh.classList.add('open');$('veil').classList.add('on');sh.scrollTop=0}
+function closeSheet(){$('sheet').classList.remove('open');$('veil').classList.remove('on')}
+function openEvent(){
+  const s=S;if(!s.alive)return sheetDeath();
+  CUR=pickEvent(s);if(!CUR){passTime();return}
+  const sc=sceneFor(CUR,s);drawScene(sc[0],sc[1],{mood:CUR.id==='sick'?'sleep':'normal'});
+  const ph=photoFor(CUR.id,s);
+  $('sheet').innerHTML=`<p class="eyebrow">${stage(s)} · ${fmtAge(s.age)} · ${PLACE[s.place]}</p><p class="story">${CUR.text(s)}</p>${factBox(CUR.fact(s),ph)}<div class="choices">${CUR.choices.map((c,i)=>`<button class="choice" data-i="${i}"><kbd>${i+1}</kbd><span>${lab(c,s)}</span></button>`).join('')}</div>`;
+  $('sheet').querySelectorAll('.choice').forEach(b=>{b.onclick=()=>choose(+b.dataset.i)});
+  PHASE='event';openSheet();
+}
+function choose(i){
+  const s=S,e=CUR;if(PHASE!=='event'||!e||!e.choices[i])return;PHASE='result';
+  const n0=s.log.length,label=lab(e.choices[i],s),place0=s.place;
+  s.d={};const txt=e.choices[i].run(s);
+  s.seen[e.id]=(s.seen[e.id]||0)+1;LAST=e.id;
+  if(s.alive&&s.h<=0)die(s,s.f<=0?'굶주림':'부상과 쇠약');
+  if(s.log.length===n0)soft(s,`${label}. ${first(txt)}`);
+  if(!s.alive){const sc=placeScene(s);drawScene(sc[0],sc[1],{empty:1,collar:s.look.collar})}
+  else{const d=s.d,mood=(d.h||0)<=-12?'hurt':((d.b||0)>=5||(d.f||0)>=15||(d.h||0)>=8)?'happy':'normal';
+    const sc=s.place!==place0?placeScene(s):sceneFor(e,s);drawScene(sc[0],sc[1],{mood})}
+  drawHud(true);
+  $('sheet').innerHTML=`<p class="eyebrow">선택 · ${label}</p><p class="story">${txt}</p><div class="chips">${chips(s.d)}</div><button class="cta" id="cont">${s.alive?'시간이 흐른다':'…'}</button>`;
+  $('cont').onclick=cont;$('sheet').scrollTop=0;
+}
+function cont(){if(PHASE!=='result')return;if(!S.alive){sheetDeath();return}passTime()}
+function sheetDeath(){
+  const s=S,sc=placeScene(s);PHASE='death';
+  drawScene(sc[0],sc[1],{empty:1,collar:s.look.collar});drawHud(false);
+  $('sheet').innerHTML=`<p class="eyebrow fin">삶의 끝 · ${fmtAge(s.age)}</p><p class="story">${eun(who(s))} ${ro(s.cause)} 생을 마쳤다.</p><p class="story dim">${epitaph(s)}</p><button class="cta" id="cont">한 생을 돌아본다</button>`;
+  $('cont').onclick=()=>{if(PHASE==='death'){PHASE='idle';showEnd()}};openSheet();
+}
+function tickAge(from,to,done){
+  const el=$('hud-age');
+  if(calm()){el.textContent=fmtAge(to);return done()}
+  const n=to-from,steps=Math.min(n,24),dur=Math.min(1000,300+n*30);let k=0;
+  (function f(){k++;el.textContent=fmtAge(Math.round(from+n*k/steps));if(k<steps)setTimeout(f,dur/steps);else done()})();
+}
+function passTime(){
+  const s=S;PHASE='time';closeSheet();
+  const m=stepMonths(s),from=s.age,b0={h:s.h,f:s.f,b:s.b},y=m/12;
+  s.age+=m;s.turns++;
   if(s.place==='home'){s.f=clamp(Math.max(s.f,70)+5,0,100);s.h=clamp(s.h+(senior(s)?-5*y:3),0,100);s.b=clamp(s.b+2,0,100)}
   else if(s.place==='street'){s.f=clamp(s.f-ri(4,12)*((s.colony||s.pack)?.5:1),0,100);s.h=clamp(s.h-(senior(s)?8:3)-(s.f<=0?15:0),0,100)}
   else if(s.place==='shelter'){s.f=Math.max(s.f,50);s.h=clamp(s.h-3,0,100)}
   else if(s.place==='mill'){s.f=Math.max(s.f,40);s.h=clamp(s.h-6,0,100)}
   else{s.f=Math.max(s.f,45)}
-  if(s.h<=0){die(s,s.f<=0?'굶주림':bgCause(s))}
-  else if(s.place!=='shelter'&&P(hazard(s,m))){die(s,bgCause(s))}
-  if(!s.alive)return showEnd();
-  turn();
+  s.d={h:s.h-b0.h,f:s.f-b0.f,b:s.b-b0.b};
+  const sc=placeScene(s);drawScene(sc[0],sc[1],{});
+  $('hud-place').textContent=PLACE[s.place];$('hud-flow').classList.add('on');
+  tickAge(from,s.age,()=>{
+    $('hud-flow').classList.remove('on');
+    passive(s,from,m).forEach(t=>soft(s,t));
+    if(s.h<=0)die(s,s.f<=0?'굶주림':bgCause(s));
+    else if(s.place!=='shelter'&&P(hazard(s,m)))die(s,bgCause(s));
+    drawHud(true);
+    setTimeout(()=>{if(S!==s)return;if(!s.alive)sheetDeath();else openEvent()},s.alive?520:900);
+  });
 }
-function turn(){
-  const s=S;CUR=pickEvent(s);
-  if(!CUR){advance();return}
-  renderGame(false);
-}
-function choose(i){
-  const s=S,e=CUR;if(!e||s._res)return;
-  s.d={};const txt=e.choices[i].run(s);
-  s.seen[e.id]=(s.seen[e.id]||0)+1;LAST=e.id;
-  if(s.alive&&s.h<=0)die(s,s.f<=0?'굶주림':'부상과 쇠약');
-  s._res={txt,label:lab(e.choices[i],s)};
-  renderGame(true);
-}
-const lab=(c,s)=>c.dyn?c.dyn(s):c.label;
-function next(){S._res=null;if(!S.alive)return showEnd();advance()}
 
 /* ---------- 화면 ---------- */
-function show(id){for(const x of ['start','birth','game','end'])$(x).classList.toggle('on',x===id);window.scrollTo(0,0)}
+function show(id){for(const x of ['start','birth','game','end']){const el=$(x);el.classList.toggle('on',x===id);if(x===id)el.scrollTop=0}}
 function pct(p){const v=p*100;return v>=10?v.toFixed(0):v>=1?v.toFixed(1):v>=.1?v.toFixed(2):v.toFixed(3)}
 function big(n){if(n>=1e8)return (n/1e8).toFixed(1).replace(/\.0$/,'')+'억';if(n>=1e4)return Math.round(n/1e4).toLocaleString('ko-KR')+'만';return Math.round(n).toLocaleString('ko-KR')}
+function census(el,you,same){
+  let h='<svg class="dots" viewBox="0 0 500 300" role="img" aria-label="점 1,500개로 나타낸 전 세계의 개와 고양이. 채운 점은 개, 빈 점은 고양이다.">';
+  for(let i=0;i<1500;i++){const dg=i<900,sm=!!(same&&same.has(i)),r=i===you?5.6:sm?3.4:dg?3:2.5;
+    h+=`<circle cx="${i%50*10+5}" cy="${Math.floor(i/50)*10+5}" r="${r}" data-r="${dg?3:2.5}" class="${dg?'d':'c'}${sm?' s':''}${i===you?' y':''}"/>`}
+  el.innerHTML=h+'</svg>';
+  const y=el.querySelector('.y');if(y)y.parentNode.appendChild(y);
+}
+function markYou(i){const root=$('census0'),old=root.querySelector('.y');if(old){old.classList.remove('y');old.setAttribute('r',old.dataset.r)}const c=root.querySelectorAll('circle')[i];if(c){c.classList.add('y');c.setAttribute('r','5.6')}}
+function startRoulette(){const f=()=>markYou(Math.floor(Math.random()*1500));f();if(!calm())RT=setInterval(f,900)}
+function stopRoulette(){if(RT){clearInterval(RT);RT=null}}
+const ORIGIN_SHORT={home:'가정집',street:'길 위',mill:'번식장'};
 function showBirth(){
-  const s=S=birth();LAST=null;
+  stopRoulette();
+  const s=S=birth();s.look=makeLook(s);LAST=null;PHASE='idle';
+  const lo=isDog(s)?0:900,hi=isDog(s)?900:1500;
+  YOU=lo+Math.floor(Math.random()*(hi-lo));
+  const n=Math.max(1,Math.round(s.p*1500)),same=new Set([YOU]);let g=0;
+  while(same.size<n&&g++<8000)same.add(lo+Math.floor(Math.random()*(hi-lo)));
   const rows=[
-   ['종',`${isDog(s)?'🐕 개':'🐈 고양이'}`,`개·고양이 15억 마리 중 ${pct(s.pParts.sp)}%`],
-   ['태어난 땅',`${s.reg.e} ${s.reg.n}`,`전 세계 ${spn(s)}의 약 ${pct(s.pParts.reg)}%`],
+   ['종',isDog(s)?'개':'고양이',`개·고양이 15억 마리 중 ${pct(s.pParts.sp)}%`],
+   ['태어난 땅',s.reg.n,`전 세계 ${spn(s)}의 약 ${pct(s.pParts.reg)}%`],
    ['태어난 곳',ORIGIN[s.origin],s.origin==='street'?`이 지역 ${spn(s)}의 약 ${pct(s.pParts.o)}%는 주인이 없다`:`이 지역 ${spn(s)}의 약 ${pct(s.pParts.o)}%`],
    ['성별',s.female?'암컷':'수컷','50%'],
    ['한배 형제',s.litter===1?'혼자 태어났다':`${s.litter}마리 중 하나`,isDog(s)?'개의 한배 새끼 수는 평균 7.1마리':(s.weakLitter?'혼자이거나 7마리 이상이면 생존율이 낮다':'한배가 클수록 신생아 사망 위험이 커진다')],
    ['생김새',s.breed,s.pure?(isDog(s)?'품종견 · 중앙 수명 12.7년':'품종묘 · 한 연구에서 첫해 사망률 34.5%'):(isDog(s)?'믹스견 · 중앙 수명 12.0년':'토종·혼종')],
    ['이름',s.name||'없음',s.name?'가족이 지어 주었다':'아무도 지어 주지 않았다']];
-  $('birth').innerHTML=`<div class="tag">탄생</div><h2>당신은 태어났다</h2><p class="sub">고른 것은 아무것도 없다.</p><div class="card">`+
-   rows.map((r,i)=>`<div class="reveal" style="animation-delay:${i*.45}s"><span>${r[0]}</span><b>${r[1]}<em>${r[2]}</em></b></div>`).join('')+
-   `<p class="odds reveal" style="border:0;display:block;animation-delay:${rows.length*.45}s">이런 조건으로 태어날 확률은 <b>${pct(s.p)}%</b>.<br>지금 지구에 당신과 같은 처지의 ${spn(s)}는 약 <b>${big(s.p*(POP.dog+POP.cat))}마리</b>다.</p></div>
-   <button class="btn main reveal" id="live" style="animation-delay:${(rows.length+1)*.45}s">삶을 시작한다</button>`;
-  $('live').onclick=()=>{note(s,`${s.reg.n}의 ${ORIGIN[s.origin]}에서 태어났다`);show('game');turn()};
-  show('birth');
+  const sk=s.origin==='home'?['nest',{}]:s.origin==='street'?['street',{den:1}]:['mill',{}];
+  const pk=s.origin==='home'?(isDog(s)&&PHOTOS.newborn?'newborn':'home_'+s.sp):s.origin==='street'?'street_'+s.sp:'mill';
+  const ph=PHOTOS[pk]&&(!PHOTOS[pk].sp||PHOTOS[pk].sp===s.sp)?PHOTOS[pk]:null;
+  $('birth').innerHTML=`<p class="eyebrow">탄생 기록</p><h2>당신은 태어났다</h2><p class="lede">고른 것은 아무것도 없다.</p>
+   <div class="stage" style="margin-top:16px">${Art.scene(sk[0],s.look,Object.assign({label:'갓 태어난 '+s.breed},petState(s),sk[1]))}<div class="chip place">${ORIGIN_SHORT[s.origin]}</div></div>
+   <dl class="rec">${rows.map((r,i)=>`<div style="animation-delay:${(i*.26).toFixed(2)}s"><dt>${r[0]}</dt><dd>${r[1]}<small>${r[2]}</small></dd></div>`).join('')}</dl>
+   <figure class="census"><div id="census1"></div><figcaption>노란 점이 당신과 같은 조건으로 태어난 ${spn(s)}들이다. 테두리가 굵은 점 하나가 당신이다.</figcaption></figure>
+   <p class="odds">이런 조건으로 태어날 확률은 <b>${pct(s.p)}%</b>. 지금 지구에 당신과 같은 처지의 ${spn(s)}는 약 <b>${big(s.p*(POP.dog+POP.cat))}마리</b>다.</p>
+   ${ph?`<figure class="photo"><img src="${ph.src}" alt="${ph.alt}"><figcaption>실제 사진 · ${ph.cap} (${ph.by})</figcaption></figure>`:''}
+   <button class="cta" id="live">삶을 시작한다</button>`;
+  census($('census1'),YOU,same);
+  if(ph){s.ph={};s.ph[pk]=1}
+  $('live').onclick=beginGame;show('birth');
 }
-function bar(n,v){return `<div class="bar${v<25?' low':''}"><span>${n}</span><i><u style="width:${v}%"></u></i><span>${Math.round(v)}</span></div>`}
-function chipsHtml(d){const N={h:'건강',f:'배부름',b:'유대'};return Object.keys(N).filter(k=>d[k]&&Math.round(d[k])).map(k=>`<span class="chip ${d[k]>0?'up':'dn'}">${N[k]} ${d[k]>0?'+':''}${Math.round(d[k])}</span>`).join('')}
-function renderGame(res){
-  const s=S,e=CUR;
-  let h=`<div class="hud"><div class="who"><span class="av">${avatar(s)}</span><div><b>${who(s)}</b><small>${s.breed} · ${s.female?'암컷':'수컷'} · ${s.reg.n}</small></div></div><div class="age">${fmtAge(s.age)}<small>${stage(s)}</small></div></div>
-  <span class="place">${PLACE[s.place]}</span>
-  <div class="bars">${bar('건강',s.h)}${bar('배부름',s.f)}${bar(s.everHome?'유대':'사람 신뢰',s.b)}</div><div class="card">`;
-  if(!res){
-    h+=`<p class="story">${e.text(s)}</p><p class="fact">📊 ${e.fact(s)}</p>`+e.choices.map((c,i)=>`<button class="btn" data-i="${i}"><span class="k">${i+1}</span>${lab(c,s)}</button>`).join('');
-  }else{
-    h+=`<div class="tag">${s._res.label}</div><p class="story">${s._res.txt}</p><div class="chips">${chipsHtml(s.d)}</div><button class="btn main" id="nx">${s.alive?'시간이 흐른다':'…'}</button>`;
-  }
-  h+=`</div>`;
-  $('game').innerHTML=h;
-  if(res)$('nx').onclick=next;else $('game').querySelectorAll('.btn[data-i]').forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+function beginGame(){
+  const s=S;if(PHASE!=='idle')return;PHASE='time';
+  note(s,`${s.reg.n}의 ${ORIGIN[s.origin]}에서 태어났다`);
+  show('game');buildHud();s.log.forEach(l=>logLine(l.age,l.t,'key'));
+  const sc=s.origin==='home'?['nest',{}]:s.origin==='street'?['street',{den:1}]:placeScene(s);
+  drawScene(sc[0],sc[1],{});drawHud(false);closeSheet();
+  setTimeout(()=>{if(S===s)openEvent()},650);
 }
 function compare(s){const a=yr(s);
   if(isDog(s)){if(s.everHome)return `영국 반려견 58만 마리의 중앙 수명은 12.5년이다. 당신은 그보다 ${a>=12.5?(a-12.5).toFixed(1)+'년 더':(12.5-a).toFixed(1)+'년 덜'} 살았다.`;
@@ -520,33 +1062,53 @@ function epitaph(s){if(s.epi)return s.epi;
   if(s.place==='street')return s.name?'길 위에서 끝났다. 이름을 불러 줄 사람은 곁에 없었다.':'이름 없이 태어나 이름 없이 떠났다. 아무도 그 죽음을 세지 않았다.';
   if(s.place==='mill')return '철창 밖을 한 번도 보지 못했다.';
   return '공고 번호 하나가 기록으로 남았다.'}
+function lifeChart(s){
+  const a=yr(s),max=Math.max(20,Math.ceil(a/5)*5),w=v=>(v/max*100).toFixed(1)+'%';
+  const rows=[{t:'당신',a:0,b:a,you:1,v:fmtAge(s.age)}];
+  if(isDog(s))rows.push({t:'반려견 중앙 수명(영국)',a:0,b:12.5,v:'12.5년'},{t:'코가 긴 소형견',a:0,b:13.3,v:'13.3년'},{t:'코가 납작한 중형견',a:9.1,b:9.6,v:'9.1~9.6년'});
+  else rows.push({t:'실내 고양이 기대수명',a:10,b:15,v:'10~15년'},{t:'길고양이 추정 수명',a:2,b:5,v:'2~5년'});
+  return `<div class="chart" role="img" aria-label="수명 비교 막대">${rows.map(r=>`<div class="crow${r.you?' you':''}"><span class="ct">${r.t}</span><span class="cb"><i style="left:${w(r.a)};width:${w(Math.max(r.b-r.a,.2))}"></i></span><span class="cv num">${r.v}</span></div>`).join('')}</div><p class="chartnote">막대 전체가 ${max}년이다. ${compare(s)}</p>`;
+}
 function showEnd(){
-  const s=S;
+  const s=S;closeSheet();
   let best=null;try{best=JSON.parse(localStorage.getItem('ob15')||'null')}catch(e){}
-  const rec={age:s.age,who:who(s),sp:s.sp,n:(best&&best.n||0)+1};
-  const isBest=!best||s.age>best.age;
+  const rec={age:s.age,who:who(s),sp:s.sp,n:(best&&best.n||0)+1},isBest=!best||s.age>best.age;
   try{localStorage.setItem('ob15',JSON.stringify(isBest?rec:Object.assign(best,{n:rec.n})))}catch(e){}
-  const share=`🐾 15억분의 1\n나는 ${s.reg.n}의 ${ORIGIN[s.origin]}에서 ${s.breed}(으)로 태어났다.\n${fmtAge(s.age)}을 살고 ${s.cause}(으)로 생을 마쳤다.\n이런 삶으로 태어날 확률 ${pct(s.p)}%`;
-  $('end').innerHTML=`<div class="tomb"><div class="av">${isDog(s)?'🐕':'🐈'}</div><h2>${who(s)}</h2><p class="sub">${fmtAge(s.age)}의 삶 · 사람 나이로 약 ${humanAge(s)}세</p></div>
-  <div class="card"><p class="story">${epitaph(s)}</p><dl class="kv">
-  <dt>마지막</dt><dd>${s.cause}</dd><dt>마지막 장소</dt><dd>${PLACE[s.place]}</dd>
-  <dt>태어난 곳</dt><dd>${s.reg.e} ${s.reg.n} · ${ORIGIN[s.origin]}</dd><dt>생김새</dt><dd>${s.breed} · ${s.female?'암컷':'수컷'}</dd>
-  <dt>태어날 확률</dt><dd>${pct(s.p)}% (약 ${big(s.p*(POP.dog+POP.cat))}마리)</dd></dl>
-  <p class="fact" style="margin-top:14px">📊 ${compare(s)}</p></div>
-  <div class="card"><div class="tag">한 생의 기록</div><ul class="log">${s.log.map(l=>`<li><span>${l.age?fmtAge(l.age):"탄생"}</span><div>${l.t}</div></li>`).join('')}</ul></div>
-  <button class="btn main" id="again">다시 태어난다</button><button class="btn" id="share" style="text-align:center">결과 복사하기</button>
-  <p class="foot">${isBest?'지금까지 가장 긴 삶이었다.':`가장 길었던 삶: ${best.who} · ${fmtAge(best.age)}`} · ${rec.n}번째 생</p>`;
+  const share=`15억분의 1\n나는 ${s.reg.n}의 ${ORIGIN[s.origin]}에서 ${ro(s.breed)} 태어났다.\n${fmtAge(s.age)}을 살고 ${ro(s.cause)} 생을 마쳤다.\n이런 삶으로 태어날 확률 ${pct(s.p)}%`;
+  const sc=placeScene(s),ps=petState(s);
+  $('end').innerHTML=`<p class="eyebrow">생애 기록 · ${rec.n}번째 생</p>
+  <div class="stage" style="margin-top:12px">${Art.scene(sc[0],s.look,Object.assign({label:'비어 있는 '+PLACE[s.place]},ps,sc[1],{empty:1,collar:s.look.collar}))}<div class="medal">${Art.portrait(s.look,{age:ps.age,collar:s.everHome?s.look.collar:null,tip:s.tip,mood:'sleep',label:s.breed})}</div><div class="chip place">${PLACE[s.place]}</div></div>
+  <h2 style="margin-top:16px">${who(s)}</h2>
+  <p class="lede"><span class="num">${fmtAge(s.age)}</span>의 삶 · 사람 나이로 약 <span class="num">${humanAge(s)}</span>세</p>
+  <p class="story">${epitaph(s)}</p>
+  <dl class="rec">${[['마지막',s.cause,''],['태어난 곳',s.reg.n,ORIGIN[s.origin]],['생김새',s.breed,s.female?'암컷':'수컷'],['태어날 확률',pct(s.p)+'%','약 '+big(s.p*(POP.dog+POP.cat))+'마리']].map(r=>`<div style="animation:none"><dt>${r[0]}</dt><dd>${r[1]}<small>${r[2]}</small></dd></div>`).join('')}</dl>
+  <p class="eyebrow sec">수명 비교</p>${lifeChart(s)}
+  <p class="eyebrow sec">한 생의 기록</p>
+  <ol class="log static">${s.log.map(l=>`<li class="${l.soft?'soft':/^생을 마쳤다/.test(l.t)?'end':'key'}"><span class="num">${l.age?fmtAge(l.age):'탄생'}</span><div>${l.t}</div></li>`).join('')}</ol>
+  <button class="cta" id="again">다시 태어난다</button><button class="ghost" id="share">결과 복사하기</button>
+  <p class="foot">${isBest?'지금까지 가장 긴 삶이었다.':`가장 길었던 삶: ${best.who} · ${fmtAge(best.age)}`}</p>`;
   $('again').onclick=showBirth;
   $('share').onclick=()=>{const done=()=>{$('share').textContent='복사했다'};try{navigator.clipboard.writeText(share).then(done,()=>fallbackCopy(share,done))}catch(e){fallbackCopy(share,done)}};
   show('end');
 }
 function fallbackCopy(t,done){try{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();done()}catch(e){}}
-$('go').onclick=showBirth;
-let DP=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;$('inst').hidden=false});
-$('inst').onclick=()=>{if(DP){DP.prompt();DP=null}$('inst').hidden=true};
-if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('sw.js').catch(()=>{})}
-try{const b=JSON.parse(localStorage.getItem('ob15')||'null');if(b)$('best').textContent=`가장 길었던 삶: ${b.who} · ${fmtAge(b.age)} (${b.n}번의 생)`}catch(e){}
-document.addEventListener('keydown',ev=>{if(!$('game').classList.contains('on'))return;if(S&&S._res){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();next()}}else if(['1','2','3'].includes(ev.key)){const i=+ev.key-1;if(CUR&&CUR.choices[i])choose(i)}});
+function init(){
+  census($('census0'),-1,null);startRoulette();
+  const trio=[[PHOTOS.home_dog||PHOTOS.home_cat,'집'],[PHOTOS.street_dog||PHOTOS.street_cat,'길'],[PHOTOS.shelter,'보호소']].filter(x=>x[0]);
+  if(trio.length){$('trip').style.gridTemplateColumns=`repeat(${trio.length},1fr)`;$('trip').innerHTML=trio.map(x=>`<figure><img src="${x[0].src}" alt="${x[0].alt}"><figcaption>${x[1]}</figcaption></figure>`).join('');$('tripnote').hidden=false}
+  const keys=Object.keys(PHOTOS);
+  if(keys.length)$('credits').innerHTML='<p>사진은 모두 위키미디어 공용에서 가져왔고, 크기만 줄였다.</p><ul>'+keys.map(k=>{const p=PHOTOS[k];return `<li>${p.cap}: <a href="${p.page}" target="_blank" rel="noopener">${p.by}</a></li>`}).join('')+'</ul>';
+  $('go').onclick=showBirth;
+  try{const b=JSON.parse(localStorage.getItem('ob15')||'null');if(b)$('best').textContent=`가장 길었던 삶: ${b.who} · ${fmtAge(b.age)} (${b.n}번의 생)`}catch(e){}
+  let DP=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;$('inst').hidden=false});
+  $('inst').onclick=()=>{if(DP){DP.prompt();DP=null}$('inst').hidden=true};
+  try{if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+  document.addEventListener('keydown',ev=>{if(!$('game').classList.contains('on'))return;
+    if((ev.key==='Enter'||ev.key===' ')&&(PHASE==='result'||PHASE==='death')){const c=$('cont');if(c){ev.preventDefault();c.click()}}
+    else if(/^[1-3]$/.test(ev.key)&&PHASE==='event'){const b=$('sheet').querySelector(`.choice[data-i="${+ev.key-1}"]`);if(b)b.click()}});
+}
+init();
+
 </script>
 </body>
 </html>

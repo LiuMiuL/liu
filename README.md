@@ -14,6 +14,8 @@ HTTPS로 배포하면 브라우저에서 그대로 플레이할 수 있고, 휴�
 
 ## 화면
 
-| 단두종 더위 | 대형견 | 양육비(한국) | 탄생 |
-|---|---|---|---|
-| ![](screenshots/1-heat.png) | ![](screenshots/2-bigsize.png) | ![](screenshots/3-cost.png) | ![](screenshots/4-birth.png) |
+| 시작 | 탄생 | 선택지 | 결과 | 마지막 | 생애 기록 |
+|---|---|---|---|---|---|
+| ![](screenshots/1-start.png) | ![](screenshots/2-birth.png) | ![](screenshots/3-choice.png) | ![](screenshots/4-result.png) | ![](screenshots/5-ending.png) | ![](screenshots/6-record.png) |
+
+삽화는 코드(SVG)로 그렸고, 실제 사진의 출처와 라이선스는 `img/CREDITS.md`에 있다.
