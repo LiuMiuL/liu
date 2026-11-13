@@ -480,7 +480,7 @@ function renderGame(res){
 }
 function compare(s){const a=yr(s);
   if(isDog(s)){if(s.everHome)return `영국 반려견 58만 마리의 중앙 수명은 12.5년이다. 당신은 그보다 ${a>=12.5?(a-12.5).toFixed(1)+'년 더':(12.5-a).toFixed(1)+'년 덜'} 살았다.`;
-    return `떠돌이 개의 삶은 대개 몇 해를 넘기지 못한다. 그리고 지구의 개 대부분이 그렇게 산다.`}
+    return a>=5?`떠돌이 개로서는 드물게 긴 삶이었다. 길 위의 개 대부분은 몇 해를 넘기지 못한다.`:`떠돌이 개의 삶은 대개 몇 해를 넘기지 못한다. 그리고 지구의 개 대부분이 그렇게 산다.`}
   if(s.everHome)return `실내 고양이의 기대수명은 10~15년이다. 당신은 ${fmtAge(s.age)}을 살았다.`;
   return `길고양이의 수명은 2~5년으로 추정된다. 당신은 ${fmtAge(s.age)}을 살았다.`}
 function epitaph(s){if(s.epi)return s.epi;
@@ -502,7 +502,7 @@ function showEnd(){
   <dt>태어난 곳</dt><dd>${s.reg.e} ${s.reg.n} · ${ORIGIN[s.origin]}</dd><dt>생김새</dt><dd>${s.breed} · ${s.female?'암컷':'수컷'}</dd>
   <dt>태어날 확률</dt><dd>${pct(s.p)}% (약 ${big(s.p*(POP.dog+POP.cat))}마리)</dd></dl>
   <p class="fact" style="margin-top:14px">📊 ${compare(s)}</p></div>
-  <div class="card"><div class="tag">한 생의 기록</div><ul class="log">${s.log.map(l=>`<li><span>${fmtAge(l.age)}</span><div>${l.t}</div></li>`).join('')}</ul></div>
+  <div class="card"><div class="tag">한 생의 기록</div><ul class="log">${s.log.map(l=>`<li><span>${l.age?fmtAge(l.age):"탄생"}</span><div>${l.t}</div></li>`).join('')}</ul></div>
   <button class="btn main" id="again">다시 태어난다</button><button class="btn" id="share" style="text-align:center">결과 복사하기</button>
   <p class="foot">${isBest?'지금까지 가장 긴 삶이었다.':`가장 길었던 삶: ${best.who} · ${fmtAge(best.age)}`} · ${rec.n}번째 생</p>`;
   $('again').onclick=showBirth;
