@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>15억분의 1</title>
+<meta name="description" content="지구의 개와 고양이 15억 마리 중 한 마리로 태어나 살아가는 통계 기반 생애 시뮬레이션">
+<style>
+:root{--bg:#f6f0e7;--card:#fffaf2;--line:#e2d6c5;--ink:#2b2420;--mute:#7d6f61;--acc:#c96a1b;--accink:#fff;--good:#3d8b46;--bad:#c2452f;--fact:#efe4d3;--bar:#e6dac8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15110e;--card:#211b16;--line:#3a3028;--ink:#f3ebe1;--mute:#a8998a;--acc:#f0a35e;--accink:#221609;--good:#8fcf8a;--bad:#ee8375;--fact:#2b231c;--bar:#352c24}}
+:root[data-theme="dark"]{--bg:#15110e;--card:#211b16;--line:#3a3028;--ink:#f3ebe1;--mute:#a8998a;--acc:#f0a35e;--accink:#221609;--good:#8fcf8a;--bad:#ee8375;--fact:#2b231c;--bar:#352c24}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;word-break:keep-all}
+#app{max-width:560px;margin:0 auto;padding:24px 16px 72px;min-height:100vh}
+.screen{display:none}.screen.on{display:block;animation:fade .45s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:44px;line-height:1.15;margin:8px 0 4px;letter-spacing:-1px}
+h2{font-size:22px;margin:0 0 8px}
+.sub{color:var(--mute);margin:0 0 20px}
+.hero{text-align:center;padding:36px 0 8px}.hero .paw{font-size:56px}
+.lead{font-size:17px;margin:18px 0}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0}
+.trio div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;font-size:12px;color:var(--mute)}
+.trio b{display:block;font-size:20px;color:var(--ink)}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{display:block;width:100%;padding:15px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:16px;text-align:left;margin-top:10px;transition:transform .08s,border-color .15s}
+.btn:hover{border-color:var(--acc)}.btn:active{transform:scale(.985)}
+.btn.main{background:var(--acc);color:var(--accink);border-color:var(--acc);text-align:center;font-weight:700;font-size:17px}
+.btn .k{display:inline-block;width:22px;height:22px;line-height:20px;text-align:center;border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--mute);margin-right:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-top:14px}
+.story{font-size:17px;margin:0 0 14px;white-space:pre-line}
+.fact{background:var(--fact);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mute);margin:0 0 6px}
+.fact b{color:var(--ink);font-weight:600}
+.tag{font-size:12px;color:var(--acc);font-weight:700;letter-spacing:.5px;margin-bottom:6px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.av{font-size:38px;line-height:1}
+.who b{display:block;font-size:17px}.who small,.age small{display:block;color:var(--mute);font-size:12px}
+.age{text-align:right;font-size:20px;font-weight:700;white-space:nowrap}
+.place{display:inline-block;margin-top:10px;font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
+.bars{display:grid;gap:7px;margin-top:12px}
+.bar{display:grid;grid-template-columns:64px 1fr 30px;align-items:center;gap:8px;font-size:12px;color:var(--mute)}
+.bar i{display:block;height:8px;border-radius:99px;background:var(--bar);overflow:hidden}
+.bar i u{display:block;height:100%;border-radius:99px;background:var(--acc);transition:width .5s}
+.bar.low i u{background:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 4px}
+.chip{font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--line)}
+.chip.up{color:var(--good)}.chip.dn{color:var(--bad)}
+.reveal{display:flex;justify-content:space-between;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line);opacity:0;animation:fade .5s ease forwards}
+.reveal span{color:var(--mute);font-size:13px;white-space:nowrap}.reveal b{text-align:right}.reveal em{display:block;font-style:normal;font-size:12px;color:var(--mute);font-weight:400}
+.odds{margin-top:16px;font-size:15px}
+.odds b{color:var(--acc)}
+.tomb{text-align:center;padding:14px 0 4px}.tomb .av{font-size:60px}
+.tomb h2{font-size:26px;margin-top:8px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0}
+.kv dt{color:var(--mute)}.kv dd{margin:0;text-align:right}
+.log{list-style:none;padding:0;margin:0;font-size:14px}
+.log li{display:grid;grid-template-columns:76px 1fr;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.log li span{color:var(--mute);font-size:12px;padding-top:2px}
+details{margin-top:18px;font-size:13px;color:var(--mute)}
+details a{color:var(--acc)}summary{cursor:pointer}
+.foot{margin-top:26px;font-size:12px;color:var(--mute);text-align:center}
+.best{font-size:13px;color:var(--mute);text-align:center;margin-top:14px}
+</style>
+</head>
+<body>
+<div id="app">
+<section id="start" class="screen on">
+  <div class="hero"><div class="paw">🐾</div><h1>15억분의 1</h1><p class="sub">개나 고양이로 태어난다면</p></div>
+  <p class="lead">지구에는 약 9억 마리의 개와 6억 마리의 고양이가 산다.<br>그 대부분에게는 이름이 없다.</p>
+  <p class="lead">당신은 그중 한 마리로 태어난다. 어느 땅에서, 누구의 곁에서 태어날지는 고를 수 없다. 고를 수 있는 것은 그다음부터다.</p>
+  <div class="trio"><div><b>9억</b>전 세계 개</div><div><b>6억</b>전 세계 고양이</div><div><b>12.5년</b>반려견 중앙 수명</div></div>
+  <button class="btn main" id="go">태어나기</button>
+  <div class="best" id="best"></div>
+  <details><summary>이 게임이 쓰는 자료</summary>
+  <p>출생 확률과 사건의 결과는 아래 통계를 바탕으로 만든 근사 모형이다. 지역별 분포처럼 정확한 수치가 없는 부분은 게임용 추정치를 썼다.</p>
+  <ul>
+  <li>전 세계 개·고양이 개체 수와 떠돌이 비율 추정: <a href="https://wellbeingintl.org/global-dog-populations-2/" target="_blank" rel="noopener">Wellbeing International</a>, <a href="https://www.worldatlas.com/articles/how-many-dogs-are-there-in-the-world.html" target="_blank" rel="noopener">WorldAtlas</a></li>
+  <li>개 품종·체형별 수명(영국 58만 마리, 2024): <a href="https://phys.org/news/2024-02-small-nosed-dogs-longest.amp" target="_blank" rel="noopener">McMillan 외, Scientific Reports</a></li>
+  <li>어린 고양이의 사망 원인(영국 브리스톨 코호트): <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12033825/" target="_blank" rel="noopener">PMC12033825</a></li>
+  <li>강아지·새끼 고양이 초기 사망률: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10845399" target="_blank" rel="noopener">PMC10845399</a>, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10251906" target="_blank" rel="noopener">PMC10251906</a></li>
+  <li>개의 사망 원인(일본 동물병원): <a href="https://www.jstage.jst.go.jp/article/jvma/75/6/75_e128/_article/-char/en" target="_blank" rel="noopener">일본수의사회지</a></li>
+  <li>미국 보호소 통계: <a href="https://www.aspca.org/helping-people-pets/shelter-intake-and-surrender/pet-statistics" target="_blank" rel="noopener">ASPCA</a>, <a href="https://www.shelteranimalscount.org/wp-content/uploads/YearEndReport_3.13_Website_FINAL.pdf" target="_blank" rel="noopener">Shelter Animals Count 2024</a></li>
+  <li>한국 유기동물·반려동물 통계(2024): <a href="https://www.dailyvet.co.kr/news/policy/248072" target="_blank" rel="noopener">데일리벳(검역본부 실태조사)</a>, <a href="https://www.dailyvet.co.kr/?p=234742" target="_blank" rel="noopener">양육 현황</a></li>
+  </ul></details>
+</section>
+<section id="birth" class="screen"></section>
+<section id="game" class="screen"></section>
+<section id="end" class="screen"></section>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+let RNG=Math.random;
+const R=()=>RNG(), P=p=>R()<p, ri=(a,b)=>a+Math.floor(R()*(b-a+1)), pick=a=>a[Math.floor(R()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function wpick(items,wf){let t=0;const ws=items.map(i=>{const w=Math.max(0,wf(i));t+=w;return w});let r=R()*t;for(let i=0;i<items.length;i++){r-=ws[i];if(r<=0)return items[i]}return items[items.length-1]}
+
+/* ---------- 세계 ---------- */
+const POP={dog:9e8,cat:6e8};
+const REGIONS=[
+{k:'kr',n:'대한민국',e:'🇰🇷',dog:.006,cat:.006,ds:.08,cs:.40,mill:.35},
+{k:'na',n:'북아메리카',e:'🌎',dog:.09,cat:.16,ds:.04,cs:.40,mill:.25},
+{k:'eu',n:'유럽',e:'🌍',dog:.09,cat:.19,ds:.12,cs:.30,mill:.15},
+{k:'la',n:'중남미',e:'🌎',dog:.15,cat:.08,ds:.65,cs:.50,mill:.05},
+{k:'ea',n:'중국·동아시아',e:'🌏',dog:.12,cat:.15,ds:.65,cs:.45,mill:.20},
+{k:'sa',n:'인도·남아시아',e:'🌏',dog:.18,cat:.07,ds:.92,cs:.70,mill:.02},
+{k:'se',n:'동남아시아',e:'🌏',dog:.12,cat:.10,ds:.85,cs:.60,mill:.03},
+{k:'af',n:'아프리카',e:'🌍',dog:.18,cat:.09,ds:.92,cs:.70,mill:.01},
+{k:'me',n:'중동·중앙아시아',e:'🌍',dog:.064,cat:.154,ds:.80,cs:.65,mill:.03}];
+const NAMES=['코코','보리','초코','콩이','두부','망고','호두','루이','모카','달이','별이','레오','나비','치즈','까미','밤이','구름','라떼','마루','해피'];
+const DOGB={소형:['몰티즈','푸들','포메라니안','치와와','미니어처 닥스훈트'],중형:['비글','웰시코기','보더콜리','시바견'],대형:['래브라도 리트리버','골든 리트리버','저먼 셰퍼드','진돗개']};
+const DOGBR={소형:['퍼그','시추','프렌치 불도그'],중형:['불도그','보스턴 테리어'],대형:['복서']};
+const CATB=['페르시안','러시안 블루','브리티시 숏헤어','스코티시 폴드','샴','먼치킨'];
+const CATC=['치즈','고등어','턱시도','삼색','올블랙','젖소'];
+const PLACE={home:'🏠 사람의 집',street:'🛣️ 길 위',shelter:'🏚️ 보호소',shop:'🪟 펫숍 진열장',mill:'⛓️ 번식장'};
+const ORIGIN={home:'가정집',street:'길 위',mill:'번식장(강아지·고양이 공장)'};
+
+const isDog=s=>s.sp==='dog', yr=s=>s.age/12, senior=s=>yr(s)>=s.life-4;
+const rich=s=>['kr','na','eu'].includes(s.reg.k);
+const spn=s=>isDog(s)?'개':'고양이';
+const atHome=s=>s.place==='home', onSt=s=>s.place==='street';
+
+function birth(){
+  const sp=P(POP.dog/(POP.dog+POP.cat))?'dog':'cat';
+  const tot=REGIONS.reduce((a,r)=>a+r[sp],0);
+  const reg=wpick(REGIONS,r=>r[sp]);
+  const stP=sp==='dog'?reg.ds:reg.cs;
+  let origin,pO;
+  if(P(stP)){origin='street';pO=stP}
+  else if(P(reg.mill)){origin='mill';pO=(1-stP)*reg.mill}
+  else{origin='home';pO=(1-stP)*(1-reg.mill)}
+  const female=P(.5);
+  const s={sp,reg,origin,female,place:origin==='mill'?'mill':origin,age:0,alive:true,log:[],seen:{},d:{},name:null,
+    everHome:origin==='home',lost:false,neutered:false,vax:false,problem:0,fat:0,shTurns:0,turns:0};
+  if(sp==='dog'){
+    s.pure=origin==='street'?P(.04):origin==='mill'?P(.95):P(.45);
+    s.size=origin==='mill'?wpick(['소형','중형','대형'],x=>({소형:7,중형:2,대형:1})[x]):wpick(['소형','중형','대형'],x=>({소형:4,중형:3.5,대형:2.5})[x]);
+    s.brachy=s.pure&&P(.2);
+    s.breed=s.pure?pick((s.brachy?DOGBR:DOGB)[s.size]):(reg.k==='kr'?s.size+' 믹스견(시고르자브종)':s.size+' 믹스견');
+    s.life=(s.pure?12.7:12.0)+(s.size==='소형'?.8:s.size==='대형'?-1.5:0)+(female?.15:-.15)+(s.brachy?-3:0);
+    s.litter=ri(3,9);
+  }else{
+    s.pure=origin==='street'?P(.02):origin==='mill'?P(.95):P(.12);
+    let c=pick(CATC); if(c==='삼색'&&!female)c='고등어';
+    s.breed=s.pure?pick(CATB):c+' '+(reg.k==='kr'?'코리안 숏헤어':'집고양이');
+    s.size='소형'; s.life=13.5+(female?.5:-.5)+(s.pure?-.8:0);
+    s.litter=ri(2,6);
+  }
+  s.life+=(R()-.5)*3;s.prone=P(.4);
+  s.h=origin==='home'?82:origin==='street'?62:55;
+  s.f=origin==='home'?65:origin==='street'?45:50;
+  s.b=origin==='home'?50:origin==='street'?5:10;
+  if(origin==='home')s.name=pick(NAMES);
+  s.p=(POP[sp]/(POP.dog+POP.cat))*(reg[sp]/tot)*pO*.5;
+  s.pParts={sp:POP[sp]/(POP.dog+POP.cat),reg:reg[sp]/tot,o:pO/( origin==='street'?1:1)};
+  return s;
+}
+
+/* ---------- 상태 변화 ---------- */
+function chg(s,o){for(const k of ['h','f','b']){if(!o[k])continue;const b=s[k];s[k]=clamp(s[k]+o[k],0,100);s.d[k]=(s.d[k]||0)+(s[k]-b)}}
+function note(s,t){s.log.push({age:s.age,t})}
+function die(s,cause,epi){if(!s.alive)return;s.alive=false;s.cause=cause;s.epi=epi||null;note(s,'생을 마쳤다 — '+cause)}
+function adopt(s,how){s.place='home';s.everHome=true;s.lost=false;s.shTurns=0;if(!s.name){s.name=pick(NAMES);note(s,`${how} 처음으로 이름이 생겼다: ${s.name}`)}else note(s,`${how} 새 가족이 생겼다`);chg(s,{b:25,f:20})}
+function fmtAge(m){if(m<=0)return '태어난 지 며칠';if(m<12)return m+'개월';return Math.floor(m/12)+'살'+(m%12?' '+(m%12)+'개월':'')}
+function stage(s){const a=s.age;if(a<3)return '신생아기';if(a<12)return '성장기';if(senior(s))return '노년기';if(yr(s)<3)return '청년기';return '장년기'}
+function humanAge(s){const a=yr(s);if(a<=1)return Math.round(a*15);if(a<=2)return Math.round(15+(a-1)*9);const per=s.sp==='cat'?4:(s.size==='대형'?6:s.size==='중형'?5:4);return Math.round(24+(a-2)*per)}
+function avatar(s){return isDog(s)?(s.age<12?'🐶':'🐕'):(s.age<12?'🐱':'🐈')}
+function who(s){return s.name||('이름 없는 '+spn(s))}
+
+/* ---------- 보호소 ---------- */
+function shelterRoll(s,boost){
+  const k=s.reg.k;let t;
+  if(k==='kr')t={ret:11.4,adopt:23.5,nat:27.6,eu:18.5,wait:19};
+  else if(k==='na')t={ret:isDog(s)?18:4,adopt:isDog(s)?57:64,nat:3,eu:isDog(s)?9:8,wait:10};
+  else if(k==='eu')t={ret:15,adopt:50,nat:5,eu:5,wait:25};
+  else t={ret:3,adopt:15,nat:30,eu:25,wait:12,rel:15};
+  if(!s.lost){t.wait+=t.ret;t.ret=0}
+  t.adopt*=boost*(s.age<12?1.4:1)*(s.pure?1.3:1)*(yr(s)>7?.5:1);
+  if(isDog(s)&&k==='kr')t.eu*=s.pure?.4:1.5;
+  if(s.shTurns>=2){t.eu+=t.wait*.6;t.wait*=.4}
+  const r=wpick(Object.keys(t),x=>t[x]);
+  if(r==='ret'){s.place='home';s.lost=false;s.shTurns=0;chg(s,{b:15,f:15});note(s,'보호소에서 가족이 찾으러 왔다');return `철창 문이 열린다. 익숙한 냄새다. 가족이다. 당신을 끝내 찾아낸 것이다.`}
+  if(r==='adopt'){adopt(s,'보호소에서 입양되어');return `누군가 당신의 철창 앞에 오래 서 있다가 서류에 서명한다. 낯선 차, 낯선 집, 낯선 방석. ${s.name}. 이제 그것이 당신의 이름이다.`}
+  if(r==='nat'){die(s,'보호소 안에서의 자연사(질병)','공고 번호 하나가 기록으로 남았다.');return `옆 칸에서 기침 소리가 옮아왔다. 며칠 뒤 당신은 일어나지 못했다.`}
+  if(r==='eu'){die(s,'보호소 안락사','공고 기간이 끝났고, 아무도 오지 않았다.');return `공고 기간이 끝났다. 수의사가 조용히 당신을 안아 올린다. 주삿바늘은 아프지 않았다.`}
+  if(r==='rel'){s.place='street';s.neutered=true;s.vax=true;s.shTurns=0;chg(s,{h:6});note(s,'중성화·접종 뒤 살던 곳에 풀려났다');return `수술과 예방접종을 받은 뒤, 당신은 붙잡혔던 그 골목에 다시 풀려났다.`}
+  s.shTurns++;chg(s,{h:-8,b:-3});return `오늘도 통로를 지나는 발걸음은 당신 앞에서 멈추지 않았다.`
+}
+
+/* ---------- 사건 ---------- */
+const EV=[];const E=o=>EV.push(o);
+E({id:'milk',once:1,when:s=>s.age===0&&s.origin!=='mill',
+ text:s=>`눈도 뜨지 못한 채 어미의 품을 더듬는다. 한배에서 난 형제 ${s.litter-1}마리가 젖을 두고 서로 밀친다.`,
+ fact:s=>isDog(s)?`강아지는 태어난 뒤 두 달 안에 <b>약 15%</b>가 죽는다는 연구가 있다. 한배 새끼 수는 평균 7.1마리.`:`새끼 고양이가 젖을 떼기 전에 죽는 비율은 연구에 따라 <b>8~27%</b>. 대부분 생후 첫 주에 일어난다.`,
+ choices:[
+ {label:'형제들을 밀치고 파고든다',run:s=>{if(P(.85)){chg(s,{h:8,f:15});return `따뜻한 젖이 목으로 넘어간다. 배가 동그랗게 부푼다.`}chg(s,{h:-6,f:-5});return `더 큰 형제에게 밀려났다. 이번에는 거의 먹지 못했다.`}},
+ {label:'끝자리에서 차례를 기다린다',run:s=>{if(P(.55)){chg(s,{h:3,f:6,b:2});return `어미가 당신을 핥아 품 안으로 끌어당긴다.`}chg(s,{h:-10,f:-12});return `차례는 오지 않았다. 몸이 조금씩 식는다.`}}]});
+E({id:'rain',once:1,when:s=>s.age===0&&onSt(s),
+ text:s=>`밤새 비가 내린다. 어미가 새끼를 한 마리씩 물어 옮기기 시작했다. 당신 차례는 아직 오지 않았다.`,
+ fact:s=>`길에서 태어난 새끼에게 가장 위험한 때는 생후 첫 몇 주다. 체온을 스스로 지키지 못하기 때문이다.`,
+ choices:[
+ {label:'있는 힘껏 운다',run:s=>{if(P(.65)){chg(s,{h:-3});return `어미가 소리를 듣고 돌아왔다. 목덜미가 들리고, 세상이 흔들린다.`}if(P(.45)){adopt(s,'비 오는 밤 길에서 구조되어');return `어미보다 먼저 사람이 왔다. 따뜻한 손이 당신을 수건으로 감싼다.`}chg(s,{h:-22});return `아무도 오지 않았다. 아침이 되어서야 어미가 돌아왔다. 몸이 얼음장 같다.`}},
+ {label:'조용히 몸을 웅크린다',run:s=>{if(P(.6)){chg(s,{h:-8});return `한참 뒤 어미가 돌아와 당신을 물어 올렸다.`}chg(s,{h:-26});return `빗물이 배 밑으로 스며든다. 어미는 새벽에야 왔다.`}}]});
+E({id:'millbox',once:1,when:s=>s.age===0&&s.place==='mill',
+ text:s=>`철창 바닥은 철망이다. 발이 자꾸 빠진다. 어미는 지쳐 있고, 젖은 모자라다. 눈을 뜬 지 얼마 되지 않아 누군가 당신을 상자에 담는다.`,
+ fact:s=>s.reg.k==='kr'?`한국에서 펫숍을 통해 반려동물을 들이는 비율은 3년 연속 늘었다. 평균 입양 비용은 <b>51.2만 원</b>.`:`어미와 너무 일찍 떨어진 새끼는 면역과 사회성 발달에서 불리하다.`,
+ choices:[
+ {label:'어미에게 매달린다',run:s=>{chg(s,{h:-5,b:-3});s.place='shop';note(s,'어미와 떨어져 펫숍으로 옮겨졌다');return `손이 당신을 떼어 냈다. 상자가 닫히고, 어미의 냄새가 멀어진다.`}},
+ {label:'얌전히 상자에 들어간다',run:s=>{chg(s,{h:-3});s.place='shop';note(s,'어미와 떨어져 펫숍으로 옮겨졌다');return `상자가 흔들린다. 형제들의 체온이 한데 뭉쳐 있다. 어미는 다시 보지 못했다.`}}]});
+E({id:'shop',when:s=>s.place==='shop',
+ text:s=>`유리 진열장 안. 조명이 뜨겁다. 사람들이 손가락으로 유리를 두드리고 지나간다.${s.seen.shop?' 옆 칸의 친구들은 하나씩 사라졌다.':''}`,
+ fact:s=>`작고 어릴수록 잘 팔린다. 진열장에서 자랄수록 값은 떨어진다.`,
+ choices:[
+ {label:'유리에 앞발을 대고 꼬리를 흔든다',run:s=>shopRoll(s,.75)},
+ {label:'구석에서 몸을 말고 잔다',run:s=>shopRoll(s,.45)}]});
+function shopRoll(s,p){
+  if(P(p+(s.seen.shop||0)*.1)){adopt(s,'펫숍에서 팔려');return `한 사람이 당신을 가리킨다. 카드가 긁히고, 당신은 작은 상자에 담긴다. ${s.name}. 그것이 당신의 이름이 되었다.`}
+  if((s.seen.shop||0)>=1){s.place='mill';note(s,'팔리지 않아 번식장으로 돌려보내졌다');chg(s,{h:-8});return `당신은 너무 커 버렸다. 진열장에서 꺼내진 당신은 왔던 곳으로 되돌아간다. 이번에는 새끼가 아니라 어미${s.female?'':'·아비'}가 될 차례다.`}
+  chg(s,{h:-8,f:-5});return `오늘도 선택받지 못했다. 가격표의 숫자가 한 번 지워지고 다시 적힌다.`}
+E({id:'mill',when:s=>s.place==='mill'&&s.age>0,
+ text:s=>`번식장. 계절이 몇 번 바뀌었는지 알 수 없다. ${s.female?'또 새끼를 낳았고, 새끼들은 눈을 뜨자마자 사라졌다.':'또 교배장으로 끌려갔다가 철창으로 돌아왔다.'}`,
+ fact:s=>`번식장의 동물은 통계에 거의 잡히지 않는다. 구조되거나 단속되었을 때에야 숫자가 된다.`,
+ choices:[
+ {label:'철창을 물어뜯는다',run:s=>millRoll(s,-10)},
+ {label:'가만히 눕는다',run:s=>millRoll(s,-6)}]});
+function millRoll(s,h){if(P(.18)){s.place='shelter';s.lost=false;note(s,'번식장에서 구조되어 보호소로 갔다');chg(s,{h:5});return `어느 날 낯선 사람들이 몰려와 철창을 하나씩 열었다. 처음으로 흙을 밟았다.`}chg(s,{h:h});return `아무 일도 일어나지 않았다. 내일도 같은 하루다.`}
+E({id:'shelter',when:s=>s.place==='shelter',
+ text:s=>`보호소. 철창마다 공고 번호가 붙어 있다. 짖는 소리와 소독약 냄새. 통로로 사람들이 지나간다.`,
+ fact:s=>s.reg.k==='kr'?`2024년 한국 보호센터에 들어온 동물 <b>106,824마리</b> 가운데 입양 23.5%, 보호자 반환 11.4%. <b>자연사 27.6%, 안락사 18.5%</b>. 품종견 안락사율은 7.1%, 믹스견은 34.6%였다.`:s.reg.k==='na'?`미국 보호소에는 한 해 약 580만 마리가 들어온다. 2024년 입양률은 개 57%, 고양이 64%, 안락사는 개 9%, 고양이 8%.`:`보호소의 운명은 태어난 나라에 따라 크게 달라진다. 수용 능력이 없는 곳에서는 대부분 살아 나가지 못한다.`,
+ choices:[
+ {label:'철창 앞으로 나와 눈을 맞춘다',run:s=>shelterRoll(s,1.4)},
+ {label:'구석에 웅크려 등을 돌린다',run:s=>shelterRoll(s,.7)}]});
+E({id:'vax',once:1,when:s=>atHome(s)&&s.age>=3&&s.age<=12&&!s.vax,
+ text:s=>`동물병원 냄새. 차가운 진료대. 주삿바늘이 다가온다.`,
+ fact:s=>`${isDog(s)?'파보·홍역':'범백혈구감소증'} 같은 전염병은 어린 동물의 주요 사망 원인이지만, 예방접종으로 대부분 막을 수 있다.`,
+ choices:[
+ {label:'꾹 참는다',run:s=>{s.vax=true;chg(s,{h:10,b:3});note(s,'예방접종을 마쳤다');return `따끔했다. 그리고 간식이 나왔다.`}},
+ {label:'발버둥 친다',run:s=>{if(P(.6)){s.vax=true;chg(s,{h:10,b:-4});note(s,'예방접종을 마쳤다');return `세 사람이 달라붙고서야 끝났다. 가족의 팔에 긁힌 자국이 남았다.`}chg(s,{b:-5});return `결국 접종은 다음으로 미뤄졌다. 다음은 오지 않을지도 모른다.`}}]});
+E({id:'social',once:1,when:s=>atHome(s)&&s.age>=3&&s.age<12,
+ text:s=>`처음 보는 사람이 집에 왔다. 낯선 냄새, 큰 목소리. 손이 당신 쪽으로 다가온다.`,
+ fact:s=>`영국의 5만 2천 마리 연구에 따르면, 1~6세 개의 이른 안락사에는 <b>행동 문제</b>가 큰 영향을 미친다. 어릴 때의 경험이 평생을 좌우한다.`,
+ choices:[
+ {label:'냄새를 맡고 다가간다',run:s=>{chg(s,{b:12});return `손은 생각보다 부드러웠다. 세상에는 가족 말고도 사람이 있다.`}},
+ {label:'가구 밑으로 숨는다',run:s=>{s.problem++;chg(s,{b:-3});return `한 시간 동안 나오지 않았다. 낯선 것은 무서운 것이라고 몸이 기억한다.`}}]});
+E({id:'door',when:s=>atHome(s)&&s.age>=6,
+ text:s=>`현관문이 열려 있다. 바깥 냄새가 쏟아져 들어온다.`,
+ fact:s=>s.reg.k==='kr'?`2024년 한국에서 보호센터에 들어온 유실·유기동물 중 보호자에게 돌아간 것은 <b>11.4%</b>뿐이다.`:`집을 잃은 동물이 가족에게 돌아갈 확률은 인식표와 등록 여부에 크게 좌우된다.`,
+ choices:[
+ {label:'뛰쳐나간다',run:s=>{const r=R()*(s.neutered?1.25:1);if(r<.07){die(s,'교통사고','현관문은 그날 3초 동안 열려 있었다.');return `냄새를 따라 달렸다. 큰길이었다. 불빛이 너무 빨랐다.`}if(r<.37){s.lost=true;note(s,'집을 나갔다가 길을 잃었다');if(rich(s)&&P(.55)){s.place='shelter';return `돌아가는 길을 찾지 못했다. 며칠 뒤 그물을 든 사람이 당신을 차에 실었다.`}s.place='street';chg(s,{f:-20});return `돌아가는 길을 찾지 못했다. 집 냄새는 어디에도 없다.`}chg(s,{h:3,b:-4});return `온 동네를 돌고 돌아왔다. 가족이 울면서 당신을 끌어안았다.`}},
+ {label:'문턱에서 냄새만 맡는다',run:s=>{chg(s,{b:5});return `누군가 문을 닫았다. 당신은 창가로 가서 바깥을 본다.`}}]});
+E({id:'neuter',once:1,when:s=>atHome(s)&&s.age>=6&&s.age<=36&&!s.neutered,
+ text:s=>`오늘은 아침밥이 없다. 가족이 이동장을 열어 놓고 당신을 부른다.`,
+ fact:s=>`중성화는 생식기 질환과 가출·싸움의 위험을 줄인다. 원치 않는 새끼가 길과 보호소로 가는 것도 막는다.`,
+ choices:[
+ {label:'이동장에 들어간다',run:s=>{s.neutered=true;s.life+=.5;chg(s,{h:4});note(s,'중성화 수술을 받았다');return `눈을 떠 보니 배가 얼얼하고 목에는 이상한 깔때기가 씌워져 있다.`}},
+ {label:'침대 밑으로 숨는다',run:s=>{if(P(.5)){s.neutered=true;s.life+=.5;chg(s,{h:4,b:-3});note(s,'중성화 수술을 받았다');return `결국 붙잡혔다. 눈을 떠 보니 목에 깔때기가 씌워져 있다.`}return `가족이 포기했다. 예약은 취소되었다.`}}]});
+E({id:'treat',when:s=>atHome(s)&&s.age>=12,
+ text:s=>`가족이 식탁에서 음식을 건넨다. 오늘만 벌써 세 번째다.`,
+ fact:s=>`래브라도 48마리를 평생 추적한 연구에서, 날씬하게 키운 개는 그렇지 않은 형제보다 <b>약 1.8년</b> 더 살았다.`,
+ choices:[
+ {label:'받아먹는다',run:s=>{s.fat++;if(s.fat>=2)s.life-=.5;chg(s,{b:6,h:-5});return `맛있다. 가족이 웃는다. 배가 조금 더 무거워졌다.`}},
+ {label:'내 밥그릇으로 간다',run:s=>{chg(s,{h:4});return `사료는 늘 같은 맛이다. 몸은 가볍다.`}}]});
+E({id:'alone',when:s=>atHome(s)&&s.age>=6,
+ text:s=>`가족이 모두 나갔다. 집이 조용하다. 벌써 여덟 시간째다.`,
+ fact:s=>`짖음·파괴·배변 실수 같은 행동 문제는 보호자가 양육을 포기하는 흔한 이유로 꼽힌다.`,
+ choices:[
+ {label:isDog({sp:'dog'})?'문을 긁고 운다':'',dyn:s=>isDog(s)?'문을 긁으며 짖는다':'소파를 발톱으로 뜯는다',run:s=>{s.problem++;chg(s,{b:-7});return `가족이 돌아와 한숨을 쉰다. ${isDog(s)?'이웃이 쪽지를 붙이고 갔다.':'소파 옆구리에서 솜이 나와 있다.'}`}},
+ {dyn:s=>isDog(s)?'현관 앞에 엎드려 기다린다':'창밖의 새를 구경한다',run:s=>{chg(s,{b:3,h:1});return `발소리가 들린다. 열쇠 소리. 하루 중 가장 좋은 순간이다.`}}]});
+E({id:'move',once:1,when:s=>atHome(s)&&s.age>=12,
+ text:s=>`집 안에 상자가 쌓인다. 가족이 당신을 오래 쳐다본다. 무언가 바뀌고 있다.`,
+ fact:s=>s.reg.k==='kr'?`2024년 한국의 유실·유기동물은 106,824마리. <b>72.4%가 개, 26.0%가 고양이</b>였다.`:`이사, 출산, 비용, 행동 문제. 동물이 버려지는 이유는 대개 동물의 잘못이 아니다.`,
+ choices:[
+ {label:'가족 곁에 꼭 붙어 있는다',run:s=>moveRoll(s,5)},
+ {label:'평소처럼 지낸다',run:s=>moveRoll(s,0)}]});
+function moveRoll(s,b){chg(s,{b});const p=clamp(.34-s.b/260+s.problem*.08,.03,.6);
+  if(P(p)){s.lost=false;if(P(.5)){s.place='shelter';note(s,'가족이 보호소에 맡기고 떠났다');return `가족이 서류를 쓰고 돌아섰다. 뒤돌아보지 않았다. 목줄만 남았다.`}s.place='street';chg(s,{f:-15});note(s,'낯선 곳에 버려졌다');return `차가 낯선 곳에 멈췄다. 문이 열리고, 닫히고, 차는 떠났다. 당신은 차가 사라진 방향을 오래 바라본다.`}
+  chg(s,{b:6});return `새집이다. 당신의 방석은 가장 먼저 옮겨졌다.`}
+E({id:'check',when:s=>atHome(s)&&s.age>=24,
+ text:s=>`가족이 건강검진을 예약했다. 이동장이 나온다.`,
+ fact:s=>isDog(s)?`일본 동물병원 연구에서 개의 사망 원인은 <b>종양 18.4%, 심혈관 17.4%, 비뇨기 15.2%</b> 순이었다.`:`나이 든 고양이에게 만성 신장 질환은 매우 흔하다. 일찍 발견하면 관리하며 오래 살 수 있다.`,
+ choices:[
+ {label:'얌전히 간다',run:s=>{chg(s,{h:10});if(senior(s)){s.life+=.7;return `피를 뽑았다. 수의사가 화면을 가리키며 가족에게 무언가 설명한다. 일찍 발견해서 다행이라고 한다.`}return `별 이상 없다고 한다. 돌아오는 길에 간식을 받았다.`}},
+ {label:'이동장 앞에서 버틴다',run:s=>{if(P(.5)){chg(s,{h:8,b:-3});return `결국 끌려갔다. 별 이상은 없다고 한다.`}return `가족이 포기했다. 검진은 다음 해로 미뤄졌다.`}}]});
+E({id:'bigdog',when:s=>atHome(s)&&isDog(s)&&s.age>=6,
+ text:s=>`산책길. 목줄 없는 큰 개가 곧장 다가온다.`,
+ fact:s=>`영국 반려견 58만 마리 연구에서 중앙 수명은 <b>12.5년</b>. 암컷 12.7년, 수컷 12.4년.`,
+ choices:[
+ {label:'으르렁대며 맞선다',run:s=>{if(P(.3)){chg(s,{h:-22});return `물렸다. 가족이 비명을 지르며 당신을 안아 올린다. 병원에서 여섯 바늘을 꿰맸다.`}chg(s,{b:2});return `상대가 고개를 돌리고 지나갔다.`}},
+ {label:'가족의 다리 뒤로 숨는다',run:s=>{chg(s,{b:5});return `가족이 당신을 번쩍 안아 올렸다. 높은 곳은 안전하다.`}}]});
+E({id:'window',when:s=>atHome(s)&&!isDog(s)&&s.age>=6,
+ text:s=>`베란다 방충망이 조금 찢어져 있다. 난간에 새가 앉았다.`,
+ fact:s=>`실내 고양이의 기대수명은 <b>10~15년</b>, 길고양이는 <b>2~5년</b>으로 추정된다.`,
+ choices:[
+ {label:'뛰어오른다',run:s=>{if(P(.22)){chg(s,{h:-38});if(s.h<=0){die(s,'추락 사고','방충망은 고양이의 무게를 견디지 못한다.');return `방충망이 찢어졌다. 바닥이 없었다.`}return `방충망이 찢어졌다. 화단에 떨어졌고, 뒷다리가 부러졌다. 가족이 맨발로 뛰어 내려왔다.`}return `새는 날아갔다. 당신은 채터링을 하며 꼬리를 떤다.`}},
+ {label:'꼬리만 흔들며 바라본다',run:s=>{chg(s,{h:2});return `새가 날아갈 때까지 지켜보았다. 좋은 오후였다.`}}]});
+E({id:'sun',gen:1,when:s=>atHome(s)&&s.age>=3,
+ text:s=>`별일 없는 날. 거실 바닥에 햇볕이 네모나게 들어온다.`,
+ fact:s=>isDog(s)?`소형 장두종(미니어처 닥스훈트 등)의 중앙 수명은 13.3년, 중형 단두종(불도그 등)은 9.1~9.6년이다.`:`2024년 한국의 반려묘는 약 277만 마리, 반려견은 약 499만 마리로 추정된다.`,
+ choices:[
+ {label:'햇볕 속에서 낮잠을 잔다',run:s=>{chg(s,{h:4});return `따뜻하다. 꿈속에서 다리가 달린다.`}},
+ {label:'장난감을 물고 가족에게 간다',run:s=>{chg(s,{b:7,h:2});return `가족이 휴대전화를 내려놓았다. 십 분 동안 세상에는 둘뿐이었다.`}}]});
+/* 길 위 */
+E({id:'road',when:s=>onSt(s)&&s.age>=3,
+ text:s=>`길 건너편에서 음식 냄새가 난다. 차들이 빠르게 지나간다.`,
+ fact:s=>isDog(s)?`떠돌이 개에게 도로는 질병·굶주림과 함께 가장 큰 위험이다.`:`영국 연구에서 1세 미만 고양이 사망 원인의 <b>61.2%가 교통사고</b>였다. 5세 미만 고양이 사망의 47%가 외상이다.`,
+ choices:[
+ {label:'지금 뛴다',run:s=>{const r=R();if(r<.08){die(s,"교통사고",'길 위의 죽음은 대개 아무에게도 기록되지 않는다.');return `절반쯤 건넜을 때 불빛이 덮쳤다.`}if(r<.22){chg(s,{h:-28,f:10});return `범퍼가 뒷다리를 스쳤다. 절뚝거리며 겨우 건넜다.`}chg(s,{f:30});return `건넜다. 뜯긴 봉투 속에 아직 따뜻한 것이 있었다.`}},
+ {label:'차가 끊길 때까지 기다린다',run:s=>{if(P(.03)){die(s,'교통사고','길 위의 죽음은 대개 아무에게도 기록되지 않는다.');return `한밤에도 차는 있었다.`}if(P(.6)){chg(s,{f:16});return `새벽에 건넜다. 남은 것은 많지 않았지만 없는 것보다는 낫다.`}chg(s,{f:-10});return `새벽에 건넜을 때는 이미 누가 다 먹은 뒤였다.`}}]});
+E({id:'hand',when:s=>onSt(s)&&s.age>=3,
+ text:s=>`사람이 쪼그려 앉아 손을 내민다. 손에 무언가 들려 있다.`,
+ fact:s=>isDog(s)?`전 세계 개의 다수는 집 안이 아니라 길과 마을에서 자유롭게 떠돌며 산다. 그 비율을 <b>75~85%</b>로 보는 추정도 있다.`:`전 세계 고양이 약 6억 마리 중 <b>2억 3천만 마리 이상</b>이 길고양이로 추정된다.`,
+ choices:[
+ {label:'천천히 다가간다',run:s=>{const pa=(s.age<12?.28:.1)+(rich(s)?.1:0)+s.b/400;const r=R();if(r<pa){adopt(s,'길에서 사람을 따라가');return `손이 당신을 들어 올렸다. 처음 타 보는 차, 처음 보는 천장. 그리고 처음으로 이름이 불렸다. ${s.name}.`}if(r<pa+.5){chg(s,{f:25,b:8});return `먹을 것이었다. 사람은 당신이 다 먹을 때까지 지켜보다가 떠났다.`}chg(s,{h:-15,b:-10});return `손에 든 것은 돌이었다. 옆구리가 욱신거린다. 사람은 믿을 수 없다.`}},
+ {label:'뒤로 물러나 달아난다',run:s=>{chg(s,{f:-5,b:-2});return `안전하다. 배는 여전히 고프다.`}}]});
+E({id:'feeder',when:s=>onSt(s)&&!isDog(s)&&s.age>=3,
+ text:s=>`매일 같은 시간, 같은 담장 밑에 사료 그릇이 놓인다.`,
+ fact:s=>`밥자리를 돌보는 사람이 있는 길고양이 무리는 그렇지 않은 고양이보다 영양 상태가 낫고, 중성화(TNR)로 이어지는 경우가 많다.`,
+ choices:[
+ {label:'밥자리 근처에 자리를 잡는다',run:s=>{s.colony=true;chg(s,{f:30,b:6,h:4});return `사료 봉지 바스락거리는 소리를 알게 되었다. 그 소리가 나면 달려간다.`}},
+ {label:'경계하며 가끔만 들른다',run:s=>{chg(s,{f:12});return `다른 고양이들이 먹고 남긴 것을 먹었다.`}}]});
+E({id:'tnr',once:1,when:s=>onSt(s)&&!isDog(s)&&s.age>=6&&!s.neutered,
+ text:s=>`낯선 철제 틀 안에서 참치 냄새가 난다.`,
+ fact:s=>`한쪽 귀 끝이 잘린 길고양이는 중성화 수술을 받고 제자리에 방사(TNR)된 고양이라는 표시다.`,
+ choices:[
+ {label:'들어가서 먹는다',run:s=>{s.neutered=true;s.vax=true;chg(s,{h:6,f:15});note(s,'포획되어 중성화 수술을 받고 방사되었다(TNR)');return `철컥. 문이 닫혔다. 사흘 뒤, 당신은 귀 끝이 조금 잘린 채 같은 골목에 풀려났다.`}},
+ {label:'수상하다. 지나친다',run:s=>{chg(s,{f:-5});return `참치 냄새가 오래 코에 남았다.`}}]});
+E({id:'winter',when:s=>onSt(s)&&s.age>=3&&!['sa','se','af'].includes(s.reg.k),
+ text:s=>`기온이 영하로 떨어졌다. 물이 얼었다.`,
+ fact:s=>isDog(s)?`추위와 굶주림은 떠돌이 동물의 면역을 무너뜨려 전염병에 쉽게 쓰러지게 한다.`:`겨울철 길고양이는 따뜻한 자동차 엔진룸에 자주 들어간다. 출발 전 보닛을 두드리는 것만으로 사고를 막을 수 있다.`,
+ choices:[
+ {dyn:s=>isDog(s)?'지하 주차장으로 숨어든다':'주차된 차의 엔진룸으로 들어간다',run:s=>{if(isDog(s)){if(P(.35)){chg(s,{h:-12});return `경비원이 빗자루를 들고 쫓아냈다. 밤새 바람을 맞았다.`}chg(s,{h:2});return `환풍구 옆은 따뜻했다. 아침까지 아무도 오지 않았다.`}if(P(.1)){die(s,'자동차 엔진룸 사고','보닛을 두드리는 소리는 들리지 않았다.');return `따뜻해서 깊이 잠들었다. 아침에 시동이 걸렸다.`}chg(s,{h:3});return `엔진의 온기가 남아 있었다. 아침에 누군가 보닛을 두드렸고, 당신은 뛰쳐나왔다.`}},
+ {dyn:s=>isDog(s)?'바람을 등지고 몸을 만다':'상자 더미 밑에서 버틴다',run:s=>{chg(s,{h:-14,f:-6});return `긴 밤이었다. 발바닥에 감각이 없다.`}}]});
+E({id:'pack',when:s=>onSt(s)&&isDog(s)&&s.age>=6&&!s.pack,
+ text:s=>`떠돌이 개 무리가 다가온다. 우두머리가 당신의 냄새를 맡는다.`,
+ fact:s=>`광견병으로 해마다 약 <b>5만 9천 명</b>이 숨지며, 대부분 개에게 물려 감염된다(WHO). 떠돌이 개 백신 접종이 가장 효과적인 대책이다.`,
+ choices:[
+ {label:'배를 보이고 무리에 낀다',run:s=>{s.pack=true;chg(s,{f:12,h:3});note(s,'떠돌이 무리의 일원이 되었다');return `맨 끝자리지만 자리가 생겼다. 밤에 등을 맞댈 몸이 있다.`}},
+ {label:'꼬리를 내리고 혼자 떠난다',run:s=>{chg(s,{f:-6});return `혼자가 편하다. 혼자는 춥다.`}}]});
+E({id:'trash',when:s=>onSt(s)&&s.age>=3,
+ text:s=>`쓰레기 더미에서 닭 뼈 냄새가 난다.`,
+ fact:s=>`길 위의 삶에서 배고픔은 매일의 일이다. 먹을 것의 대부분은 사람이 버린 것이다.`,
+ choices:[
+ {label:'봉투를 뜯는다',run:s=>{if(P(.2)){chg(s,{h:-18,f:10});return `상한 것이었다. 이틀 동안 토했다.`}chg(s,{f:26});return `오랜만에 배가 찼다.`}},
+ {label:'지나친다',run:s=>{chg(s,{f:-8});return `냄새만 맡고 돌아섰다. 위장이 조여 온다.`}}]});
+E({id:'catcher',when:s=>onSt(s)&&isDog(s)&&s.age>=6,
+ text:s=>`그물과 올무를 든 사람들이 골목 양쪽을 막아선다.`,
+ fact:s=>rich(s)?`붙잡힌 떠돌이 개는 보호소로 간다. 공고 기간 안에 누군가 나타나지 않으면 대부분 그곳에서 삶이 끝난다.`:`인도 등 여러 나라는 떠돌이 개를 죽이는 대신 붙잡아 중성화·백신 접종 뒤 제자리에 풀어 주는 방식을 쓴다.`,
+ choices:[
+ {label:'틈을 찾아 달린다',run:s=>{if(P(.5)){chg(s,{f:-6});return `담장 밑 구멍으로 빠져나왔다. 심장이 터질 것 같다.`}return caught(s)}},
+ {label:'그 자리에 엎드린다',run:s=>caught(s)}]});
+function caught(s){if(rich(s)||P(.4)){s.place='shelter';s.lost=false;note(s,'포획되어 보호소로 갔다');return `그물이 덮였다. 철창이 실린 차가 당신을 태우고 떠난다.`}s.neutered=true;s.vax=true;chg(s,{h:8});note(s,'포획되어 중성화·백신 접종 뒤 방사되었다');return `붙잡혔다. 며칠 뒤, 주사 자국과 귀의 표식을 얻은 채 같은 골목에 풀려났다.`}
+E({id:'sick',once:1,when:s=>s.prone&&!s.vax&&s.age>=3&&s.age<=24&&(onSt(s)||atHome(s)),
+ text:s=>`몸이 뜨겁다. 아무것도 먹고 싶지 않다. 설사가 멈추지 않는다.`,
+ fact:s=>isDog(s)?`파보바이러스 장염은 접종하지 않은 강아지에게 치명적이다. 치료받지 못하면 대부분 죽는다.`:`범백혈구감소증(고양이 파보)은 접종하지 않은 새끼 고양이에게 치명적이다.`,
+ choices:[
+ {label:'물이라도 마신다',run:s=>sickRoll(s,atHome(s)?.8:.58)},
+ {label:'웅크린 채 잠든다',run:s=>sickRoll(s,atHome(s)?.72:.45)}]});
+function sickRoll(s,p){const c=isDog(s)?'전염병(파보바이러스 장염)':'전염병(범백혈구감소증)';if(P(p)){chg(s,{h:-25,f:-15});s.vax=true;note(s,'전염병을 이겨 냈다');return atHome(s)?`가족이 한밤중에 당신을 안고 병원으로 달렸다. 수액 줄을 달고 닷새를 버텼다. 살았다.`:`닷새 동안 움직이지 못했다. 엿새째, 일어섰다. 형제 중에 일어선 것은 당신뿐이다.`}die(s,c,atHome(s)?'주사 한 대로 막을 수 있는 병이었다.':'길 위에서 태어난 새끼들의 가장 흔한 끝이다.');return `몸에서 물이 다 빠져나갔다. 눈을 뜰 힘이 없다.`}
+E({id:'night',gen:1,when:s=>onSt(s)&&s.age>=3,
+ text:s=>`조용한 밤이다. 달이 밝다.`,
+ fact:s=>isDog(s)?`미국의 한 해 보호소 입소 동물은 약 580만 마리. 길 위의 숫자는 아무도 정확히 세지 못한다.`:`길고양이의 수는 아무도 정확히 알지 못한다. 세는 사람이 없기 때문이다.`,
+ choices:[
+ {label:'먹이를 찾아 나선다',run:s=>{if(P(.12)){chg(s,{h:-12});return `다른 수컷의 영역이었다. 귀가 찢어졌다.`}chg(s,{f:16});return `${isDog(s)?'시장 뒷골목에서 뼈를 찾았다.':'쥐를 한 마리 잡았다.'}`}},
+ {label:'안전한 곳에서 잔다',run:s=>{chg(s,{h:6,f:-8});return `방해받지 않고 아침까지 잤다. 드문 일이다.`}}]});
+/* 노년 */
+E({id:'joint',when:s=>atHome(s)&&senior(s),
+ text:s=>`계단이 예전 같지 않다. 뒷다리가 떨린다. ${isDog(s)?'산책 줄 소리가 나도 바로 일어나지 못한다.':'캣타워 꼭대기에 올라간 지 오래되었다.'}`,
+ fact:s=>`사람 나이로 치면 당신은 지금 약 <b>${humanAge(s)}세</b>다.`,
+ choices:[
+ {dyn:s=>isDog(s)?'그래도 산책을 조른다':'그래도 창틀에 뛰어오른다',run:s=>{chg(s,{b:8,h:-4});return `느리게, 그러나 끝까지 해냈다. 가족이 걸음을 맞춰 준다.`}},
+ {label:'방석에서 쉰다',run:s=>{chg(s,{h:3,b:2});return `가족이 방석을 볕 드는 자리로 옮겨 주었다.`}}]});
+E({id:'kidney',once:1,when:s=>atHome(s)&&senior(s),
+ text:s=>`물을 자꾸 마시게 된다. 가족이 밥을 처방 사료로 바꿨다. 맛이 없다.`,
+ fact:s=>isDog(s)?`개의 사망 원인 3위는 비뇨기(신장) 질환(15.2%)이다. 식이 관리가 진행을 늦춘다.`:`나이 든 고양이의 가장 흔한 질환 중 하나가 만성 신장 질환이다. 식이 관리가 수명을 늘린다.`,
+ choices:[
+ {label:'그래도 먹는다',run:s=>{s.life+=.8;chg(s,{h:5});return `맛은 없지만 속은 편하다.`}},
+ {label:'고개를 돌린다',run:s=>{chg(s,{h:-10,b:2});return `가족이 결국 예전 간식을 꺼냈다. 맛있다. 몸은 더 무거워진다.`}}]});
+E({id:'last',once:1,when:s=>atHome(s)&&yr(s)>=s.life-1&&s.b>=55,
+ text:s=>`가족이 당신을 오래 쓰다듬는다. 요즘은 자주 그런다. 가족의 얼굴에서 짠맛이 난다.`,
+ fact:s=>`집에서 태어난 ${spn(s)}의 삶은 대개 사람의 삶의 7분의 1 길이다.`,
+ choices:[
+ {label:'손을 핥는다',run:s=>{chg(s,{b:12});return `가족이 당신의 이름을 부른다. ${s.name||''}. 평생 수만 번 들은 소리다.`}},
+ {label:'무릎에 턱을 올리고 잠든다',run:s=>{chg(s,{b:12,h:2});return `심장 소리가 들린다. 처음 이 집에 온 날에도 이 소리를 들었다.`}}]});
+
+/* ---------- 진행 ---------- */
+let S=null,CUR=null,LAST=null;
+function pickEvent(s){
+  let pool=EV.filter(e=>!(e.once&&s.seen[e.id])&&e.when(s));
+  if(pool.length>1&&LAST)pool=pool.filter(e=>e.id!==LAST)||pool;
+  if(!pool.length)pool=EV.filter(e=>e.gen&&e.when(s));
+  if(!pool.length)return null;
+  return wpick(pool,e=>e.gen?.5:(s.seen[e.id]?1:3));
+}
+function stepMonths(s){if(s.place==='shelter'||s.place==='shop')return 3;if(s.age<12)return 3;if(s.age<36||s.place!=='home')return 12;return 24}
+function bgCause(s){
+  const a=yr(s),old=a>=s.life-3,W=l=>wpick(l,x=>x[1])[0];
+  if(s.place==='street'){if(old)return '노쇠와 질병';
+    if(!isDog(s))return W([['교통사고',55],['전염병',15],['싸움과 외상',10],['굶주림과 추위',20]]);
+    return W([['교통사고',30],['전염병(파보·홍역·광견병)',32],['굶주림',20],['사람에 의한 죽음',18]])}
+  if(s.place==='shelter')return '보호소 안에서의 자연사(질병)';
+  if(s.place==='mill')return '번식장에서의 쇠약';
+  if(s.place==='shop')return '진열장에서의 질병';
+  if(old||a>6){if(isDog(s))return W([['종양(암)',18.4],['심혈관 질환',17.4],['비뇨기(신장) 질환',15.2],['노쇠',22],['그 밖의 질환',27]]);
+    return W([['만성 신장 질환',30],['종양(암)',20],['심장 질환',12],['노쇠',22],['그 밖의 질환',16]])}
+  return a<1?'선천적 질환·감염':W([['급성 질환',50],['사고',30],['원인을 알 수 없는 죽음',20]])}
+function hazard(s,m){
+  const a=yr(s);let h=0;
+  if(a>s.life-4)h+=Math.min(.9,Math.pow((a-(s.life-4))/6.5,2)*.9);
+  if(s.place==='street'){h+=(s.colony||s.pack)?.08:.13;if(a<1)h+=.12;if(s.neutered)h-=.03}
+  else if(s.place==='mill')h+=.1;else if(s.place==='home'){h+=.008;if(a<1)h+=.03}
+  if(s.h<30)h+=(30-s.h)/90;if(s.f<15)h+=.15;
+  return 1-Math.pow(1-clamp(h,0,.97),m/12)}
+function advance(){
+  const s=S;if(!s.alive)return showEnd();
+  const m=stepMonths(s);s.age+=m;s.turns++;s.d={};
+  const y=m/12;
+  if(s.place==='home'){s.f=clamp(Math.max(s.f,70)+5,0,100);s.h=clamp(s.h+(senior(s)?-5*y:3),0,100);s.b=clamp(s.b+2,0,100)}
+  else if(s.place==='street'){s.f=clamp(s.f-ri(4,12)*((s.colony||s.pack)?.5:1),0,100);s.h=clamp(s.h-(senior(s)?8:3)-(s.f<=0?15:0),0,100)}
+  else if(s.place==='shelter'){s.f=Math.max(s.f,50);s.h=clamp(s.h-3,0,100)}
+  else if(s.place==='mill'){s.f=Math.max(s.f,40);s.h=clamp(s.h-6,0,100)}
+  else{s.f=Math.max(s.f,45)}
+  if(s.h<=0){die(s,s.f<=0?'굶주림':bgCause(s))}
+  else if(s.place!=='shelter'&&P(hazard(s,m))){die(s,bgCause(s))}
+  if(!s.alive)return showEnd();
+  turn();
+}
+function turn(){
+  const s=S;CUR=pickEvent(s);
+  if(!CUR){advance();return}
+  renderGame(false);
+}
+function choose(i){
+  const s=S,e=CUR;if(!e||s._res)return;
+  s.d={};const txt=e.choices[i].run(s);
+  s.seen[e.id]=(s.seen[e.id]||0)+1;LAST=e.id;
+  if(s.alive&&s.h<=0)die(s,s.f<=0?'굶주림':'부상과 쇠약');
+  s._res={txt,label:lab(e.choices[i],s)};
+  renderGame(true);
+}
+const lab=(c,s)=>c.dyn?c.dyn(s):c.label;
+function next(){S._res=null;if(!S.alive)return showEnd();advance()}
+
+/* ---------- 화면 ---------- */
+function show(id){for(const x of ['start','birth','game','end'])$(x).classList.toggle('on',x===id);window.scrollTo(0,0)}
+function pct(p){const v=p*100;return v>=10?v.toFixed(0):v>=1?v.toFixed(1):v>=.1?v.toFixed(2):v.toFixed(3)}
+function big(n){if(n>=1e8)return (n/1e8).toFixed(1).replace(/\.0$/,'')+'억';if(n>=1e4)return Math.round(n/1e4).toLocaleString('ko-KR')+'만';return Math.round(n).toLocaleString('ko-KR')}
+function showBirth(){
+  const s=S=birth();LAST=null;
+  const rows=[
+   ['종',`${isDog(s)?'🐕 개':'🐈 고양이'}`,`개·고양이 15억 마리 중 ${pct(s.pParts.sp)}%`],
+   ['태어난 땅',`${s.reg.e} ${s.reg.n}`,`전 세계 ${spn(s)}의 약 ${pct(s.pParts.reg)}%`],
+   ['태어난 곳',ORIGIN[s.origin],s.origin==='street'?`이 지역 ${spn(s)}의 약 ${pct(s.pParts.o)}%는 주인이 없다`:`이 지역 ${spn(s)}의 약 ${pct(s.pParts.o)}%`],
+   ['성별',s.female?'암컷':'수컷','50%'],
+   ['생김새',s.breed,s.pure?'품종':(isDog(s)?'믹스':'토종·혼종')],
+   ['이름',s.name||'없음',s.name?'가족이 지어 주었다':'아무도 지어 주지 않았다']];
+  $('birth').innerHTML=`<div class="tag">탄생</div><h2>당신은 태어났다</h2><p class="sub">고른 것은 아무것도 없다.</p><div class="card">`+
+   rows.map((r,i)=>`<div class="reveal" style="animation-delay:${i*.45}s"><span>${r[0]}</span><b>${r[1]}<em>${r[2]}</em></b></div>`).join('')+
+   `<p class="odds reveal" style="border:0;display:block;animation-delay:${rows.length*.45}s">이런 조건으로 태어날 확률은 <b>${pct(s.p)}%</b>.<br>지금 지구에 당신과 같은 처지의 ${spn(s)}는 약 <b>${big(s.p*(POP.dog+POP.cat))}마리</b>다.</p></div>
+   <button class="btn main reveal" id="live" style="animation-delay:${(rows.length+1)*.45}s">삶을 시작한다</button>`;
+  $('live').onclick=()=>{note(s,`${s.reg.n}의 ${ORIGIN[s.origin]}에서 태어났다`);show('game');turn()};
+  show('birth');
+}
+function bar(n,v){return `<div class="bar${v<25?' low':''}"><span>${n}</span><i><u style="width:${v}%"></u></i><span>${Math.round(v)}</span></div>`}
+function chipsHtml(d){const N={h:'건강',f:'배부름',b:'유대'};return Object.keys(N).filter(k=>d[k]&&Math.round(d[k])).map(k=>`<span class="chip ${d[k]>0?'up':'dn'}">${N[k]} ${d[k]>0?'+':''}${Math.round(d[k])}</span>`).join('')}
+function renderGame(res){
+  const s=S,e=CUR;
+  let h=`<div class="hud"><div class="who"><span class="av">${avatar(s)}</span><div><b>${who(s)}</b><small>${s.breed} · ${s.female?'암컷':'수컷'} · ${s.reg.n}</small></div></div><div class="age">${fmtAge(s.age)}<small>${stage(s)}</small></div></div>
+  <span class="place">${PLACE[s.place]}</span>
+  <div class="bars">${bar('건강',s.h)}${bar('배부름',s.f)}${bar(s.everHome?'유대':'사람 신뢰',s.b)}</div><div class="card">`;
+  if(!res){
+    h+=`<p class="story">${e.text(s)}</p><p class="fact">📊 ${e.fact(s)}</p>`+e.choices.map((c,i)=>`<button class="btn" data-i="${i}"><span class="k">${i+1}</span>${lab(c,s)}</button>`).join('');
+  }else{
+    h+=`<div class="tag">${s._res.label}</div><p class="story">${s._res.txt}</p><div class="chips">${chipsHtml(s.d)}</div><button class="btn main" id="nx">${s.alive?'시간이 흐른다':'…'}</button>`;
+  }
+  h+=`</div>`;
+  $('game').innerHTML=h;
+  if(res)$('nx').onclick=next;else $('game').querySelectorAll('.btn[data-i]').forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+}
+function compare(s){const a=yr(s);
+  if(isDog(s)){if(s.everHome)return `영국 반려견 58만 마리의 중앙 수명은 12.5년이다. 당신은 그보다 ${a>=12.5?(a-12.5).toFixed(1)+'년 더':(12.5-a).toFixed(1)+'년 덜'} 살았다.`;
+    return `떠돌이 개의 삶은 대개 몇 해를 넘기지 못한다. 그리고 지구의 개 대부분이 그렇게 산다.`}
+  if(s.everHome)return `실내 고양이의 기대수명은 10~15년이다. 당신은 ${fmtAge(s.age)}을 살았다.`;
+  return `길고양이의 수명은 2~5년으로 추정된다. 당신은 ${fmtAge(s.age)}을 살았다.`}
+function epitaph(s){if(s.epi)return s.epi;
+  if(s.place==='home'&&s.b>=60)return '가족의 품에서 눈을 감았다. 누군가 오래 울었다.';
+  if(s.place==='home')return '집에서 조용히 눈을 감았다.';
+  if(s.place==='street')return s.name?'길 위에서 끝났다. 이름을 불러 줄 사람은 곁에 없었다.':'이름 없이 태어나 이름 없이 떠났다. 아무도 그 죽음을 세지 않았다.';
+  if(s.place==='mill')return '철창 밖을 한 번도 보지 못했다.';
+  return '공고 번호 하나가 기록으로 남았다.'}
+function showEnd(){
+  const s=S;
+  let best=null;try{best=JSON.parse(localStorage.getItem('ob15')||'null')}catch(e){}
+  const rec={age:s.age,who:who(s),sp:s.sp,n:(best&&best.n||0)+1};
+  const isBest=!best||s.age>best.age;
+  try{localStorage.setItem('ob15',JSON.stringify(isBest?rec:Object.assign(best,{n:rec.n})))}catch(e){}
+  const share=`🐾 15억분의 1\n나는 ${s.reg.n}의 ${ORIGIN[s.origin]}에서 ${s.breed}(으)로 태어났다.\n${fmtAge(s.age)}을 살고 ${s.cause}(으)로 생을 마쳤다.\n이런 삶으로 태어날 확률 ${pct(s.p)}%`;
+  $('end').innerHTML=`<div class="tomb"><div class="av">${isDog(s)?'🐕':'🐈'}</div><h2>${who(s)}</h2><p class="sub">${fmtAge(s.age)}의 삶 · 사람 나이로 약 ${humanAge(s)}세</p></div>
+  <div class="card"><p class="story">${epitaph(s)}</p><dl class="kv">
+  <dt>마지막</dt><dd>${s.cause}</dd><dt>마지막 장소</dt><dd>${PLACE[s.place]}</dd>
+  <dt>태어난 곳</dt><dd>${s.reg.e} ${s.reg.n} · ${ORIGIN[s.origin]}</dd><dt>생김새</dt><dd>${s.breed} · ${s.female?'암컷':'수컷'}</dd>
+  <dt>태어날 확률</dt><dd>${pct(s.p)}% (약 ${big(s.p*(POP.dog+POP.cat))}마리)</dd></dl>
+  <p class="fact" style="margin-top:14px">📊 ${compare(s)}</p></div>
+  <div class="card"><div class="tag">한 생의 기록</div><ul class="log">${s.log.map(l=>`<li><span>${fmtAge(l.age)}</span><div>${l.t}</div></li>`).join('')}</ul></div>
+  <button class="btn main" id="again">다시 태어난다</button><button class="btn" id="share" style="text-align:center">결과 복사하기</button>
+  <p class="foot">${isBest?'지금까지 가장 긴 삶이었다.':`가장 길었던 삶: ${best.who} · ${fmtAge(best.age)}`} · ${rec.n}번째 생</p>`;
+  $('again').onclick=showBirth;
+  $('share').onclick=()=>{const done=()=>{$('share').textContent='복사했다'};try{navigator.clipboard.writeText(share).then(done,()=>fallbackCopy(share,done))}catch(e){fallbackCopy(share,done)}};
+  show('end');
+}
+function fallbackCopy(t,done){try{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();done()}catch(e){}}
+$('go').onclick=showBirth;
+try{const b=JSON.parse(localStorage.getItem('ob15')||'null');if(b)$('best').textContent=`가장 길었던 삶: ${b.who} · ${fmtAge(b.age)} (${b.n}번의 생)`}catch(e){}
+document.addEventListener('keydown',ev=>{if(!$('game').classList.contains('on'))return;if(S&&S._res){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();next()}}else if(['1','2','3'].includes(ev.key)){const i=+ev.key-1;if(CUR&&CUR.choices[i])choose(i)}});
+</script>
+</body>
+</html>
