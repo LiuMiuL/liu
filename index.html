@@ -2,7 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#c96a1b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="15억분의 1">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
 <title>15억분의 1</title>
 <meta name="description" content="지구의 개와 고양이 15억 마리 중 한 마리로 태어나 살아가는 통계 기반 생애 시뮬레이션">
 <style>
@@ -12,7 +19,8 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;word-break:keep-all}
-#app{max-width:560px;margin:0 auto;padding:24px 16px 72px;min-height:100vh}
+#app{max-width:560px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top)) 16px calc(72px + env(safe-area-inset-bottom));min-height:100vh}
+[hidden]{display:none!important}
 .screen{display:none}.screen.on{display:block;animation:fade .45s ease}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 h1{font-size:44px;line-height:1.15;margin:8px 0 4px;letter-spacing:-1px}
@@ -73,6 +81,7 @@ details a{color:var(--acc)}summary{cursor:pointer}
   <p class="lead">당신은 그중 한 마리로 태어난다. 어느 땅에서, 누구의 곁에서 태어날지는 고를 수 없다. 고를 수 있는 것은 그다음부터다.</p>
   <div class="trio"><div><b>9억</b>전 세계 개</div><div><b>6억</b>전 세계 고양이</div><div><b>12.5년</b>반려견 중앙 수명</div></div>
   <button class="btn main" id="go">태어나기</button>
+  <button class="btn" id="inst" hidden style="text-align:center">📲 앱으로 설치하기</button>
   <div class="best" id="best"></div>
   <details><summary>이 게임이 쓰는 자료</summary>
   <p>출생 확률과 사건의 결과는 아래 통계를 바탕으로 만든 근사 모형이다. 지역별 분포처럼 정확한 수치가 없는 부분은 게임용 추정치를 썼다.</p>
@@ -83,7 +92,7 @@ details a{color:var(--acc)}summary{cursor:pointer}
   <li>강아지·새끼 고양이 초기 사망률: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10845399" target="_blank" rel="noopener">PMC10845399</a>, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10251906" target="_blank" rel="noopener">PMC10251906</a></li>
   <li>개의 사망 원인(일본 동물병원): <a href="https://www.jstage.jst.go.jp/article/jvma/75/6/75_e128/_article/-char/en" target="_blank" rel="noopener">일본수의사회지</a></li>
   <li>미국 보호소 통계: <a href="https://www.aspca.org/helping-people-pets/shelter-intake-and-surrender/pet-statistics" target="_blank" rel="noopener">ASPCA</a>, <a href="https://www.shelteranimalscount.org/wp-content/uploads/YearEndReport_3.13_Website_FINAL.pdf" target="_blank" rel="noopener">Shelter Animals Count 2024</a></li>
-  <li>한국 유기동물·반려동물 통계(2024): <a href="https://www.dailyvet.co.kr/news/policy/248072" target="_blank" rel="noopener">데일리벳(검역본부 실태조사)</a>, <a href="https://www.dailyvet.co.kr/?p=234742" target="_blank" rel="noopener">양육 현황</a></li>
+  <li>한국 유기동물·반려동물 통계(2024): <a href="https://www.dailyvet.co.kr/news/policy/248072" target="_blank" rel="noopener">데일리벳(검역본부 실태조사)</a>, <a href="https://www.dailyvet.co.kr/?p=234742" target="_blank" rel="noopener">양육 현황</a>, <a href="https://www.segye.com/newsView/20250122513043" target="_blank" rel="noopener">양육비(농식품부 조사 보도)</a></li>
   </ul></details>
 </section>
 <section id="birth" class="screen"></section>
@@ -147,10 +156,10 @@ function birth(){
     let c=pick(CATC); if(c==='삼색'&&!female)c='고등어';
     s.breed=s.pure?pick(CATB):c+' '+(reg.k==='kr'?'코리안 숏헤어':'집고양이');
     s.size='소형'; s.life=13.5+(female?.5:-.5)+(s.pure?-.8:0);
-    s.litter=ri(2,6);
+    s.litter=ri(1,8);s.weakLitter=s.litter===1||s.litter>=7;
   }
   s.life+=(R()-.5)*3;s.prone=P(.4);
-  s.h=origin==='home'?82:origin==='street'?62:55;
+  s.h=origin==='home'?82:origin==='street'?62:55;if(s.weakLitter)s.h-=10;
   s.f=origin==='home'?65:origin==='street'?45:50;
   s.b=origin==='home'?50:origin==='street'?5:10;
   if(origin==='home')s.name=pick(NAMES);
@@ -193,8 +202,8 @@ function shelterRoll(s,boost){
 /* ---------- 사건 ---------- */
 const EV=[];const E=o=>EV.push(o);
 E({id:'milk',once:1,when:s=>s.age===0&&s.origin!=='mill',
- text:s=>`눈도 뜨지 못한 채 어미의 품을 더듬는다. 한배에서 난 형제 ${s.litter-1}마리가 젖을 두고 서로 밀친다.`,
- fact:s=>isDog(s)?`강아지는 태어난 뒤 두 달 안에 <b>약 15%</b>가 죽는다는 연구가 있다. 한배 새끼 수는 평균 7.1마리.`:`새끼 고양이가 젖을 떼기 전에 죽는 비율은 연구에 따라 <b>8~27%</b>. 대부분 생후 첫 주에 일어난다.`,
+ text:s=>s.litter===1?`눈도 뜨지 못한 채 어미의 품을 더듬는다. 형제는 없다. 당신은 혼자 태어났다.`:`눈도 뜨지 못한 채 어미의 품을 더듬는다. 한배에서 난 형제 ${s.litter-1}마리가 젖을 두고 서로 밀친다.`,
+ fact:s=>isDog(s)?`강아지는 태어난 뒤 두 달 안에 <b>약 15%</b>가 죽는다는 연구가 있다. 한배 새끼 수는 평균 7.1마리.`:`새끼 고양이가 젖을 떼기 전에 죽는 비율은 연구에 따라 <b>8~27%</b>. 대부분 생후 첫 주에 일어난다.${s.weakLitter?' 혼자 태어났거나 한배가 7마리 이상인 새끼는 생존율이 더 낮다.':''}`,
  choices:[
  {label:'형제들을 밀치고 파고든다',run:s=>{if(P(.85)){chg(s,{h:8,f:15});return `따뜻한 젖이 목으로 넘어간다. 배가 동그랗게 부푼다.`}chg(s,{h:-6,f:-5});return `더 큰 형제에게 밀려났다. 이번에는 거의 먹지 못했다.`}},
  {label:'끝자리에서 차례를 기다린다',run:s=>{if(P(.55)){chg(s,{h:3,f:6,b:2});return `어미가 당신을 핥아 품 안으로 끌어당긴다.`}chg(s,{h:-10,f:-12});return `차례는 오지 않았다. 몸이 조금씩 식는다.`}}]});
@@ -365,6 +374,25 @@ E({id:'night',gen:1,when:s=>onSt(s)&&s.age>=3,
  choices:[
  {label:'먹이를 찾아 나선다',run:s=>{if(P(.12)){chg(s,{h:-12});return `다른 수컷의 영역이었다. 귀가 찢어졌다.`}chg(s,{f:16});return `${isDog(s)?'시장 뒷골목에서 뼈를 찾았다.':'쥐를 한 마리 잡았다.'}`}},
  {label:'안전한 곳에서 잔다',run:s=>{chg(s,{h:6,f:-8});return `방해받지 않고 아침까지 잤다. 드문 일이다.`}}]});
+/* 체형·비용: 연구 수치가 있는 것만 */
+E({id:'heat',when:s=>atHome(s)&&isDog(s)&&s.brachy&&s.age>=6,
+ text:s=>`한여름 낮 산책. 몇 걸음 걷지 않았는데 숨이 턱까지 찬다. 납작한 코로는 공기가 잘 들어오지 않는다.`,
+ fact:s=>`영국 58만 마리 연구에서 코가 납작한 중형 단두종의 중앙 수명은 <b>9.1~9.6년</b>. 코가 긴 소형견(13.3년)보다 4년 가까이 짧았다.`,
+ choices:[
+ {label:'그래도 계속 걷는다',run:s=>{chg(s,{h:-14,b:3});return `혀가 보랏빛이 되었다. 가족이 놀라 당신을 안고 그늘로 뛰었다.`}},
+ {label:'그늘에 주저앉아 버틴다',run:s=>{chg(s,{h:2});return `가족이 물을 꺼내 주었다. 산책은 해가 진 뒤로 미뤄졌다.`}}]});
+E({id:'bigsize',once:1,when:s=>atHome(s)&&isDog(s)&&s.size==='대형'&&s.age>=24,
+ text:s=>`몸이 다 자랐다. 소파에 올라가면 가족이 앉을 자리가 없다. 엉덩이 관절에서 가끔 소리가 난다.`,
+ fact:s=>`같은 연구에서 대형견은 소형견보다 일찍 죽을 위험이 <b>20%</b> 높았다.`,
+ choices:[
+ {label:'마음껏 뛰고 점프한다',run:s=>{chg(s,{b:5,h:-6});return `공을 쫓아 높이 뛰었다. 착지할 때 뒷다리가 찌릿했다.`}},
+ {label:'천천히 오래 걷는다',run:s=>{chg(s,{h:4,b:3});return `가족과 나란히 강변을 끝까지 걸었다. 숨이 고르다.`}}]});
+E({id:'cost',once:1,when:s=>atHome(s)&&s.reg.k==='kr'&&s.age>=12,
+ text:s=>`가족이 동물병원 영수증을 오래 들여다본다. 식탁 위에 계산기가 놓여 있다.`,
+ fact:s=>`2024년 한국에서 반려동물 한 마리를 기르는 데 드는 비용은 병원비를 포함해 <b>월평균 14만 2천 원</b>. 한 해 전보다 1만 6천 원 늘었다.`,
+ choices:[
+ {label:'가족의 무릎에 턱을 올린다',run:s=>{chg(s,{b:8});return `가족이 계산기를 내려놓고 당신의 귀를 만진다. 한숨과 웃음이 같이 나왔다.`}},
+ {dyn:s=>isDog(s)?'슬리퍼를 물어뜯는다':'화분을 떨어뜨린다',run:s=>{s.problem++;chg(s,{b:-6});return `치울 것이 하나 더 늘었다. 가족의 한숨이 길어졌다.`}}]});
 /* 노년 */
 E({id:'joint',when:s=>atHome(s)&&senior(s),
  text:s=>`계단이 예전 같지 않다. 뒷다리가 떨린다. ${isDog(s)?'산책 줄 소리가 나도 바로 일어나지 못한다.':'캣타워 꼭대기에 올라간 지 오래되었다.'}`,
@@ -405,13 +433,14 @@ function bgCause(s){
   if(s.place==='shop')return '진열장에서의 질병';
   if(old||a>6){if(isDog(s))return W([['종양(암)',18.4],['심혈관 질환',17.4],['비뇨기(신장) 질환',15.2],['노쇠',22],['그 밖의 질환',27]]);
     return W([['만성 신장 질환',30],['종양(암)',20],['심장 질환',12],['노쇠',22],['그 밖의 질환',16]])}
+  if(a<1&&!isDog(s))return W([['외출 중 교통사고',61.2],['고양이 전염성 복막염(FIP)',11.9],['그 밖의 외상',7.5],['선천적 질환·감염',19.4]]);
   return a<1?'선천적 질환·감염':W([['급성 질환',50],['사고',30],['원인을 알 수 없는 죽음',20]])}
 function hazard(s,m){
   const a=yr(s);let h=0;
   if(a>s.life-4)h+=Math.min(.9,Math.pow((a-(s.life-4))/6.5,2)*.9);
   if(s.place==='street'){h+=(s.colony||s.pack)?.08:.13;if(a<1)h+=.12;if(s.neutered)h-=.03}
   else if(s.place==='mill')h+=.1;else if(s.place==='home'){h+=.008;if(a<1)h+=.03}
-  if(s.h<30)h+=(30-s.h)/90;if(s.f<15)h+=.15;
+  if(a<1&&!isDog(s)&&s.pure)h+=.12;if(s.h<30)h+=(30-s.h)/90;if(s.f<15)h+=.15;
   return 1-Math.pow(1-clamp(h,0,.97),m/12)}
 function advance(){
   const s=S;if(!s.alive)return showEnd();
@@ -454,7 +483,8 @@ function showBirth(){
    ['태어난 땅',`${s.reg.e} ${s.reg.n}`,`전 세계 ${spn(s)}의 약 ${pct(s.pParts.reg)}%`],
    ['태어난 곳',ORIGIN[s.origin],s.origin==='street'?`이 지역 ${spn(s)}의 약 ${pct(s.pParts.o)}%는 주인이 없다`:`이 지역 ${spn(s)}의 약 ${pct(s.pParts.o)}%`],
    ['성별',s.female?'암컷':'수컷','50%'],
-   ['생김새',s.breed,s.pure?'품종':(isDog(s)?'믹스':'토종·혼종')],
+   ['한배 형제',s.litter===1?'혼자 태어났다':`${s.litter}마리 중 하나`,isDog(s)?'개의 한배 새끼 수는 평균 7.1마리':(s.weakLitter?'혼자이거나 7마리 이상이면 생존율이 낮다':'한배가 클수록 신생아 사망 위험이 커진다')],
+   ['생김새',s.breed,s.pure?(isDog(s)?'품종견 · 중앙 수명 12.7년':'품종묘 · 한 연구에서 첫해 사망률 34.5%'):(isDog(s)?'믹스견 · 중앙 수명 12.0년':'토종·혼종')],
    ['이름',s.name||'없음',s.name?'가족이 지어 주었다':'아무도 지어 주지 않았다']];
   $('birth').innerHTML=`<div class="tag">탄생</div><h2>당신은 태어났다</h2><p class="sub">고른 것은 아무것도 없다.</p><div class="card">`+
    rows.map((r,i)=>`<div class="reveal" style="animation-delay:${i*.45}s"><span>${r[0]}</span><b>${r[1]}<em>${r[2]}</em></b></div>`).join('')+
@@ -512,6 +542,9 @@ function showEnd(){
 }
 function fallbackCopy(t,done){try{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();done()}catch(e){}}
 $('go').onclick=showBirth;
+let DP=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;$('inst').hidden=false});
+$('inst').onclick=()=>{if(DP){DP.prompt();DP=null}$('inst').hidden=true};
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 try{const b=JSON.parse(localStorage.getItem('ob15')||'null');if(b)$('best').textContent=`가장 길었던 삶: ${b.who} · ${fmtAge(b.age)} (${b.n}번의 생)`}catch(e){}
 document.addEventListener('keydown',ev=>{if(!$('game').classList.contains('on'))return;if(S&&S._res){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();next()}}else if(['1','2','3'].includes(ev.key)){const i=+ev.key-1;if(CUR&&CUR.choices[i])choose(i)}});
 </script>

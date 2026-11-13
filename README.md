@@ -5,3 +5,15 @@
 `index.html` 한 파일로 동작한다. 브라우저에서 열거나 정적 호스팅(GitHub Pages 등)에 올리면 된다.
 
 출생 확률과 사건 결과는 공개 통계(개체 수 추정, 품종별 수명, 보호소 통계, 한국 유기동물 실태조사 등)를 바탕으로 한 근사 모형이며, 출처는 게임 첫 화면에 있다.
+
+## 앱으로 설치 (PWA)
+
+HTTPS로 배포하면 브라우저에서 그대로 플레이할 수 있고, 휴대폰이나 PC에서 홈 화면에 추가하면 앱처럼 전체 화면으로 실행된다. 한 번 열고 나면 오프라인에서도 동작한다.
+
+관련 파일: `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`
+
+## 화면
+
+| 단두종 더위 | 대형견 | 양육비(한국) | 탄생 |
+|---|---|---|---|
+| ![](screenshots/1-heat.png) | ![](screenshots/2-bigsize.png) | ![](screenshots/3-cost.png) | ![](screenshots/4-birth.png) |

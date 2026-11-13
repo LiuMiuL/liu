@@ -1,0 +1,26 @@
+{
+ "name": "15억분의 1",
+ "short_name": "15억분의 1",
+ "description": "개나 고양이로 태어나 살아가는 통계 기반 생애 시뮬레이션",
+ "lang": "ko",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#f6f0e7",
+ "theme_color": "#c96a1b",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}
